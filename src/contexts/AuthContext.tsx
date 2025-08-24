@@ -50,41 +50,95 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
-    // Mock authentication - in real app, this would call API
-    if (username === 'admin' && password === 'admin123') {
-      setUser(mockUser);
-      setIsAuthenticated(true);
-      localStorage.setItem('meeting_manager_user', JSON.stringify(mockUser));
-      return true;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const { user, token } = data.data;
+        
+        setUser(user);
+        setIsAuthenticated(true);
+        localStorage.setItem('meeting_manager_user', JSON.stringify(user));
+        localStorage.setItem('auth_token', token);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('meeting_manager_user');
+    localStorage.removeItem('auth_token');
   };
 
   const updateProfile = async (data: { avatar?: string }): Promise<void> => {
-    if (user) {
-      const updatedUser = { ...user, ...data };
-      setUser(updatedUser);
-      localStorage.setItem('meeting_manager_user', JSON.stringify(updatedUser));
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/profile`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const updatedUser = result.data;
+        setUser(updatedUser);
+        localStorage.setItem('meeting_manager_user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      throw error;
     }
   };
 
   const changePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
-    // Mock password change - in real app, this would call API
-    if (currentPassword === 'admin123') {
-      return true;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error('Password change error:', error);
+      return false;
     }
-    return false;
   };
 
   const resetPassword = async (email: string): Promise<boolean> => {
-    // Mock password reset - in real app, this would call API
-    return email === mockUser.email;
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/reset-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      return response.ok;
+    } catch (error) {
+      console.error('Password reset error:', error);
+      return false;
+    }
   };
 
   return (

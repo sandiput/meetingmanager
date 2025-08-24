@@ -37,7 +37,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   onSendReminder,
 }) => {
   const status = getMeetingStatus(meeting);
-  const statusInfo = statusConfig[meeting.status];
+  const statusInfo = statusConfig[status];
   const StatusIcon = statusInfo.icon;
   
   const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);

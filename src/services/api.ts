@@ -146,6 +146,62 @@ export const settingsApi = {
     const response = await apiClient.post('/settings/test-whatsapp');
     return response.data;
   },
+    
+  previewGroupMessage: async (date?: string): Promise<ApiResponse<{ message: string; meetings: Meeting[] }>> => {
+    const params = date ? { date } : {};
+    const response = await apiClient.get('/settings/preview-group-message', { params });
+    
+  previewGroupMessage: async (date?: string): Promise<ApiResponse<{ message: string; meetings: Meeting[] }>> => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const targetDate = date || format(new Date(), 'yyyy-MM-dd');
+    const meetings = mockMeetings.filter(meeting => meeting.date === targetDate);
+    
+    let message = '🗓️ *Daily Meeting Schedule*\n';
+    message += `📅 ${format(new Date(targetDate), 'dd MMMM yyyy')}\n\n`;
+    
+    if (meetings.length === 0) {
+      message += 'Tidak ada rapat yang dijadwalkan untuk hari ini.\n\n';
+    } else {
+      message += `📋 *${meetings.length} Rapat Hari Ini:*\n\n`;
+      
+      meetings.forEach((meeting, index) => {
+        message += `${index + 1}. *${meeting.title}*\n`;
+        message += `   ⏰ ${format(new Date(`${meeting.date}T${meeting.start_time}`), 'HH:mm')} - ${format(new Date(`${meeting.date}T${meeting.end_time}`), 'HH:mm')}\n`;
+        message += `   📍 ${meeting.location}\n`;
+        message += `   👤 ${meeting.designated_attendee}\n`;
+        if (meeting.dress_code) {
+          message += `   👔 ${meeting.dress_code}\n`;
+        }
+        message += '\n';
+      });
+    }
+    
+    message += '📱 Pesan otomatis dari Meeting Manager\n';
+    message += '🤖 Subdirektorat Intelijen';
+    
+    return {
+      success: true,
+      data: { message, meetings }
+    };
+  },
+    
+  sendTestGroupMessage: async (date?: string): Promise<ApiResponse<void>> => {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Mock sending test message
+    return {
+      success: true,
+      data: undefined
+    };
+  },
+    return response.data;
+  },
+    
+  sendTestGroupMessage: async (date?: string): Promise<ApiResponse<void>> => {
+    const params = date ? { date } : {};
+    const response = await apiClient.post('/settings/send-test-group-message', params);
+    return response.data;
+  },
 };
 
 // Review API

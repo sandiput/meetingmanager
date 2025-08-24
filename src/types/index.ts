@@ -34,9 +34,7 @@ export interface Settings {
   group_notification_enabled: boolean;
   individual_reminder_minutes: number; // Minutes before meeting
   individual_reminder_enabled: boolean;
-  whatsapp_bot_token?: string;
-  whatsapp_phone_number_id?: string;
-  whatsapp_business_account_id?: string;
+  whatsapp_connected: boolean;
   updated_at: string;
 }
 

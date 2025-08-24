@@ -90,3 +90,38 @@ export interface UpdateSettingsForm {
   individual_reminder_minutes: number;
   individual_reminder_enabled: boolean;
 }
+
+// Review & Analytics Types
+export interface ReviewStats {
+  total_meetings: number;
+  completed_meetings: number;
+  attendance_rate: number;
+  total_attendees: number;
+  avg_duration: number;
+  whatsapp_notifications: number;
+  ontime_rate: number;
+  whatsapp_response_rate: number;
+  completion_rate: number;
+  avg_participants: number;
+}
+
+export interface TopParticipant {
+  id: string;
+  name: string;
+  seksi: string;
+  meeting_count: number;
+  attendance_rate: number;
+}
+
+export interface SeksiStats {
+  seksi: string;
+  meeting_count: number;
+  participant_count: number;
+  attendance_rate: number;
+}
+
+export interface MeetingTrend {
+  period: string;
+  count: number;
+  completion_rate: number;
+}

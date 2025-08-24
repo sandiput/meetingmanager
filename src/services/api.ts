@@ -300,3 +300,164 @@ export const settingsApi = {
     return { data: { connected: true }, success: true, message: 'WhatsApp connection test successful' };
   },
 };
+
+// Review API
+export const reviewApi = {
+  getStats: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<ReviewStats>> => {
+    await delay(800);
+    const mockReviewStats: ReviewStats = {
+      total_meetings: period === 'weekly' ? 8 : period === 'monthly' ? 32 : 156,
+      completed_meetings: period === 'weekly' ? 6 : period === 'monthly' ? 24 : 128,
+      attendance_rate: 87,
+      total_attendees: period === 'weekly' ? 48 : period === 'monthly' ? 192 : 936,
+      avg_duration: 1.5,
+      whatsapp_notifications: period === 'weekly' ? 64 : period === 'monthly' ? 248 : 1248,
+      ontime_rate: 92,
+      whatsapp_response_rate: 95,
+      completion_rate: 89,
+      avg_participants: 6,
+    };
+    return { data: mockReviewStats, success: true, message: 'Review stats retrieved successfully' };
+  },
+
+  getTopParticipants: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<TopParticipant[]>> => {
+    await delay(600);
+    const mockTopParticipants: TopParticipant[] = [
+      {
+        id: '1',
+        name: 'Budi Santoso',
+        seksi: 'Intelijen Kepabeanan I',
+        meeting_count: period === 'weekly' ? 5 : period === 'monthly' ? 18 : 89,
+        attendance_rate: 95,
+      },
+      {
+        id: '2',
+        name: 'Sari Dewi',
+        seksi: 'Intelijen Kepabeanan II',
+        meeting_count: period === 'weekly' ? 4 : period === 'monthly' ? 16 : 82,
+        attendance_rate: 92,
+      },
+      {
+        id: '3',
+        name: 'Ahmad Wijaya',
+        seksi: 'Intelijen Cukai',
+        meeting_count: period === 'weekly' ? 4 : period === 'monthly' ? 15 : 78,
+        attendance_rate: 88,
+      },
+      {
+        id: '4',
+        name: 'Rina Kartika',
+        seksi: 'Dukungan Operasi Intelijen',
+        meeting_count: period === 'weekly' ? 3 : period === 'monthly' ? 14 : 75,
+        attendance_rate: 90,
+      },
+      {
+        id: '5',
+        name: 'Dedi Kurniawan',
+        seksi: 'Intelijen Kepabeanan I',
+        meeting_count: period === 'weekly' ? 3 : period === 'monthly' ? 13 : 71,
+        attendance_rate: 85,
+      },
+      {
+        id: '6',
+        name: 'Maya Sari',
+        seksi: 'Intelijen Kepabeanan II',
+        meeting_count: period === 'weekly' ? 3 : period === 'monthly' ? 12 : 68,
+        attendance_rate: 87,
+      },
+      {
+        id: '7',
+        name: 'Indra Pratama',
+        seksi: 'Intelijen Cukai',
+        meeting_count: period === 'weekly' ? 2 : period === 'monthly' ? 11 : 65,
+        attendance_rate: 83,
+      },
+      {
+        id: '8',
+        name: 'Lestari Wulan',
+        seksi: 'Dukungan Operasi Intelijen',
+        meeting_count: period === 'weekly' ? 2 : period === 'monthly' ? 10 : 62,
+        attendance_rate: 86,
+      },
+      {
+        id: '9',
+        name: 'Fajar Nugroho',
+        seksi: 'Intelijen Kepabeanan I',
+        meeting_count: period === 'weekly' ? 2 : period === 'monthly' ? 9 : 58,
+        attendance_rate: 81,
+      },
+      {
+        id: '10',
+        name: 'Dewi Sartika',
+        seksi: 'Intelijen Kepabeanan II',
+        meeting_count: period === 'weekly' ? 1 : period === 'monthly' ? 8 : 55,
+        attendance_rate: 79,
+      },
+    ];
+    return { data: mockTopParticipants, success: true, message: 'Top participants retrieved successfully' };
+  },
+
+  getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<SeksiStats[]>> => {
+    await delay(500);
+    const mockSeksiStats: SeksiStats[] = [
+      {
+        seksi: 'Intelijen Kepabeanan I',
+        meeting_count: period === 'weekly' ? 3 : period === 'monthly' ? 12 : 58,
+        participant_count: 4,
+        attendance_rate: 89,
+      },
+      {
+        seksi: 'Intelijen Kepabeanan II',
+        meeting_count: period === 'weekly' ? 2 : period === 'monthly' ? 10 : 48,
+        participant_count: 3,
+        attendance_rate: 85,
+      },
+      {
+        seksi: 'Intelijen Cukai',
+        meeting_count: period === 'weekly' ? 2 : period === 'monthly' ? 8 : 38,
+        participant_count: 2,
+        attendance_rate: 87,
+      },
+      {
+        seksi: 'Dukungan Operasi Intelijen',
+        meeting_count: period === 'weekly' ? 1 : period === 'monthly' ? 6 : 28,
+        participant_count: 2,
+        attendance_rate: 92,
+      },
+    ];
+    return { data: mockSeksiStats, success: true, message: 'Seksi stats retrieved successfully' };
+  },
+
+  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<MeetingTrend[]>> => {
+    await delay(700);
+    let mockTrends: MeetingTrend[] = [];
+    
+    if (period === 'weekly') {
+      mockTrends = [
+        { period: 'Mon', count: 2, completion_rate: 100 },
+        { period: 'Tue', count: 1, completion_rate: 100 },
+        { period: 'Wed', count: 3, completion_rate: 67 },
+        { period: 'Thu', count: 1, completion_rate: 100 },
+        { period: 'Fri', count: 1, completion_rate: 100 },
+        { period: 'Sat', count: 0, completion_rate: 0 },
+        { period: 'Sun', count: 0, completion_rate: 0 },
+      ];
+    } else if (period === 'monthly') {
+      mockTrends = [
+        { period: 'Week 1', count: 8, completion_rate: 88 },
+        { period: 'Week 2', count: 12, completion_rate: 92 },
+        { period: 'Week 3', count: 7, completion_rate: 86 },
+        { period: 'Week 4', count: 5, completion_rate: 80 },
+      ];
+    } else {
+      mockTrends = [
+        { period: 'Q1', count: 38, completion_rate: 89 },
+        { period: 'Q2', count: 42, completion_rate: 91 },
+        { period: 'Q3', count: 35, completion_rate: 85 },
+        { period: 'Q4', count: 41, completion_rate: 93 },
+      ];
+    }
+    
+    return { data: mockTrends, success: true, message: 'Meeting trends retrieved successfully' };
+  },
+};

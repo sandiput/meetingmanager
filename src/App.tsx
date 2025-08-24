@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { ToastProvider } from './components/ToastProvider';
 import { Dashboard } from './pages/Dashboard';
 import { Participants } from './pages/Participants';
+import { Review } from './pages/Review';
 import { Settings } from './pages/Settings';
 
 function App() {
@@ -16,8 +17,8 @@ function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/participants" element={<Participants />} />
+              <Route path="/review" element={<Review />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/review" element={<div>Review Page Coming Soon</div>} />
             </Routes>
           </main>
         </div>

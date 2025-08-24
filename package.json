@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:production": "vite build --mode production",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:api": "curl -X GET http://localhost:8000/api/dashboard/stats"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

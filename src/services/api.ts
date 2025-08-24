@@ -15,7 +15,7 @@ import { API_CONFIG } from '../utils/constants';
 
 // Create axios instance with base configuration
 const apiClient = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
   timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
@@ -41,10 +41,14 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('meeting_manager_user');
       window.location.href = '/';
+    } else if (error.response?.status === 500) {
+      console.error('Server Error:', error.response.data);
     }
     return Promise.reject(error);
   }

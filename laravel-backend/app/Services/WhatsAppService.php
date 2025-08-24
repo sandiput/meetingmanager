@@ -132,20 +132,37 @@ class WhatsAppService
 
     private function formatGroupNotificationMessage($meetings)
     {
-        $message = "🗓️ *Daily Meeting Schedule*\n\n";
+        $message = $this->formatGroupNotificationMessage($meetings, now()->toDateString());
+    }
+
+    public function formatGroupNotificationMessage($meetings, $date = null)
+    {
+        $dateStr = $date ? \Carbon\Carbon::parse($date)->format('d M Y') : now()->format('d M Y');
+        $message = "🗓️ *Daily Meeting Schedule*\n";
+        $message .= "📅 {$dateStr}\n\n";
 
         if (empty($meetings)) {
-            $message .= "No meetings scheduled for today.\n\n";
+            $message .= "Tidak ada rapat yang dijadwalkan hari ini.\n\n";
         } else {
+            $message .= "📋 " . count($meetings) . " Rapat Hari Ini:\n\n";
+            
             foreach ($meetings as $meeting) {
-                $message .= "📋 *{$meeting->title}*\n";
+                $index = array_search($meeting, $meetings->toArray()) + 1;
+                $message .= "{$index}. *{$meeting->title}*\n";
                 $message .= "⏰ {$meeting->start_time->format('H:i')} - {$meeting->end_time->format('H:i')}\n";
                 $message .= "📍 {$meeting->location}\n";
                 $message .= "👤 {$meeting->designated_attendee}\n\n";
+                
+                if ($meeting->dress_code) {
+                    $message .= "👔 {$meeting->dress_code}\n";
+                }
+                
+                $message .= "\n";
             }
         }
 
-        $message .= "📱 This is an automated message from Meeting Manager.";
+        $message .= "📱 Pesan otomatis dari Meeting Manager\n";
+        $message .= "🤖 Subdirektorat Intelijen";
 
         return $message;
     }

@@ -182,6 +182,17 @@ export const meetingsApi = {
     return { data: meeting, success: true, message: 'Meeting retrieved successfully' };
   },
     
+  search: async (query: string): Promise<ApiResponse<Meeting[]>> => {
+    await delay(300);
+    const filtered = mockMeetings.filter(meeting => 
+      meeting.title.toLowerCase().includes(query.toLowerCase()) ||
+      meeting.location.toLowerCase().includes(query.toLowerCase()) ||
+      meeting.designated_attendee.toLowerCase().includes(query.toLowerCase()) ||
+      (meeting.discussion_results && meeting.discussion_results.toLowerCase().includes(query.toLowerCase()))
+    );
+    return { data: filtered, success: true, message: 'Search completed successfully' };
+  },
+    
   create: async (data: CreateMeetingForm): Promise<ApiResponse<Meeting>> => {
     await delay(800);
     const newMeeting: Meeting = {

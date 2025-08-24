@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Eye, 
@@ -9,9 +9,13 @@ import {
   MessageCircle,
   CheckCircle,
   PlusCircle,
-  MoreVertical
+  MoreVertical,
+  Calendar
 } from 'lucide-react';
+import { meetingsApi } from '../../services/api';
+import { Meeting } from '../../types';
 import { clsx } from 'clsx';
+import { format } from 'date-fns';
 
 interface SidebarProps {
   className?: string;
@@ -62,6 +66,64 @@ const recentActivities = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchResults, setSearchResults] = React.useState<Meeting[]>([]);
+  const [isSearching, setIsSearching] = React.useState(false);
+  const [showResults, setShowResults] = React.useState(false);
+  const navigate = useNavigate();
+
+  // Debounced search function
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery.trim().length > 0) {
+        performSearch(searchQuery);
+      } else {
+        setSearchResults([]);
+        setShowResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const performSearch = async (query: string) => {
+    try {
+      setIsSearching(true);
+      const response = await meetingsApi.search(query);
+      setSearchResults(response.data);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleMeetingSelect = (meeting: Meeting) => {
+    setSearchQuery('');
+    setShowResults(false);
+    // Navigate to dashboard and potentially scroll to meeting
+    navigate('/');
+  };
+
+  const handleSearchFocus = () => {
+    if (searchQuery.trim().length > 0) {
+      setShowResults(true);
+    }
+  };
+
+  const handleSearchBlur = () => {
+    // Delay hiding results to allow clicking on them
+    setTimeout(() => {
+      setShowResults(false);
+    }, 200);
+  };
+
   return (
     <aside className={clsx(
       'sticky top-0 h-screen w-64 bg-gradient-to-b from-white to-slate-50 shadow-xl border-r border-gray-200',
@@ -80,15 +142,85 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </div>
 
         {/* Search */}
-        <div className="px-4 py-4">
+        <div className="px-4 py-4 relative">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              onFocus={handleSearchFocus}
+              onBlur={handleSearchBlur}
               className="w-full rounded-xl border-gray-200 py-2.5 pl-10 pr-4 text-sm focus:border-indigo-300 focus:ring-indigo-200 transition-colors"
               placeholder="Search meetings..."
               type="text"
             />
+            {isSearching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-indigo-300 border-t-indigo-600 rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
+          
+          {/* Search Results Dropdown */}
+          {showResults && (
+            <div className="absolute top-full left-4 right-4 mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-80 overflow-y-auto z-50">
+              {searchResults.length > 0 ? (
+                <div className="py-2">
+                  <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                    Search Results ({searchResults.length})
+                  </div>
+                  {searchResults.map((meeting) => {
+                    const meetingDate = new Date(`${meeting.date}T${meeting.time}`);
+                    return (
+                      <button
+                        key={meeting.id}
+                        onClick={() => handleMeetingSelect(meeting)}
+                        className="w-full px-3 py-3 text-left hover:bg-gray-50 border-b border-gray-50 last:border-b-0 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mt-0.5">
+                            <Calendar className="w-4 h-4 text-indigo-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">
+                              {meeting.title}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {format(meetingDate, 'dd MMM yyyy, HH:mm')}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">
+                              📍 {meeting.location}
+                            </p>
+                            <p className="text-xs text-gray-400 truncate">
+                              👤 {meeting.designated_attendee}
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <span className={clsx(
+                              'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
+                              meeting.status === 'incoming'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            )}>
+                              {meeting.status === 'incoming' ? 'Incoming' : 'Completed'}
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-8 text-center">
+                  <Calendar className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No meetings found</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Try searching with different keywords
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Navigation */}

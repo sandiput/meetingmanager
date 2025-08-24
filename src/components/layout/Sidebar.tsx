@@ -45,16 +45,16 @@ const navigationItems = [
 const recentActivities = [
   {
     id: '1',
-    title: 'Meeting Confirmed',
-    subtitle: 'Project Phoenix Kickoff',
+    title: 'Rapat Dikonfirmasi',
+    subtitle: 'Rapat Koordinasi Bulanan',
     time: '2 min ago',
     icon: CheckCircle,
     iconColor: 'text-green-600 bg-green-100',
   },
   {
     id: '2',
-    title: 'New Meeting',
-    subtitle: 'Intelligence Briefing',
+    title: 'Rapat Baru',
+    subtitle: 'Briefing Intelijen Mingguan',
     time: '15 min ago',
     icon: PlusCircle,
     iconColor: 'text-blue-600 bg-blue-100',

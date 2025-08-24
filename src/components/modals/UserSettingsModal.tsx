@@ -103,9 +103,9 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         }
       }}
     >
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl m-4 max-h-[90vh] flex flex-col">
+      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-6">
+        <div className="flex items-center justify-between border-b border-gray-200 p-6 flex-shrink-0">
           <div>
             <h2 className="text-xl font-bold text-gray-800">User Settings</h2>
             <p className="text-sm text-gray-600 mt-1">
@@ -121,7 +121,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 flex-shrink-0">
           <button
             onClick={() => setActiveTab('profile')}
             className={clsx(
@@ -149,9 +149,9 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-grow overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6">
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <div className="space-y-6">
               {/* Avatar Upload */}
               <div className="text-center">
                 <div className="relative inline-block">
@@ -209,11 +209,11 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                   </p>
                 </div>
               </div>
-            </form>
+            </div>
           )}
 
           {activeTab === 'password' && (
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Current Password
@@ -291,12 +291,12 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
                   </p>
                 </div>
               </div>
-            </form>
+            </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-4 border-t border-gray-200 p-6">
+        <div className="flex justify-end gap-4 border-t border-gray-200 p-6 flex-shrink-0">
           <button
             type="button"
             onClick={onClose}
@@ -305,7 +305,14 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             Cancel
           </button>
           <button
-            onClick={activeTab === 'profile' ? handleProfileUpdate : handlePasswordChange}
+            onClick={(e) => {
+              e.preventDefault();
+              if (activeTab === 'profile') {
+                handleProfileUpdate(e as any);
+              } else {
+                handlePasswordChange(e as any);
+              }
+            }}
             disabled={loading}
             className={clsx(
               'flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all',

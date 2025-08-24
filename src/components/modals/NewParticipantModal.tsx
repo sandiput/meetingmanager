@@ -30,12 +30,12 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
   };
 
   const formatWhatsAppNumber = (value: string) => {
-    // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
+    // Remove all non-digits and spaces
+    const digits = value.replace(/\D/g, '').replace(/\s/g, '');
     
     // If starts with 0, replace with +62
     if (digits.startsWith('0')) {
-      return '+62 ' + digits.substring(1);
+      return '+62' + digits.substring(1);
     }
     
     // If starts with 62, add +
@@ -45,7 +45,7 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
     
     // If doesn't start with 62 or 0, assume it's local number
     if (digits.length > 0 && !digits.startsWith('62')) {
-      return '+62 ' + digits;
+      return '+62' + digits;
     }
     
     return value;
@@ -62,8 +62,8 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
   };
 
   const validateWhatsApp = (number: string) => {
-    // Should start with +62 and have 10-13 digits after
-    return /^\+62\s?\d{10,13}$/.test(number);
+    // Should start with +62 and have 10-13 digits after (no spaces)
+    return /^\+62\d{10,13}$/.test(number);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -192,15 +192,15 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
                   </div>
                   <input
                     type="tel"
-                    value={formData.whatsapp_number.replace('+62 ', '').replace('+62', '')}
+                    value={formData.whatsapp_number.replace('+62 ', '').replace('+62', '').replace(/\s/g, '')}
                     onChange={(e) => handleWhatsAppChange(e.target.value)}
                     className="flex-1 px-4 py-3 text-sm bg-white focus:outline-none"
-                    placeholder="812 3456 7890"
+                    placeholder="8123456789"
                     required
                   />
                 </div>
               <p className="text-xs text-gray-500 mt-1">
-                Enter Indonesian mobile number (will be formatted automatically)
+                Enter Indonesian mobile number without spaces (will be formatted automatically)
               </p>
             </div>
             </div>

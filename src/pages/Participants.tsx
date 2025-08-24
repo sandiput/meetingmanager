@@ -165,7 +165,7 @@ export const Participants: React.FC = () => {
                         </div>
                         <div className="px-3 py-2 bg-white">
                           <span className="text-sm text-gray-900">
-                            {participant.whatsapp_number.replace('+62 ', '').replace('+62', '')}
+                            {participant.whatsapp_number.replace('+62 ', '').replace('+62', '').replace(/\s/g, '')}
                           </span>
                         </div>
                       </div>

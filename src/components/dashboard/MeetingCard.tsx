@@ -15,7 +15,7 @@ const statusConfig = {
   incoming: {
     label: 'Incoming',
     icon: CheckCircle,
-    className: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800',
+    className: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800',
   },
   completed: {
     label: 'Completed',

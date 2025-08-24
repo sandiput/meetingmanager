@@ -77,7 +77,7 @@ const mockParticipants: Participant[] = [
   {
     id: '1',
     name: 'Budi Santoso',
-    whatsapp_number: '+62 812 3456 7890',
+    whatsapp_number: '+628123456789',
     nip: '198501012010011001',
     created_at: '2025-01-15T10:00:00Z',
     updated_at: '2025-01-15T10:00:00Z',
@@ -85,7 +85,7 @@ const mockParticipants: Participant[] = [
   {
     id: '2',
     name: 'Sari Dewi',
-    whatsapp_number: '+62 813 9876 5432',
+    whatsapp_number: '+628139876543',
     nip: '198702022011012002',
     created_at: '2025-01-16T10:00:00Z',
     updated_at: '2025-01-16T10:00:00Z',
@@ -93,7 +93,7 @@ const mockParticipants: Participant[] = [
   {
     id: '3',
     name: 'Ahmad Wijaya',
-    whatsapp_number: '+62 814 1122 3344',
+    whatsapp_number: '+628141122334',
     nip: '198903032012013003',
     created_at: '2025-01-17T10:00:00Z',
     updated_at: '2025-01-17T10:00:00Z',
@@ -101,7 +101,7 @@ const mockParticipants: Participant[] = [
   {
     id: '4',
     name: 'Rina Kartika',
-    whatsapp_number: '+62 815 5566 7788',
+    whatsapp_number: '+628155667788',
     nip: '199004042013014004',
     created_at: '2025-01-18T10:00:00Z',
     updated_at: '2025-01-18T10:00:00Z',
@@ -109,7 +109,7 @@ const mockParticipants: Participant[] = [
   {
     id: '5',
     name: 'Dedi Kurniawan',
-    whatsapp_number: '+62 816 2233 4455',
+    whatsapp_number: '+628162233445',
     nip: '199105052014015005',
     created_at: '2025-01-19T10:00:00Z',
     updated_at: '2025-01-19T10:00:00Z',
@@ -117,7 +117,7 @@ const mockParticipants: Participant[] = [
   {
     id: '6',
     name: 'Maya Sari',
-    whatsapp_number: '+62 817 6677 8899',
+    whatsapp_number: '+628176677889',
     nip: '199206062015016006',
     created_at: '2025-01-20T10:00:00Z',
     updated_at: '2025-01-20T10:00:00Z',

@@ -19,7 +19,8 @@ export const WHATSAPP_CONFIG = {
   DEFAULT_GROUP_NOTIFICATION_TIME: '07:00',
   MESSAGE_TEMPLATES: {
     DAILY_REMINDER: `🗓️ *Daily Meeting Schedule*\n\n{meetings}\n\n📱 This is an automated message from Meeting Manager.`,
-    INDIVIDUAL_REMINDER: `⏰ *Meeting Reminder*\n\n📋 *{title}*\n📅 {date} at {time}\n📍 {location}\n\n${dress_code ? `👔 Dress Code: ${dress_code}\n` : ''}Please be prepared and arrive on time.\n\n📱 This is an automated reminder.`,
+    INDIVIDUAL_REMINDER: (title: string, date: string, time: string, location: string, dress_code?: string) => 
+      `⏰ *Meeting Reminder*\n\n📋 *${title}*\n📅 ${date} at ${time}\n📍 ${location}\n\n${dress_code ? `👔 Dress Code: ${dress_code}\n` : ''}Please be prepared and arrive on time.\n\n📱 This is an automated reminder.`,
   },
 } as const;
 

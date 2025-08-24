@@ -2,7 +2,7 @@
 export const API_CONFIG = {
   BASE_URL: import.meta.env.PROD 
     ? 'https://your-laravel-backend.com/api' 
-    : 'http://localhost:8000/api',
+    : '/api',
   TIMEOUT: 10000,
 } as const;
 

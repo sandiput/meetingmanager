@@ -17,8 +17,11 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
 }) => {
   if (!isOpen || !meeting) return null;
 
-  const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`);
-  const formattedDateTime = format(meetingDateTime, 'dd MMM yyyy, h:mm a');
+  const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+  const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
+  const formattedDate = format(startDateTime, 'dd MMM yyyy');
+  const formattedStartTime = format(startDateTime, 'h:mm a');
+  const formattedEndTime = format(endDateTime, 'h:mm a');
 
   const statusConfig = {
     incoming: {
@@ -86,7 +89,8 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-600">Tanggal & Waktu</p>
-                    <p className="text-lg font-semibold text-gray-800">{formattedDateTime}</p>
+                    <p className="text-lg font-semibold text-gray-800">{formattedDate}</p>
+                    <p className="text-sm text-gray-600">{formattedStartTime} - {formattedEndTime}</p>
                   </div>
                 </div>
                 

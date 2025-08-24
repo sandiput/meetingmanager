@@ -1,24 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Calendar, Clock, Bell, Users as UsersIcon } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import { Header } from '../components/layout/Header';
-import { StatsCard } from '../components/dashboard/StatsCard';
 import { MeetingCard } from '../components/dashboard/MeetingCard';
 import { NewMeetingModal } from '../components/modals/NewMeetingModal';
 import { EditMeetingModal } from '../components/modals/EditMeetingModal';
 import { MeetingDetailModal } from '../components/modals/MeetingDetailModal';
 import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModal';
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
-import { dashboardApi, meetingsApi } from '../services/api';
-import { DashboardStats, Meeting } from '../types';
+import { meetingsApi } from '../services/api';
+import { Meeting } from '../types';
 import { useToast } from '../hooks/useToast';
 
 export const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState<DashboardStats>({
-    total_meetings: 0,
-    this_week_meetings: 0,
-    notifications_sent: 0,
-    active_participants: 0,
-  });
   const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
@@ -34,12 +27,8 @@ export const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const [statsResponse, meetingsResponse] = await Promise.all([
-          dashboardApi.getStats(),
-          dashboardApi.getUpcomingMeetings(),
-        ]);
+        const meetingsResponse = await dashboardApi.getUpcomingMeetings();
         
-        setStats(statsResponse.data);
         setUpcomingMeetings(meetingsResponse.data);
       } catch (err) {
         error('Failed to load dashboard data');
@@ -108,12 +97,8 @@ export const Dashboard: React.FC = () => {
     // Refresh the meetings list
     const fetchDashboardData = async () => {
       try {
-        const [statsResponse, meetingsResponse] = await Promise.all([
-          dashboardApi.getStats(),
-          dashboardApi.getUpcomingMeetings(),
-        ]);
+        const meetingsResponse = await dashboardApi.getUpcomingMeetings();
         
-        setStats(statsResponse.data);
         setUpcomingMeetings(meetingsResponse.data);
       } catch (err) {
         error('Failed to refresh data');
@@ -148,34 +133,6 @@ export const Dashboard: React.FC = () => {
       />
       
       <div className="container mx-auto px-6 py-8 sm:px-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatsCard
-            title="Total Meetings"
-            value={stats.total_meetings}
-            icon={Calendar}
-            iconColor="bg-blue-100 text-blue-600"
-          />
-          <StatsCard
-            title="This Week"
-            value={stats.this_week_meetings}
-            icon={Clock}
-            iconColor="bg-green-100 text-green-600"
-          />
-          <StatsCard
-            title="Notifications Sent"
-            value={stats.notifications_sent}
-            icon={Bell}
-            iconColor="bg-purple-100 text-purple-600"
-          />
-          <StatsCard
-            title="Active Participants"
-            value={stats.active_participants}
-            icon={UsersIcon}
-            iconColor="bg-orange-100 text-orange-600"
-          />
-        </div>
-
         {/* Upcoming Meetings */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">

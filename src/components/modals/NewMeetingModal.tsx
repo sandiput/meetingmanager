@@ -25,7 +25,8 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   const [formData, setFormData] = useState<CreateMeetingForm>({
     title: '',
     date: '',
-    time: '',
+    start_time: '',
+    end_time: '',
     location: '',
     designated_attendee: '',
     dress_code: '',
@@ -41,15 +42,19 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       fetchParticipants();
       // Set default date to today
       const today = new Date().toISOString().split('T')[0];
-      // Set default time to current hour + 1
+      // Set default start time to current hour + 1
       const now = new Date();
       now.setHours(now.getHours() + 1);
-      const timeString = now.toTimeString().slice(0, 5);
+      const startTimeString = now.toTimeString().slice(0, 5);
+      // Set default end time to start time + 1 hour
+      now.setHours(now.getHours() + 1);
+      const endTimeString = now.toTimeString().slice(0, 5);
       
       setFormData(prev => ({
         ...prev,
         date: today,
-        time: timeString,
+        start_time: startTimeString,
+        end_time: endTimeString,
       }));
     }
   }, [isOpen]);
@@ -89,7 +94,7 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.date || !formData.time || !formData.location || !formData.designated_attendee) {
+    if (!formData.title || !formData.date || !formData.start_time || !formData.end_time || !formData.location || !formData.designated_attendee) {
       error('Please fill in all required fields');
       return;
     }
@@ -112,7 +117,8 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     setFormData({
       title: '',
       date: '',
-      time: '',
+      start_time: '',
+      end_time: '',
       location: '',
       designated_attendee: '',
       dress_code: '',
@@ -177,7 +183,7 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
             </div>
 
             {/* Date & Time */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Date *
@@ -192,12 +198,24 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time *
+                  Start Time *
                 </label>
                 <input
                   type="time"
-                  value={formData.time}
-                  onChange={(e) => handleInputChange('time', e.target.value)}
+                  value={formData.start_time}
+                  onChange={(e) => handleInputChange('start_time', e.target.value)}
+                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time *
+                </label>
+                <input
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) => handleInputChange('end_time', e.target.value)}
                   className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
                   required
                 />

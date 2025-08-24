@@ -27,7 +27,8 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   const [formData, setFormData] = useState<CreateMeetingForm>({
     title: '',
     date: '',
-    time: '',
+    start_time: '',
+    end_time: '',
     location: '',
     designated_attendee: '',
     dress_code: '',
@@ -44,7 +45,8 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
       setFormData({
         title: meeting.title,
         date: meeting.date,
-        time: meeting.time,
+        start_time: meeting.start_time,
+        end_time: meeting.end_time,
         location: meeting.location,
         designated_attendee: meeting.designated_attendee,
         dress_code: meeting.dress_code || '',
@@ -92,7 +94,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!meeting || !formData.title || !formData.date || !formData.time || !formData.location || !formData.designated_attendee) {
+    if (!meeting || !formData.title || !formData.date || !formData.start_time || !formData.end_time || !formData.location || !formData.designated_attendee) {
       error('Please fill in all required fields');
       return;
     }
@@ -162,7 +164,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             </div>
 
             {/* Date & Time */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Date *
@@ -177,12 +179,24 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Time *
+                  Start Time *
                 </label>
                 <input
                   type="time"
-                  value={formData.time}
-                  onChange={(e) => handleInputChange('time', e.target.value)}
+                  value={formData.start_time}
+                  onChange={(e) => handleInputChange('start_time', e.target.value)}
+                  className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  End Time *
+                </label>
+                <input
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) => handleInputChange('end_time', e.target.value)}
                   className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
                   required
                 />

@@ -3,7 +3,8 @@ export interface Meeting {
   id: string;
   title: string;
   date: string;
-  time: string;
+  start_time: string;
+  end_time: string;
   location: string;
   meeting_link?: string;
   designated_attendee: string;
@@ -65,7 +66,8 @@ export interface PaginatedResponse<T> {
 export interface CreateMeetingForm {
   title: string;
   date: string;
-  time: string;
+  start_time: string;
+  end_time: string;
   location: string;
   meeting_link?: string;
   designated_attendee: string;

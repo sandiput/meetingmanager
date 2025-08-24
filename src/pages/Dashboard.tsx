@@ -7,7 +7,7 @@ import { EditMeetingModal } from '../components/modals/EditMeetingModal';
 import { MeetingDetailModal } from '../components/modals/MeetingDetailModal';
 import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModal';
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
-import { meetingsApi } from '../services/api';
+import { meetingsApi, dashboardApi } from '../services/api';
 import { Meeting } from '../types';
 import { useToast } from '../hooks/useToast';
 

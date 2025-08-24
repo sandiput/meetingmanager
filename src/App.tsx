@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Sidebar } from './components/layout/Sidebar';
 import { ToastProvider } from './components/ToastProvider';
 import { Dashboard } from './pages/Dashboard';
@@ -9,21 +11,39 @@ import { Settings } from './pages/Settings';
 
 function App() {
   return (
-    <Router>
-      <ToastProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50">
-          <Sidebar />
-          <main className="flex-1">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/participants" element={<Participants />} />
-              <Route path="/review" element={<Review />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
-          </main>
-        </div>
-      </ToastProvider>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <ToastProvider>
+          <div className="flex min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-50">
+            <Sidebar />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={
+                  <ProtectedRoute requireAuth={false}>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } />
+                <Route path="/participants" element={
+                  <ProtectedRoute>
+                    <Participants />
+                  </ProtectedRoute>
+                } />
+                <Route path="/review" element={
+                  <ProtectedRoute requireAuth={false}>
+                    <Review />
+                  </ProtectedRoute>
+                } />
+                <Route path="/settings" element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </main>
+          </div>
+        </ToastProvider>
+      </Router>
+    </AuthProvider>
   );
 }
 

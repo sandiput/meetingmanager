@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Calendar } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import { Header } from '../components/layout/Header';
 import { MeetingCard } from '../components/dashboard/MeetingCard';
 import { NewMeetingModal } from '../components/modals/NewMeetingModal';
@@ -12,6 +13,7 @@ import { Meeting } from '../types';
 import { useToast } from '../hooks/useToast';
 
 export const Dashboard: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
@@ -121,7 +123,7 @@ export const Dashboard: React.FC = () => {
       <Header
         title="Dashboard"
         subtitle="Manage your meetings and automated WhatsApp notifications"
-        actions={
+        actions={isAuthenticated ? (
           <button
             onClick={handleNewMeeting}
             className="bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
@@ -129,7 +131,7 @@ export const Dashboard: React.FC = () => {
             <Plus className="w-4 h-4" />
             <span>New Meeting</span>
           </button>
-        }
+        ) : undefined}
       />
       
       <div className="container mx-auto px-6 py-8 sm:px-8">
@@ -168,9 +170,10 @@ export const Dashboard: React.FC = () => {
                   data-meeting-id={meeting.id}
                   meeting={meeting}
                   onView={handleViewMeeting}
-                  onEdit={handleEditMeeting}
-                  onDelete={handleDeleteMeeting}
-                  onSendReminder={handleSendReminder}
+                  onEdit={isAuthenticated ? handleEditMeeting : () => {}}
+                  onDelete={isAuthenticated ? handleDeleteMeeting : () => {}}
+                  onSendReminder={isAuthenticated ? handleSendReminder : () => {}}
+                  isAuthenticated={isAuthenticated}
                 />
               ))
             )}
@@ -179,21 +182,45 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <NewMeetingModal
-        isOpen={showNewMeetingModal}
-        onClose={() => setShowNewMeetingModal(false)}
-        onSuccess={handleModalSuccess}
-      />
-      
-      <EditMeetingModal
-        isOpen={showEditMeetingModal}
-        meeting={selectedMeeting}
-        onClose={() => {
-          setShowEditMeetingModal(false);
-          setSelectedMeeting(null);
-        }}
-        onSuccess={handleModalSuccess}
-      />
+      {isAuthenticated && (
+        <>
+          <NewMeetingModal
+            isOpen={showNewMeetingModal}
+            onClose={() => setShowNewMeetingModal(false)}
+            onSuccess={handleModalSuccess}
+          />
+          
+          <EditMeetingModal
+            isOpen={showEditMeetingModal}
+            meeting={selectedMeeting}
+            onClose={() => {
+              setShowEditMeetingModal(false);
+              setSelectedMeeting(null);
+            }}
+            onSuccess={handleModalSuccess}
+          />
+          
+          <WhatsAppReminderModal
+            isOpen={showWhatsAppModal}
+            meeting={selectedMeeting}
+            onClose={() => {
+              setShowWhatsAppModal(false);
+              setSelectedMeeting(null);
+            }}
+          />
+          
+          <DeleteConfirmationModal
+            isOpen={showDeleteModal}
+            meeting={selectedMeeting}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setSelectedMeeting(null);
+            }}
+            onConfirm={confirmDeleteMeeting}
+            loading={deletingMeeting}
+          />
+        </>
+      )}
       
       <MeetingDetailModal
         isOpen={showDetailModal}
@@ -202,26 +229,6 @@ export const Dashboard: React.FC = () => {
           setShowDetailModal(false);
           setSelectedMeeting(null);
         }}
-      />
-      
-      <WhatsAppReminderModal
-        isOpen={showWhatsAppModal}
-        meeting={selectedMeeting}
-        onClose={() => {
-          setShowWhatsAppModal(false);
-          setSelectedMeeting(null);
-        }}
-      />
-      
-      <DeleteConfirmationModal
-        isOpen={showDeleteModal}
-        meeting={selectedMeeting}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setSelectedMeeting(null);
-        }}
-        onConfirm={confirmDeleteMeeting}
-        loading={deletingMeeting}
       />
     </div>
   );

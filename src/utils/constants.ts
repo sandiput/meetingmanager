@@ -23,6 +23,14 @@ export const WHATSAPP_CONFIG = {
   },
 } as const;
 
+// Seksi Options
+export const SEKSI_OPTIONS = [
+  'Intelijen Kepabeanan I',
+  'Intelijen Kepabeanan II', 
+  'Intelijen Cukai',
+  'Dukungan Operasi Intelijen'
+] as const;
+
 // Date and Time Formats
 export const DATE_FORMATS = {
   DISPLAY: 'dd MMM yyyy',

@@ -135,6 +135,9 @@ export const Participants: React.FC = () => {
                     WhatsApp Number
                   </th>
                   <th className="py-3 px-4 text-xs font-medium uppercase text-gray-500">
+                    Seksi
+                  </th>
+                  <th className="py-3 px-4 text-xs font-medium uppercase text-gray-500">
                     Actions
                   </th>
                 </tr>
@@ -169,6 +172,11 @@ export const Participants: React.FC = () => {
                           </span>
                         </div>
                       </div>
+                    </td>
+                    <td className="whitespace-nowrap py-4 px-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        {participant.seksi}
+                      </span>
                     </td>
                     <td className="whitespace-nowrap py-4 px-4 text-right">
                       <div className="flex items-center gap-2">

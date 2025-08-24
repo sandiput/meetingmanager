@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, User, Phone, Car as IdCard } from 'lucide-react';
+import { X, User, Phone, Car as IdCard, Building2 } from 'lucide-react';
 import { participantsApi } from '../../services/api';
 import { CreateParticipantForm } from '../../types';
+import { SEKSI_OPTIONS } from '../../utils/constants';
 import { useToast } from '../../hooks/useToast';
 import { clsx } from 'clsx';
 
@@ -23,6 +24,7 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
     name: '',
     whatsapp_number: '',
     nip: '',
+    seksi: SEKSI_OPTIONS[0],
   });
 
   const handleInputChange = (field: keyof CreateParticipantForm, value: string) => {
@@ -103,6 +105,7 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
       name: '',
       whatsapp_number: '',
       nip: '',
+      seksi: SEKSI_OPTIONS[0],
     });
   };
 
@@ -203,6 +206,26 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
                 Enter Indonesian mobile number without spaces (will be formatted automatically)
               </p>
             </div>
+            </div>
+
+            {/* Seksi */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Building2 className="w-4 h-4 inline mr-2" />
+                Seksi *
+              </label>
+              <select
+                value={formData.seksi}
+                onChange={(e) => handleInputChange('seksi', e.target.value)}
+                className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                required
+              >
+                {SEKSI_OPTIONS.map((seksi) => (
+                  <option key={seksi} value={seksi}>
+                    {seksi}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Info Box */}

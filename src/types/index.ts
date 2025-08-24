@@ -23,6 +23,7 @@ export interface Participant {
   name: string;
   whatsapp_number: string;
   nip: string; // Nomor Induk Pegawai
+  seksi: string;
   created_at: string;
   updated_at: string;
 }
@@ -80,6 +81,7 @@ export interface CreateParticipantForm {
   name: string;
   whatsapp_number: string;
   nip: string;
+  seksi: string;
 }
 
 export interface UpdateSettingsForm {

@@ -193,24 +193,24 @@ export const Review: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Top 10 Participants */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-yellow-100 to-orange-100">
-                <Award className="w-5 h-5 text-orange-600" />
+          <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg">
+                <Award className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-800">Top 10 Most Active Participants</h3>
-                <p className="text-sm text-gray-600">Participants with highest meeting attendance</p>
+                <h3 className="text-xl font-bold text-gray-800">🏆 Top 10 Most Active Participants</h3>
+                <p className="text-sm text-gray-500">Participants with highest meeting attendance</p>
               </div>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               {topParticipants.map((participant, index) => (
-                <div key={participant.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                <div key={participant.id} className="flex items-center gap-4 p-4 bg-gradient-to-r from-white to-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
                   <div className={clsx(
-                    'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
+                    'flex items-center justify-center w-10 h-10 rounded-full text-white text-sm font-bold shadow-lg',
                     index === 0 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
                     index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400' :
                     index === 2 ? 'bg-gradient-to-r from-orange-300 to-orange-400' :
@@ -219,12 +219,12 @@ export const Review: React.FC = () => {
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-800">{participant.name}</p>
-                    <p className="text-sm text-gray-600">{participant.seksi}</p>
+                    <p className="font-bold text-gray-800">{participant.name}</p>
+                    <p className="text-xs text-gray-500 font-medium">{participant.seksi}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-bold text-gray-800">{participant.meeting_count}</p>
-                    <p className="text-xs text-gray-500">meetings</p>
+                    <p className="text-xl font-bold text-indigo-600">{participant.meeting_count}</p>
+                    <p className="text-xs text-gray-400 font-medium">meetings</p>
                   </div>
                 </div>
               ))}
@@ -232,35 +232,35 @@ export const Review: React.FC = () => {
           </div>
 
           {/* Seksi Statistics Pie Chart */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-purple-100 to-indigo-100">
-                <PieChart className="w-5 h-5 text-indigo-600" />
+          <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg">
+                <PieChart className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-800">Meeting Distribution by Seksi</h3>
-                <p className="text-sm text-gray-600">Participation breakdown by department</p>
+                <h3 className="text-xl font-bold text-gray-800">📊 Meeting Distribution by Seksi</h3>
+                <p className="text-sm text-gray-500">Participation breakdown by department</p>
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-5">
               {seksiStats.map((seksi, index) => {
                 const percentage = stats ? (seksi.meeting_count / stats.total_meetings * 100) : 0;
                 return (
-                  <div key={seksi.seksi} className="space-y-2">
+                  <div key={seksi.seksi} className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={clsx('w-4 h-4 rounded-full', getSeksiColor(index))} />
-                        <span className="text-sm font-medium text-gray-700">{seksi.seksi}</span>
+                      <div className="flex items-center gap-4">
+                        <div className={clsx('w-5 h-5 rounded-full shadow-sm', getSeksiColor(index))} />
+                        <span className="text-sm font-bold text-gray-700">{seksi.seksi}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-bold text-gray-800">{seksi.meeting_count}</span>
-                        <span className="text-xs text-gray-500 ml-1">({percentage.toFixed(1)}%)</span>
+                        <span className="text-lg font-bold text-indigo-600">{seksi.meeting_count}</span>
+                        <span className="text-xs text-gray-400 ml-2 font-medium">({percentage.toFixed(1)}%)</span>
                       </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
                       <div 
-                        className={clsx('h-2 rounded-full transition-all duration-500', getSeksiColor(index))}
+                        className={clsx('h-3 rounded-full transition-all duration-700 shadow-sm', getSeksiColor(index))}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -272,26 +272,26 @@ export const Review: React.FC = () => {
         </div>
 
         {/* Meeting Trends */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-green-100 to-emerald-100">
-              <BarChart3 className="w-5 h-5 text-emerald-600" />
+        <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 mb-6">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
+              <BarChart3 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-800">Meeting Trends</h3>
-              <p className="text-sm text-gray-600">Meeting frequency over time</p>
+              <h3 className="text-xl font-bold text-gray-800">📈 Meeting Trends</h3>
+              <p className="text-sm text-gray-500">Meeting frequency over time</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {meetingTrends.map((trend, index) => (
-              <div key={index} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border">
+              <div key={index} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-1">{trend.period}</p>
-                  <p className="text-2xl font-bold text-gray-800 mb-2">{trend.count}</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <p className="text-sm text-gray-500 mb-2 font-medium">{trend.period}</p>
+                  <p className="text-3xl font-bold text-indigo-600 mb-3">{trend.count}</p>
+                  <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
                     <div 
-                      className="h-2 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-500"
+                      className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-700 shadow-sm"
                       style={{ width: `${(trend.count / Math.max(...meetingTrends.map(t => t.count))) * 100}%` }}
                     />
                   </div>
@@ -301,47 +301,11 @@ export const Review: React.FC = () => {
           </div>
         </div>
 
-        {/* Additional Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Meeting Efficiency */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-100 to-blue-100">
-                <Target className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-800">Meeting Efficiency Metrics</h3>
-                <p className="text-sm text-gray-600">Performance indicators</p>
-              </div>
-            </div>
-            
-            {stats && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                  <span className="text-sm font-medium text-green-800">On-time Start Rate</span>
-                  <span className="text-lg font-bold text-green-800">{stats.ontime_rate}%</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <span className="text-sm font-medium text-blue-800">WhatsApp Response Rate</span>
-                  <span className="text-lg font-bold text-blue-800">{stats.whatsapp_response_rate}%</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                  <span className="text-sm font-medium text-purple-800">Meeting Completion Rate</span>
-                  <span className="text-lg font-bold text-purple-800">{stats.completion_rate}%</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
-                  <span className="text-sm font-medium text-orange-800">Average Participants</span>
-                  <span className="text-lg font-bold text-orange-800">{stats.avg_participants}</span>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-100 to-purple-100">
-                <FileText className="w-5 h-5 text-purple-600" />
+        {/* Quick Actions */}
+        <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
+              <FileText className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-800">Report Actions</h3>
@@ -349,35 +313,34 @@ export const Review: React.FC = () => {
               </div>
             </div>
             
-            <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={exportReport}
-                className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 rounded-lg border border-blue-200 transition-all"
+              className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
               >
-                <Download className="w-5 h-5 text-blue-600" />
+              <Download className="w-5 h-5" />
                 <div className="text-left">
-                  <p className="font-medium text-blue-800">Export Full Report</p>
-                  <p className="text-xs text-blue-600">Download complete analytics data</p>
+                <p className="font-bold text-sm">Export Full Report</p>
+                <p className="text-xs opacity-90">Download complete data</p>
                 </div>
               </button>
               
-              <button className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 rounded-lg border border-green-200 transition-all">
-                <BarChart3 className="w-5 h-5 text-green-600" />
+            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+              <BarChart3 className="w-5 h-5" />
                 <div className="text-left">
-                  <p className="font-medium text-green-800">Generate Charts</p>
-                  <p className="text-xs text-green-600">Create visual presentations</p>
+                <p className="font-bold text-sm">Generate Charts</p>
+                <p className="text-xs opacity-90">Visual presentations</p>
                 </div>
               </button>
               
-              <button className="w-full flex items-center gap-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-lg border border-purple-200 transition-all">
-                <TrendingUp className="w-5 h-5 text-purple-600" />
+            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+              <TrendingUp className="w-5 h-5" />
                 <div className="text-left">
-                  <p className="font-medium text-purple-800">Trend Analysis</p>
-                  <p className="text-xs text-purple-600">Detailed performance trends</p>
-                </div>
-              </button>
+                <p className="font-bold text-sm">Trend Analysis</p>
+                <p className="text-xs opacity-90">Performance trends</p>
+              <h3 className="text-xl font-bold text-gray-800">📋 Report Actions</h3>
+              <p className="text-sm text-gray-500">Generate detailed reports and analytics</p>
             </div>
-          </div>
         </div>
       </div>
     </div>

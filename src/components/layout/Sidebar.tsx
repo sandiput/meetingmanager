@@ -368,20 +368,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                 </div>
               )}
             </div>
-          ) : (
-            <div className="text-center">
-              <div className="size-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white font-semibold text-sm mx-auto mb-2">
-                <UserIcon className="w-5 h-5" />
-              </div>
-              <p className="text-sm text-gray-600 mb-2">Guest Mode</p>
-              <button
-                onClick={() => navigate('/')}
-                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-              >
-                Login as Admin
-              </button>
-            </div>
-          )}
+          ) : null}
         </div>
       </div>
       

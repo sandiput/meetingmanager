@@ -54,8 +54,11 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
 
   if (!isOpen || !meeting) return null;
 
-  const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`);
-  const formattedDateTime = format(meetingDateTime, 'dd MMM yyyy, h:mm a');
+  const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+  const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
+  const formattedDate = format(startDateTime, 'dd MMM yyyy');
+  const formattedStartTime = format(startDateTime, 'h:mm a');
+  const formattedEndTime = format(endDateTime, 'h:mm a');
 
   return (
     <div 
@@ -118,7 +121,7 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                   <div className="space-y-2 text-sm text-green-700">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 flex-shrink-0" />
-                      <span className="font-medium">{formattedDateTime}</span>
+                      <span className="font-medium">{formattedDate}, {formattedStartTime} - {formattedEndTime}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 flex-shrink-0" />

@@ -173,7 +173,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                     Search Results ({searchResults.length})
                   </div>
                   {searchResults.map((meeting) => {
-                    const meetingDate = new Date(`${meeting.date}T${meeting.time}`);
+                    const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+                    const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
                     return (
                       <button
                         key={meeting.id}
@@ -189,7 +190,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                               {meeting.title}
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                              {format(meetingDate, 'dd MMM yyyy, HH:mm')}
+                              {format(startDateTime, 'dd MMM yyyy')}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {format(startDateTime, 'HH:mm')} - {format(endDateTime, 'HH:mm')}
                             </p>
                             <p className="text-xs text-gray-400 truncate">
                               📍 {meeting.location}

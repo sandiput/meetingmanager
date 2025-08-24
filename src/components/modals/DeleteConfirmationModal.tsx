@@ -21,8 +21,11 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
 }) => {
   if (!isOpen || !meeting) return null;
 
-  const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`);
-  const formattedDateTime = format(meetingDateTime, 'dd MMM yyyy, h:mm a');
+  const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+  const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
+  const formattedDate = format(startDateTime, 'dd MMM yyyy');
+  const formattedStartTime = format(startDateTime, 'h:mm a');
+  const formattedEndTime = format(endDateTime, 'h:mm a');
 
   return (
     <div 
@@ -69,7 +72,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
                   {meeting.title}
                 </h4>
                 <p className="text-sm text-red-700 mb-2">
-                  {formattedDateTime}
+                  {formattedDate}, {formattedStartTime} - {formattedEndTime}
                 </p>
                 <div className="text-sm text-red-600">
                   <p>📍 {meeting.location}</p>

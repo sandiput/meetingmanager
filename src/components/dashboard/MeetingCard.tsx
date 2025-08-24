@@ -36,11 +36,12 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   const statusInfo = statusConfig[meeting.status];
   const StatusIcon = statusInfo.icon;
   
-  const meetingDate = new Date(`${meeting.date}T${meeting.time}`);
+  const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+  const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
   const formatRelativeTime = () => {
-    if (isToday(meetingDate)) return 'Today';
-    if (isTomorrow(meetingDate)) return 'Tomorrow';
-    const daysDiff = differenceInDays(meetingDate, new Date());
+    if (isToday(startDateTime)) return 'Today';
+    if (isTomorrow(startDateTime)) return 'Tomorrow';
+    const daysDiff = differenceInDays(startDateTime, new Date());
     return daysDiff > 0 ? `in ${daysDiff} days` : `${Math.abs(daysDiff)} days ago`;
   };
 
@@ -134,7 +135,10 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
             Date & Time
           </p>
           <p className="text-sm font-semibold text-gray-800">
-            {format(meetingDate, 'dd MMM yyyy, h:mm a')}
+            {format(startDateTime, 'dd MMM yyyy')}
+          </p>
+          <p className="text-xs text-gray-600">
+            {format(startDateTime, 'h:mm a')} - {format(endDateTime, 'h:mm a')}
           </p>
           <p className="text-xs text-gray-500 mt-1">{formatRelativeTime()}</p>
         </div>

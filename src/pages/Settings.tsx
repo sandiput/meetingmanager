@@ -295,26 +295,8 @@ export const Settings: React.FC = () => {
           )}
 
           {/* Save Button */}
-          <div className="flex justify-end">
-            <button
-              type="submit"
-              disabled={saving}
-              className={clsx(
-                'flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all',
-                saving
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg'
-              )}
-            >
-              <Save className="w-4 h-4" />
-              <span>{saving ? 'Saving...' : 'Save Settings'}</span>
-            </button>
-          </div>
-
-        </form>
-
         {/* Message Preview Sections */}
-        <div className="space-y-6 mt-8">
+        <div className="space-y-6">
           {/* Group Message Preview */}
           <div className="rounded-lg bg-white p-6 shadow-md border">
             <h3 className="mb-1 text-xl font-bold text-gray-800">
@@ -594,6 +576,25 @@ export const Settings: React.FC = () => {
             </div>
           </div>
         </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={saving}
+              className={clsx(
+                'flex items-center justify-center gap-2 rounded-lg px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-all',
+                saving
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg'
+              )}
+            >
+              <Save className="w-4 h-4" />
+              <span>{saving ? 'Saving...' : 'Save Settings'}</span>
+            </button>
+          </div>
+
+        </form>
+
       </div>
     </div>
   );

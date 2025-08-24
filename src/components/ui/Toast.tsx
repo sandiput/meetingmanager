@@ -36,7 +36,7 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
   return (
     <div
       className={clsx(
-        'fixed top-4 right-4 z-50 min-w-80 rounded-xl shadow-lg text-white px-6 py-4 flex items-center gap-3 animate-in slide-in-from-right-full',
+        'fixed top-4 right-4 z-[9999] min-w-80 rounded-xl shadow-lg text-white px-6 py-4 flex items-center gap-3 animate-in slide-in-from-right-full',
         colorMap[toast.type]
       )}
     >

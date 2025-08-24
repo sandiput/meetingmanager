@@ -29,7 +29,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();

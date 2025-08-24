@@ -144,7 +144,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
   return (
     <aside className={clsx(
-      'sticky top-0 h-screen w-64 bg-gradient-to-b from-white to-slate-50 shadow-xl border-r border-gray-200',
+      'sticky top-0 h-screen w-64 bg-gradient-to-b from-white to-slate-50 shadow-xl border-r border-gray-200 z-30',
       className
     )}>
       <div className="flex h-full flex-col">
@@ -349,7 +349,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
               
               {/* User Menu Dropdown */}
               {showUserMenu && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[100]">
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                   <button
                     onClick={handleUserSettings}
                     className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"

@@ -1,11 +1,13 @@
 import React from 'react';
 import { Clock, MapPin, User, CheckCircle, Ruler as Schedule, MoreVertical, MessageCircle, Edit, Trash2 } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Meeting } from '../../types';
 import { clsx } from 'clsx';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 
 interface MeetingCardProps {
   meeting: Meeting;
+  onView: (meeting: Meeting) => void;
   onEdit: (meeting: Meeting) => void;
   onDelete: (meeting: Meeting) => void;
   onSendReminder: (meeting: Meeting) => void;
@@ -43,8 +45,9 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
 
   return (
     <div 
-      className="bg-gradient-to-r from-white to-slate-50 rounded-2xl p-6 shadow-sm border-l-4 border-indigo-500 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+      className="bg-gradient-to-r from-white to-slate-50 rounded-2xl p-6 shadow-sm border-l-4 border-indigo-500 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer"
       data-meeting-id={meeting.id}
+      onClick={() => onView(meeting)}
     >
       <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
@@ -79,14 +82,30 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
             </button>
             <div className="absolute right-0 z-10 mt-0 w-48 origin-top-right rounded-lg bg-white py-2 shadow-lg ring-1 ring-black ring-opacity-5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
               <button
-                onClick={() => onEdit(meeting)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onView(meeting);
+                }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+              >
+                <Eye className="w-4 h-4" />
+                Lihat Detail
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(meeting);
+                }}
                 className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
               >
                 <Edit className="w-4 h-4" />
                 Edit Meeting
               </button>
               <button
-                onClick={() => onSendReminder(meeting)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSendReminder(meeting);
+                }}
                 className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
               >
                 <MessageCircle className="w-4 h-4 text-green-600" />
@@ -94,7 +113,10 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
               </button>
               <hr className="my-1" />
               <button
-                onClick={() => onDelete(meeting)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(meeting);
+                }}
                 className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
               >
                 <Trash2 className="w-4 h-4" />

@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { meetingsApi } from '../../services/api';
 import { Meeting } from '../../types';
+import { MeetingDetailModal } from '../modals/MeetingDetailModal';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 
@@ -70,6 +71,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const [searchResults, setSearchResults] = React.useState<Meeting[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
   const [showResults, setShowResults] = React.useState(false);
+  const [showDetailModal, setShowDetailModal] = React.useState(false);
+  const [selectedMeeting, setSelectedMeeting] = React.useState<Meeting | null>(null);
   const navigate = useNavigate();
 
   // Debounced search function
@@ -107,8 +110,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const handleMeetingSelect = (meeting: Meeting) => {
     setSearchQuery('');
     setShowResults(false);
-    // Navigate to dashboard and potentially scroll to meeting
-    navigate('/');
+    setSelectedMeeting(meeting);
+    setShowDetailModal(true);
   };
 
   const handleSearchFocus = () => {
@@ -317,6 +320,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </div>
         </div>
       </div>
+      
+      {/* Meeting Detail Modal */}
+      <MeetingDetailModal
+        isOpen={showDetailModal}
+        meeting={selectedMeeting}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedMeeting(null);
+        }}
+      />
     </aside>
   );
 };

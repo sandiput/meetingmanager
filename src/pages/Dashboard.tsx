@@ -5,6 +5,7 @@ import { StatsCard } from '../components/dashboard/StatsCard';
 import { MeetingCard } from '../components/dashboard/MeetingCard';
 import { NewMeetingModal } from '../components/modals/NewMeetingModal';
 import { EditMeetingModal } from '../components/modals/EditMeetingModal';
+import { MeetingDetailModal } from '../components/modals/MeetingDetailModal';
 import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModal';
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
 import { dashboardApi, meetingsApi } from '../services/api';
@@ -22,6 +23,7 @@ export const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
   const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
@@ -53,6 +55,11 @@ export const Dashboard: React.FC = () => {
   const handleEditMeeting = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
     setShowEditMeetingModal(true);
+  };
+
+  const handleViewMeeting = (meeting: Meeting) => {
+    setSelectedMeeting(meeting);
+    setShowDetailModal(true);
   };
 
   const handleDeleteMeeting = async (meeting: Meeting) => {
@@ -203,6 +210,7 @@ export const Dashboard: React.FC = () => {
                   key={meeting.id}
                   data-meeting-id={meeting.id}
                   meeting={meeting}
+                  onView={handleViewMeeting}
                   onEdit={handleEditMeeting}
                   onDelete={handleDeleteMeeting}
                   onSendReminder={handleSendReminder}
@@ -228,6 +236,15 @@ export const Dashboard: React.FC = () => {
           setSelectedMeeting(null);
         }}
         onSuccess={handleModalSuccess}
+      />
+      
+      <MeetingDetailModal
+        isOpen={showDetailModal}
+        meeting={selectedMeeting}
+        onClose={() => {
+          setShowDetailModal(false);
+          setSelectedMeeting(null);
+        }}
       />
       
       <WhatsAppReminderModal

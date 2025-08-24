@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Users, TrendingUp, BarChart3, PieChart, Clock, Award, Target, FileText, Download } from 'lucide-react';
+import { Calendar, Users, TrendingUp, BarChart3, Clock, Award, Target, FileText, Download } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { reviewApi } from '../services/api';
 import { ReviewStats, TopParticipant, SeksiStats, MeetingTrend } from '../types';
@@ -118,7 +118,7 @@ export const Review: React.FC = () => {
             </select>
             <button
               onClick={exportReport}
-              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors"
             >
               <Download className="w-4 h-4" />
               <span>Export Report</span>
@@ -131,62 +131,62 @@ export const Review: React.FC = () => {
         {/* Overview Stats */}
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 border border-blue-200">
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-blue-600 mb-1">Total Meetings</p>
-                  <p className="text-3xl font-bold text-blue-800">{stats.total_meetings}</p>
-                  <p className="text-xs text-blue-600 mt-1">
-                    {stats.completed_meetings} completed, {stats.total_meetings - stats.completed_meetings} upcoming
+                  <p className="text-sm text-gray-600 mb-1">Total Meetings</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.total_meetings}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {stats.completed_meetings} completed
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-blue-200">
-                  <Calendar className="w-6 h-6 text-blue-700" />
+                <div className="p-3 rounded-lg bg-blue-100">
+                  <Calendar className="w-6 h-6 text-blue-600" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 border border-green-200">
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-green-600 mb-1">Attendance Rate</p>
-                  <p className="text-3xl font-bold text-green-800">{stats.attendance_rate}%</p>
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-sm text-gray-600 mb-1">Attendance Rate</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.attendance_rate}%</p>
+                  <p className="text-xs text-gray-500 mt-1">
                     {stats.total_attendees} total attendees
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-green-200">
-                  <Users className="w-6 h-6 text-green-700" />
+                <div className="p-3 rounded-lg bg-green-100">
+                  <Users className="w-6 h-6 text-green-600" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 border border-purple-200">
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-purple-600 mb-1">Avg Duration</p>
-                  <p className="text-3xl font-bold text-purple-800">{stats.avg_duration}h</p>
-                  <p className="text-xs text-purple-600 mt-1">
+                  <p className="text-sm text-gray-600 mb-1">Avg Duration</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.avg_duration}h</p>
+                  <p className="text-xs text-gray-500 mt-1">
                     Per meeting average
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-purple-200">
-                  <Clock className="w-6 h-6 text-purple-700" />
+                <div className="p-3 rounded-lg bg-purple-100">
+                  <Clock className="w-6 h-6 text-purple-600" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 border border-orange-200">
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-orange-600 mb-1">WhatsApp Sent</p>
-                  <p className="text-3xl font-bold text-orange-800">{stats.whatsapp_notifications}</p>
-                  <p className="text-xs text-orange-600 mt-1">
+                  <p className="text-sm text-gray-600 mb-1">WhatsApp Sent</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.whatsapp_notifications}</p>
+                  <p className="text-xs text-gray-500 mt-1">
                     Notifications delivered
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-orange-200">
-                  <TrendingUp className="w-6 h-6 text-orange-700" />
+                <div className="p-3 rounded-lg bg-orange-100">
+                  <TrendingUp className="w-6 h-6 text-orange-600" />
                 </div>
               </div>
             </div>
@@ -195,72 +195,72 @@ export const Review: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Top 10 Participants */}
-          <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg">
-                <Award className="w-6 h-6 text-white" />
+          <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-yellow-100">
+                <Award className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-800">🏆 Top 10 Most Active Participants</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Top 10 Most Active Participants</h3>
                 <p className="text-sm text-gray-500">Participants with highest meeting attendance</p>
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               {topParticipants.map((participant, index) => (
-                <div key={participant.id} className="flex items-center gap-4 p-4 bg-gradient-to-r from-white to-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
+                <div key={participant.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className={clsx(
-                    'flex items-center justify-center w-10 h-10 rounded-full text-white text-sm font-bold shadow-lg',
-                    index === 0 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
-                    index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-400' :
-                    index === 2 ? 'bg-gradient-to-r from-orange-300 to-orange-400' :
-                    'bg-gradient-to-r from-blue-400 to-blue-500'
+                    'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
+                    index === 0 ? 'bg-yellow-500' :
+                    index === 1 ? 'bg-gray-400' :
+                    index === 2 ? 'bg-orange-400' :
+                    'bg-blue-500'
                   )}>
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-gray-800">{participant.name}</p>
-                    <p className="text-xs text-gray-500 font-medium">{participant.seksi}</p>
+                    <p className="font-semibold text-gray-800">{participant.name}</p>
+                    <p className="text-xs text-gray-500">{participant.seksi}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-bold text-indigo-600">{participant.meeting_count}</p>
-                    <p className="text-xs text-gray-400 font-medium">meetings</p>
+                    <p className="text-lg font-bold text-indigo-600">{participant.meeting_count}</p>
+                    <p className="text-xs text-gray-400">meetings</p>
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Seksi Statistics Pie Chart */}
-          <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 shadow-lg">
-                <PieChart className="w-6 h-6 text-white" />
+          {/* Seksi Statistics */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-purple-100">
+                <BarChart3 className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-800">📊 Meeting Distribution by Seksi</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Meeting Distribution by Seksi</h3>
                 <p className="text-sm text-gray-500">Participation breakdown by department</p>
               </div>
             </div>
             
-            <div className="space-y-5">
+            <div className="space-y-4">
               {seksiStats.map((seksi, index) => {
                 const percentage = stats ? (seksi.meeting_count / stats.total_meetings * 100) : 0;
                 return (
-                  <div key={seksi.seksi} className="space-y-3">
+                  <div key={seksi.seksi} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className={clsx('w-5 h-5 rounded-full shadow-sm', getSeksiColor(index))} />
-                        <span className="text-sm font-bold text-gray-700">{seksi.seksi}</span>
+                      <div className="flex items-center gap-3">
+                        <div className={clsx('w-4 h-4 rounded-full', getSeksiColor(index))} />
+                        <span className="text-sm font-medium text-gray-700">{seksi.seksi}</span>
                       </div>
                       <div className="text-right">
                         <span className="text-lg font-bold text-indigo-600">{seksi.meeting_count}</span>
-                        <span className="text-xs text-gray-400 ml-2 font-medium">({percentage.toFixed(1)}%)</span>
+                        <span className="text-xs text-gray-400 ml-2">({percentage.toFixed(1)}%)</span>
                       </div>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className={clsx('h-3 rounded-full transition-all duration-700 shadow-sm', getSeksiColor(index))}
+                        className={clsx('h-2 rounded-full transition-all duration-700', getSeksiColor(index))}
                         style={{ width: `${percentage}%` }}
                       />
                     </div>
@@ -272,26 +272,26 @@ export const Review: React.FC = () => {
         </div>
 
         {/* Meeting Trends */}
-        <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 mb-6">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
-              <BarChart3 className="w-6 h-6 text-white" />
+        <div className="bg-white rounded-lg p-6 shadow-sm border mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg bg-green-100">
+              <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">📈 Meeting Trends</h3>
+              <h3 className="text-lg font-semibold text-gray-800">Meeting Trends</h3>
               <p className="text-sm text-gray-500">Meeting frequency over time</p>
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {meetingTrends.map((trend, index) => (
-              <div key={index} className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-100 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+              <div key={index} className="bg-gray-50 rounded-lg p-4">
                 <div className="text-center">
-                  <p className="text-sm text-gray-500 mb-2 font-medium">{trend.period}</p>
-                  <p className="text-3xl font-bold text-indigo-600 mb-3">{trend.count}</p>
-                  <div className="w-full bg-gray-200 rounded-full h-3 shadow-inner">
+                  <p className="text-sm text-gray-500 mb-2">{trend.period}</p>
+                  <p className="text-2xl font-bold text-indigo-600 mb-2">{trend.count}</p>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-700 shadow-sm"
+                      className="h-2 rounded-full bg-indigo-600 transition-all duration-700"
                       style={{ width: `${(trend.count / Math.max(...meetingTrends.map(t => t.count))) * 100}%` }}
                     />
                   </div>
@@ -302,13 +302,13 @@ export const Review: React.FC = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-gradient-to-br from-white to-slate-50 rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
-              <FileText className="w-6 h-6 text-white" />
+        <div className="bg-white rounded-lg p-6 shadow-sm border">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 rounded-lg bg-indigo-100">
+              <FileText className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">📋 Report Actions</h3>
+              <h3 className="text-lg font-semibold text-gray-800">Report Actions</h3>
               <p className="text-sm text-gray-500">Generate detailed reports and analytics</p>
             </div>
           </div>
@@ -316,28 +316,28 @@ export const Review: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               onClick={exportReport}
-              className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
+              className="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg text-blue-700 transition-colors"
             >
               <Download className="w-5 h-5" />
               <div className="text-left">
-                <p className="font-bold text-sm">Export Full Report</p>
-                <p className="text-xs opacity-90">Download complete data</p>
+                <p className="font-semibold text-sm">Export Full Report</p>
+                <p className="text-xs opacity-75">Download complete data</p>
               </div>
             </button>
               
-            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+            <button className="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-lg text-green-700 transition-colors">
               <BarChart3 className="w-5 h-5" />
               <div className="text-left">
-                <p className="font-bold text-sm">Generate Charts</p>
-                <p className="text-xs opacity-90">Visual presentations</p>
+                <p className="font-semibold text-sm">Generate Charts</p>
+                <p className="text-xs opacity-75">Visual presentations</p>
               </div>
             </button>
               
-            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+            <button className="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg text-purple-700 transition-colors">
               <TrendingUp className="w-5 h-5" />
               <div className="text-left">
-                <p className="font-bold text-sm">Trend Analysis</p>
-                <p className="text-xs opacity-90">Performance trends</p>
+                <p className="font-semibold text-sm">Trend Analysis</p>
+                <p className="text-xs opacity-75">Performance trends</p>
               </div>
             </button>
           </div>

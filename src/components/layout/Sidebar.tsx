@@ -323,50 +323,65 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
         {/* User Profile */}
         <div className="border-t border-gray-200 p-4">
-          <div className="flex items-center gap-3 relative">
-            <div className="size-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                user?.username?.charAt(0).toUpperCase() || 'A'
+          {isAuthenticated ? (
+            <div className="flex items-center gap-3 relative">
+              <div className="size-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                {user?.avatar ? (
+                  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  user?.username?.charAt(0).toUpperCase() || 'A'
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-gray-800 truncate">
+                  {user?.username || 'Administrator'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  Admin
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              
+              {/* User Menu Dropdown */}
+              {showUserMenu && (
+                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[100]">
+                  <button
+                    onClick={handleUserSettings}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+                  >
+                    <UserIcon className="w-4 h-4" />
+                    User Settings
+                  </button>
+                  <hr className="my-1" />
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-800 truncate">
-                {user?.username || 'Administrator'}
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                {isAuthenticated ? 'Admin' : 'Guest'}
-              </p>
-            </div>
-            <button 
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <MoreVertical className="w-5 h-5" />
-            </button>
-            
-            {/* User Menu Dropdown */}
-            {showUserMenu && isAuthenticated && (
-              <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[100]">
-                <button
-                  onClick={handleUserSettings}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                >
-                  <UserIcon className="w-4 h-4" />
-                  User Settings
-                </button>
-                <hr className="my-1" />
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Logout
-                </button>
+          ) : (
+            <div className="text-center">
+              <div className="size-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white font-semibold text-sm mx-auto mb-2">
+                <UserIcon className="w-5 h-5" />
               </div>
-            )}
-          </div>
+              <p className="text-sm text-gray-600 mb-2">Guest Mode</p>
+              <button
+                onClick={() => navigate('/')}
+                className="text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+              >
+                Login as Admin
+              </button>
+            </div>
+          )}
         </div>
       </div>
       

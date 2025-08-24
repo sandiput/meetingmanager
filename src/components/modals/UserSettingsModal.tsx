@@ -96,14 +96,14 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-md"
+      className="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto bg-black/70 backdrop-blur-lg"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
         }
       }}
     >
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl max-h-[90vh] flex flex-col m-4 relative z-[10000]">
+      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl max-h-[90vh] flex flex-col m-4 relative z-[100000]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 p-6 flex-shrink-0">
           <div>

@@ -41,15 +41,6 @@ export const DATE_FORMATS = {
 } as const;
 
 // Status Options
-export const MEETING_STATUS = {
-  INCOMING: 'incoming',
-  COMPLETED: 'completed',
-} as const;
-
-export const STATUS_LABELS = {
-  [MEETING_STATUS.INCOMING]: 'Incoming',
-  [MEETING_STATUS.COMPLETED]: 'Completed',
-} as const;
 
 // Validation Rules
 export const VALIDATION_RULES = {

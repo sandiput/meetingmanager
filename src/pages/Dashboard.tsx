@@ -10,6 +10,7 @@ import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModa
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
 import { meetingsApi, dashboardApi } from '../services/api';
 import { Meeting } from '../types';
+import { getUpcomingMeetings } from '../utils/meetingUtils';
 import { useToast } from '../hooks/useToast';
 
 export const Dashboard: React.FC = () => {

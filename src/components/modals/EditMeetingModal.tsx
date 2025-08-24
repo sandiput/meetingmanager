@@ -258,21 +258,6 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               )}
             </div>
 
-            {/* Meeting Status */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Meeting Status
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => handleInputChange('status', e.target.value as 'incoming' | 'completed')}
-                className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
-              >
-                <option value="incoming">Incoming</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-
             {/* Dress Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

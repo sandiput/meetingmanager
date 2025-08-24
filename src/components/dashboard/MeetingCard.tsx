@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, MapPin, User, CheckCircle, Ruler as Schedule, MoreVertical, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { Eye } from 'lucide-react';
 import { Meeting } from '../../types';
+import { getMeetingStatus } from '../../utils/meetingUtils';
 import { clsx } from 'clsx';
 import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 
@@ -35,6 +36,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   onDelete,
   onSendReminder,
 }) => {
+  const status = getMeetingStatus(meeting);
   const statusInfo = statusConfig[meeting.status];
   const StatusIcon = statusInfo.icon;
   

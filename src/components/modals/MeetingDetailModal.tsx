@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Calendar, Clock, MapPin, User, FileText, Link, Shirt, Hash, MessageCircle, Info } from 'lucide-react';
 import { Meeting } from '../../types';
+import { getMeetingStatus } from '../../utils/meetingUtils';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 
@@ -17,6 +18,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
 }) => {
   if (!isOpen || !meeting) return null;
 
+  const status = getMeetingStatus(meeting);
   const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
   const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
   const formattedDate = format(startDateTime, 'dd MMM yyyy');
@@ -34,7 +36,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
     },
   };
 
-  const statusInfo = statusConfig[meeting.status];
+  const statusInfo = statusConfig[status];
 
   return (
     <div 

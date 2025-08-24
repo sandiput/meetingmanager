@@ -23,7 +23,7 @@ const mockMeetings: Meeting[] = [
   {
     id: '1',
     title: 'Rapat Koordinasi Bulanan',
-    date: '2025-01-25',
+    date: '2025-01-27',
     start_time: '10:00',
     end_time: '12:00',
     location: 'Ruang Rapat Utama',
@@ -32,7 +32,6 @@ const mockMeetings: Meeting[] = [
     invitation_reference: 'SURAT-2025-001',
     attendance_link: 'https://forms.example.com/kehadiran',
     discussion_results: 'Pembahasan program kerja triwulan pertama dan evaluasi kinerja tim.',
-    status: 'incoming',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     created_at: '2025-01-20T10:00:00Z',
@@ -41,7 +40,7 @@ const mockMeetings: Meeting[] = [
   {
     id: '2',
     title: 'Briefing Intelijen Mingguan',
-    date: '2025-01-26',
+    date: '2025-01-28',
     start_time: '14:00',
     end_time: '15:30',
     location: 'Virtual (Zoom)',
@@ -50,7 +49,6 @@ const mockMeetings: Meeting[] = [
     invitation_reference: 'SURAT-2025-002',
     attendance_link: 'https://zoom.us/j/123456789',
     discussion_results: '',
-    status: 'incoming',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     created_at: '2025-01-21T14:00:00Z',
@@ -59,7 +57,7 @@ const mockMeetings: Meeting[] = [
   {
     id: '3',
     title: 'Evaluasi Keamanan Nasional',
-    date: '2025-01-28',
+    date: '2025-01-22',
     start_time: '09:00',
     end_time: '11:00',
     location: 'Ruang Briefing Khusus',
@@ -68,7 +66,6 @@ const mockMeetings: Meeting[] = [
     invitation_reference: 'SURAT-2025-003',
     attendance_link: 'https://forms.example.com/evaluasi-keamanan',
     discussion_results: 'Analisis situasi keamanan terkini dan strategi pencegahan.',
-    status: 'completed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     created_at: '2025-01-22T09:00:00Z',
@@ -201,7 +198,6 @@ export const meetingsApi = {
     const newMeeting: Meeting = {
       id: String(mockMeetings.length + 1),
       ...data,
-      status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };

@@ -12,7 +12,6 @@ export interface Meeting {
   invitation_reference?: string;
   attendance_link?: string;
   discussion_results?: string;
-  status: 'incoming' | 'completed';
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
   created_at: string;

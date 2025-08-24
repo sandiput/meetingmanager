@@ -27,7 +27,6 @@ const navigationItems = [
     name: 'Dashboard',
     href: '/',
     icon: LayoutDashboard,
-    badge: '4',
   },
   {
     name: 'Review',
@@ -38,7 +37,6 @@ const navigationItems = [
     name: 'Participants',
     href: '/participants',
     icon: Users,
-    badge: '12',
   },
   {
     name: 'Settings',

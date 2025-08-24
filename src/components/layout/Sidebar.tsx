@@ -348,7 +348,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             
             {/* User Menu Dropdown */}
             {showUserMenu && isAuthenticated && (
-              <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+              <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-[100]">
                 <button
                   onClick={handleUserSettings}
                   className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"

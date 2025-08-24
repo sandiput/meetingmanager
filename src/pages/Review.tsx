@@ -306,41 +306,41 @@ export const Review: React.FC = () => {
           <div className="flex items-center gap-4 mb-8">
             <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg">
               <FileText className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-800">Report Actions</h3>
-                <p className="text-sm text-gray-600">Generate detailed reports</p>
-              </div>
             </div>
-            
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button
-                onClick={exportReport}
-              className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
-              >
-              <Download className="w-5 h-5" />
-                <div className="text-left">
-                <p className="font-bold text-sm">Export Full Report</p>
-                <p className="text-xs opacity-90">Download complete data</p>
-                </div>
-              </button>
-              
-            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
-              <BarChart3 className="w-5 h-5" />
-                <div className="text-left">
-                <p className="font-bold text-sm">Generate Charts</p>
-                <p className="text-xs opacity-90">Visual presentations</p>
-                </div>
-              </button>
-              
-            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
-              <TrendingUp className="w-5 h-5" />
-                <div className="text-left">
-                <p className="font-bold text-sm">Trend Analysis</p>
-                <p className="text-xs opacity-90">Performance trends</p>
+            <div>
               <h3 className="text-xl font-bold text-gray-800">📋 Report Actions</h3>
               <p className="text-sm text-gray-500">Generate detailed reports and analytics</p>
             </div>
+          </div>
+            
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button
+              onClick={exportReport}
+              className="flex items-center gap-3 p-4 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1"
+            >
+              <Download className="w-5 h-5" />
+              <div className="text-left">
+                <p className="font-bold text-sm">Export Full Report</p>
+                <p className="text-xs opacity-90">Download complete data</p>
+              </div>
+            </button>
+              
+            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+              <BarChart3 className="w-5 h-5" />
+              <div className="text-left">
+                <p className="font-bold text-sm">Generate Charts</p>
+                <p className="text-xs opacity-90">Visual presentations</p>
+              </div>
+            </button>
+              
+            <button className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-1">
+              <TrendingUp className="w-5 h-5" />
+              <div className="text-left">
+                <p className="font-bold text-sm">Trend Analysis</p>
+                <p className="text-xs opacity-90">Performance trends</p>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </div>

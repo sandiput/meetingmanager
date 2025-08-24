@@ -28,6 +28,7 @@ const statusConfig = {
 
 export const MeetingCard: React.FC<MeetingCardProps> = ({
   meeting,
+  onView,
   onEdit,
   onDelete,
   onSendReminder,

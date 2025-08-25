@@ -155,7 +155,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gray-800">Meeting Manager</h1>
-            <p className="text-xs text-gray-500">Smart Scheduling</p>
+            <p className="text-xs text-gray-500">Made by Sandi</p>
           </div>
         </div>
 

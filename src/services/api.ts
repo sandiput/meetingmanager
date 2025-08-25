@@ -15,7 +15,7 @@ import { API_CONFIG } from '../utils/constants';
 
 // Create axios instance with base configuration
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://api.local/api',
   timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
@@ -69,6 +69,11 @@ export const dashboardApi = {
 
 // Meetings API
 export const meetingsApi = {
+  getUpcoming: async (): Promise<ApiResponse<Meeting[]>> => {
+    const response = await apiClient.get('/meetings/upcoming');
+    return response.data;
+  },
+    
   getAll: async (page = 1, filters?: Record<string, any>): Promise<ApiResponse<PaginatedResponse<Meeting>>> => {
     const params = { page, ...filters };
     const response = await apiClient.get('/meetings', { params });
@@ -102,6 +107,22 @@ export const meetingsApi = {
     
   sendWhatsAppReminder: async (id: string): Promise<ApiResponse<void>> => {
     const response = await apiClient.post(`/meetings/${id}/send-reminder`);
+    return response.data;
+  },
+    
+  // Meeting attendees management
+  addAttendees: async (meetingId: string, attendeeIds: string[]): Promise<ApiResponse<void>> => {
+    const response = await apiClient.post(`/meetings/${meetingId}/attendees`, { attendee_ids: attendeeIds });
+    return response.data;
+  },
+    
+  removeAttendees: async (meetingId: string, attendeeIds: string[]): Promise<ApiResponse<void>> => {
+    const response = await apiClient.delete(`/meetings/${meetingId}/attendees`, { data: { attendee_ids: attendeeIds } });
+    return response.data;
+  },
+    
+  syncAttendees: async (meetingId: string, attendeeIds: string[]): Promise<ApiResponse<void>> => {
+    const response = await apiClient.put(`/meetings/${meetingId}/attendees`, { attendee_ids: attendeeIds });
     return response.data;
   },
 };

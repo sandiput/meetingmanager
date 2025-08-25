@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, MessageCircle, Info } from 'lucide-react';
+import { X, Upload, MessageCircle, Info, Users } from 'lucide-react';
 import { participantsApi, meetingsApi } from '../../services/api';
 import { Participant, CreateMeetingForm } from '../../types';
 import { useToast } from '../../hooks/useToast';
@@ -19,6 +19,7 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { success, error } = useToast();
 
@@ -101,7 +102,13 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
 
     try {
       setLoading(true);
-      await meetingsApi.create(formData);
+      const meetingResponse = await meetingsApi.create(formData);
+      
+      // If there are additional attendees selected, add them to the meeting
+      if (selectedAttendees.length > 0) {
+        await meetingsApi.addAttendees(meetingResponse.data.id, selectedAttendees);
+      }
+      
       success('Meeting created successfully!');
       onSuccess();
       onClose();
@@ -128,6 +135,7 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       whatsapp_reminder_enabled: true,
       group_notification_enabled: true,
     });
+    setSelectedAttendees([]);
   };
 
   const handleClose = () => {
@@ -277,6 +285,38 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               )}
             </div>
 
+            {/* Additional Attendees */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Users className="w-4 h-4 inline mr-2" />
+                Additional Attendees (Optional)
+              </label>
+              <div className="space-y-2">
+                {participants.filter(p => p.is_active).map((participant) => (
+                  <label key={participant.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedAttendees.includes(participant.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedAttendees(prev => [...prev, participant.id]);
+                        } else {
+                          setSelectedAttendees(prev => prev.filter(id => id !== participant.id));
+                        }
+                      }}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-200"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{participant.name}</div>
+                      <div className="text-xs text-gray-500">{participant.seksi}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Select additional participants who will receive meeting notifications
+              </p>
+            </div>
             {/* Dress Code */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

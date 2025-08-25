@@ -12,10 +12,14 @@ export interface Meeting {
   invitation_reference?: string;
   attendance_link?: string;
   discussion_results?: string;
+  status?: 'confirmed' | 'pending' | 'completed' | 'cancelled';
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
+  reminder_sent_at?: string;
+  group_notification_sent_at?: string;
   created_at: string;
   updated_at: string;
+  attendees?: Participant[];
 }
 
 export interface Participant {
@@ -24,6 +28,7 @@ export interface Participant {
   whatsapp_number: string;
   nip: string; // Nomor Induk Pegawai
   seksi: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }

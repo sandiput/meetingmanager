@@ -9,7 +9,7 @@
     "build:production": "vite build --mode production",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:api": "curl -X GET http://localhost:8000/api/dashboard/stats"
+    "test:api": "curl -X GET http://api.local/api/meetings/upcoming"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

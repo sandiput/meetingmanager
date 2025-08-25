@@ -30,7 +30,8 @@ export const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const meetingsResponse = await dashboardApi.getUpcomingMeetings();
+        // Use the new upcoming meetings endpoint
+        const meetingsResponse = await meetingsApi.getUpcoming();
         
         setUpcomingMeetings(meetingsResponse.data);
       } catch (err) {
@@ -100,7 +101,7 @@ export const Dashboard: React.FC = () => {
     // Refresh the meetings list
     const fetchDashboardData = async () => {
       try {
-        const meetingsResponse = await dashboardApi.getUpcomingMeetings();
+        const meetingsResponse = await meetingsApi.getUpcoming();
         
         setUpcomingMeetings(meetingsResponse.data);
       } catch (err) {

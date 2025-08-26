@@ -3,8 +3,8 @@ import { Meeting } from '../types';
 // Utility function to determine meeting status based on current time
 export const getMeetingStatus = (meeting: Meeting): 'incoming' | 'completed' => {
   const now = new Date();
-  const end = parseMeetingDateTime(meeting, 'end');
-  return end > now ? 'incoming' : 'completed';
+  const start = parseMeetingDateTime(meeting, 'start');
+  return start > now ? 'incoming' : 'completed';
 };
 
 // Robust time parser that supports either "HH:mm" or full ISO in start_time/end_time

@@ -232,7 +232,7 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">
-              All Meetings
+              All Meetings (Chronological Order)
             </h3>
             <div className="flex items-center gap-2">
               <select className="rounded-lg border-gray-200 text-sm px-3 py-2 focus:border-indigo-300 focus:ring-indigo-200">
@@ -257,7 +257,12 @@ export const Dashboard: React.FC = () => {
                 </button>
               </div>
             ) : (
-              allMeetings.map((meeting) => (
+              allMeetings.map((meeting, index) => {
+                const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+                const now = new Date();
+                const isUpcoming = meetingDateTime > now;
+                
+                return (
                 <MeetingCard
                   key={meeting.id}
                   meeting={meeting}
@@ -267,7 +272,8 @@ export const Dashboard: React.FC = () => {
                   onSendReminder={handleSendReminder}
                   isAuthenticated={true}
                 />
-              ))
+                );
+              })
             )}
           </div>
         </div>

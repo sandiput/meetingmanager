@@ -487,38 +487,27 @@ export const dashboardApi = {
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
-    console.log('🎯 Dashboard API: Getting all meetings (sorted)...');
+    console.log('🎯 Dashboard API: Getting all meetings sorted by date...');
     
     // Always refresh meetings to ensure current dates
     DUMMY_MEETINGS = generateDummyMeetings();
     
-    // Sort meetings: upcoming first (by date), then completed (by date desc)
+    // Sort ALL meetings by date: earliest to latest (chronological order)
     const sortedMeetings = DUMMY_MEETINGS.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const dateTimeA = new Date(`${a.date}T${a.start_time}`);
+      const dateTimeB = new Date(`${b.date}T${b.start_time}`);
       
-      const aIsUpcoming = dateA >= today;
-      const bIsUpcoming = dateB >= today;
-      
-      // If both are upcoming or both are completed, sort by date
-      if (aIsUpcoming === bIsUpcoming) {
-        if (aIsUpcoming) {
-          // Both upcoming: earliest first
-          return dateA.getTime() - dateB.getTime();
-        } else {
-          // Both completed: latest first
-          return dateB.getTime() - dateA.getTime();
-        }
-      }
-      
-      // Upcoming meetings come first
-      return bIsUpcoming ? 1 : -1;
+      // Sort by date and time: earliest first, latest last
+      return dateTimeA.getTime() - dateTimeB.getTime();
     });
     
     console.log('✅ Sorted meetings:', sortedMeetings.length);
-    console.log('📋 Meeting order:', sortedMeetings.map(m => `${m.title} (${m.date}) - ${m.status || 'pending'}`));
+    console.log('📋 Meeting chronological order:', sortedMeetings.map(m => {
+      const meetingDateTime = new Date(`${m.date}T${m.start_time}`);
+      const now = new Date();
+      const status = meetingDateTime > now ? 'UPCOMING' : 'COMPLETED';
+      return `${m.date} ${m.start_time} - ${m.title} [${status}]`;
+    }));
     
     return mockApiCall(sortedMeetings);
   },

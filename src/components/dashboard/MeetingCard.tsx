@@ -4,7 +4,7 @@ import { Eye } from 'lucide-react';
 import { Meeting } from '../../types';
 import { getMeetingStatus } from '../../utils/meetingUtils';
 import { clsx } from 'clsx';
-import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
+import { format, isToday, isTomorrow, differenceInDays, isPast } from 'date-fns';
 
 interface MeetingCardProps {
   meeting: Meeting;
@@ -19,12 +19,12 @@ const statusConfig = {
   incoming: {
     label: 'Incoming',
     icon: CheckCircle,
-    className: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800',
+    className: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200',
   },
   completed: {
     label: 'Completed',
     icon: CheckCircle,
-    className: 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800',
+    className: 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border-gray-200',
   },
 };
 
@@ -55,10 +55,24 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   const meetingDate = parseDate(meeting.date);
 
   const formatRelativeTime = () => {
-    if (isToday(startDateTime)) return 'Today';
-    if (isTomorrow(startDateTime)) return 'Tomorrow';
-    const daysDiff = differenceInDays(startDateTime, new Date());
-    return daysDiff > 0 ? `in ${daysDiff} days` : `${Math.abs(daysDiff)} days ago`;
+    const now = new Date();
+    
+    if (isToday(startDateTime)) {
+      return isPast(startDateTime) ? 'Today (Completed)' : 'Today';
+    }
+    
+    if (isTomorrow(startDateTime)) {
+      return 'Tomorrow';
+    }
+    
+    const daysDiff = differenceInDays(startDateTime, now);
+    
+    if (daysDiff > 0) {
+      return `in ${daysDiff} day${daysDiff > 1 ? 's' : ''}`;
+    } else {
+      const absDays = Math.abs(daysDiff);
+      return `${absDays} day${absDays > 1 ? 's' : ''} ago`;
+    }
   };
 
   // Safely resolve designated attendee name
@@ -66,18 +80,31 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   const primaryAttendeeName = attendeeNames[0] || meeting.designated_attendee || 'Unknown';
   const attendeeInitial = typeof primaryAttendeeName === 'string' && primaryAttendeeName.length > 0 ? primaryAttendeeName.charAt(0).toUpperCase() : '?';
 
+  // Add visual indicator for completed meetings
+  const isCompleted = status === 'completed';
+  const cardOpacity = isCompleted ? 'opacity-75' : 'opacity-100';
+  const borderColor = isCompleted ? 'border-l-gray-400' : 'border-l-indigo-500';
   return (
     <div 
-      className="bg-gradient-to-r from-white to-slate-50 rounded-2xl p-6 shadow-sm border-l-4 border-indigo-500 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer"
+      className={clsx(
+        "bg-gradient-to-r from-white to-slate-50 rounded-2xl p-6 shadow-sm border-l-4 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer",
+        cardOpacity,
+        borderColor
+      )}
       data-meeting-id={meeting.id}
       onClick={() => onView(meeting)}
     >
       <div className="mb-4 flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <h3 className="text-lg font-bold text-gray-800">{meeting.title}</h3>
+            <h3 className={clsx(
+              "text-lg font-bold",
+              isCompleted ? "text-gray-600" : "text-gray-800"
+            )}>
+              {meeting.title}
+            </h3>
             <span className={clsx(
-              'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold gap-1',
+              'inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold gap-1 border',
               statusInfo.className
             )}>
               <StatusIcon className="w-3 h-3" />
@@ -85,7 +112,10 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
             </span>
           </div>
           {meeting.discussion_results && (
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+            <p className={clsx(
+              "text-sm mb-3 line-clamp-2",
+              isCompleted ? "text-gray-500" : "text-gray-600"
+            )}>
               {meeting.discussion_results}
             </p>
           )}

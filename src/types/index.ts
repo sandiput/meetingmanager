@@ -8,6 +8,7 @@ export interface Meeting {
   location: string;
   meeting_link?: string;
   designated_attendees: string[];
+  designated_attendee: string; // For backward compatibility
   dress_code?: string;
   invitation_reference?: string;
   attendance_link?: string;

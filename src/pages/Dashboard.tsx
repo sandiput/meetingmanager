@@ -30,27 +30,21 @@ export const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        console.log('Fetching dashboard data...');
         // Fetch both stats and upcoming meetings
         const [statsResponse, meetingsResponse] = await Promise.all([
           dashboardApi.getStats(),
           dashboardApi.getUpcomingMeetings()
         ]);
         
-        console.log('Stats response:', statsResponse);
-        console.log('Meetings response:', meetingsResponse);
-        
         if (statsResponse && statsResponse.data) {
           setStats(statsResponse.data);
-          console.log('Stats set:', statsResponse.data);
+          console.log('Dashboard stats loaded:', statsResponse.data);
         }
         
         if (meetingsResponse && meetingsResponse.data) {
-          console.log('Fetched meetings:', meetingsResponse.data);
           setUpcomingMeetings(meetingsResponse.data);
-          console.log('Meetings set, count:', meetingsResponse.data.length);
+          console.log('Upcoming meetings loaded:', meetingsResponse.data.length, 'meetings');
         } else {
-          console.log('No meetings data received');
           setUpcomingMeetings([]);
         }
       } catch (err) {
@@ -147,8 +141,45 @@ export const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      <div className="flex-1">
+        <Header
+          title="Dashboard"
+          subtitle="Loading meeting data..."
+        />
+        <div className="container mx-auto px-6 py-8 sm:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border animate-pulse">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                    <div className="h-8 bg-gray-200 rounded w-16"></div>
+                  </div>
+                  <div className="w-12 h-12 bg-gray-200 rounded-xl"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-6">
+            <div className="h-6 bg-gray-200 rounded w-48"></div>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border animate-pulse">
+                <div className="space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[1, 2, 3, 4].map((j) => (
+                      <div key={j} className="bg-gray-50 rounded-xl p-4">
+                        <div className="h-4 bg-gray-200 rounded w-16 mb-2"></div>
+                        <div className="h-5 bg-gray-200 rounded w-24 mb-1"></div>
+                        <div className="h-3 bg-gray-200 rounded w-20"></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

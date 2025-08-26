@@ -111,6 +111,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     location: 'Ruang Rapat Lantai 3',
     meeting_link: 'https://zoom.us/j/987654321',
     designated_attendees: ['Ahmad Rizki Pratama', 'Siti Nurhaliza'],
+    designated_attendee: 'Ahmad Rizki Pratama', // For backward compatibility
+    status: 'pending',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-012',
     attendance_link: 'https://forms.google.com/attendance-012',
@@ -129,6 +131,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     location: 'Lab Komputer Gedung B',
     meeting_link: 'https://teams.microsoft.com/workshop-456',
     designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya', 'Fitri Handayani'],
+    designated_attendee: 'Budi Santoso',
+    status: 'pending',
     dress_code: 'Business Casual',
     invitation_reference: 'REF-2025-013',
     attendance_link: 'https://forms.google.com/attendance-013',
@@ -146,6 +150,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '12:00',
     location: 'Ruang Rapat Direktur',
     designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani'],
+    designated_attendee: 'Gunawan Setiawan',
+    status: 'pending',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-014',
     attendance_link: 'https://forms.google.com/attendance-014',
@@ -163,6 +169,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '11:30',
     location: 'Aula Besar',
     designated_attendees: ['Ahmad Rizki Pratama', 'Diana Putri', 'Eko Wijaya'],
+    designated_attendee: 'Ahmad Rizki Pratama',
+    status: 'pending',
     dress_code: 'Business Casual',
     invitation_reference: 'REF-2025-015',
     attendance_link: 'https://forms.google.com/attendance-015',
@@ -180,6 +188,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '16:00',
     location: 'Ruang Briefing Khusus',
     designated_attendees: ['Siti Nurhaliza', 'Budi Santoso', 'Gunawan Setiawan'],
+    designated_attendee: 'Siti Nurhaliza',
+    status: 'pending',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-016',
     attendance_link: 'https://forms.google.com/attendance-016',
@@ -198,6 +208,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     location: 'Ruang Rapat Keamanan',
     meeting_link: 'https://zoom.us/j/111222333',
     designated_attendees: ['Ahmad Rizki Pratama', 'Budi Santoso'],
+    designated_attendee: 'Ahmad Rizki Pratama',
+    status: 'pending',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-017',
     attendance_link: 'https://forms.google.com/attendance-017',
@@ -215,6 +227,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '17:00',
     location: 'Aula Training',
     designated_attendees: ['Diana Putri', 'Eko Wijaya', 'Fitri Handayani', 'Hesti Ramadhani'],
+    designated_attendee: 'Diana Putri',
+    status: 'pending',
     dress_code: 'Casual',
     invitation_reference: 'REF-2025-018',
     attendance_link: 'https://forms.google.com/attendance-018',
@@ -232,6 +246,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '08:30',
     location: 'Ruang Briefing',
     designated_attendees: ['Gunawan Setiawan', 'Siti Nurhaliza'],
+    designated_attendee: 'Gunawan Setiawan',
+    status: 'pending',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-019',
     attendance_link: 'https://forms.google.com/attendance-019',
@@ -240,6 +256,82 @@ const DUMMY_MEETINGS: Meeting[] = [
     group_notification_enabled: true,
     created_at: '2025-01-27T11:00:00Z',
     updated_at: '2025-01-27T11:00:00Z',
+  },
+  // Add more meetings for current week to make dashboard more interesting
+  {
+    id: '14',
+    title: 'Rapat Koordinasi Harian',
+    date: '2025-01-28',
+    start_time: '08:00',
+    end_time: '09:00',
+    location: 'Ruang Rapat Kecil',
+    designated_attendees: ['Ahmad Rizki Pratama'],
+    designated_attendee: 'Ahmad Rizki Pratama',
+    status: 'pending',
+    dress_code: 'Formal',
+    invitation_reference: 'REF-2025-020',
+    discussion_results: '',
+    whatsapp_reminder_enabled: true,
+    group_notification_enabled: true,
+    created_at: '2025-01-27T15:00:00Z',
+    updated_at: '2025-01-27T15:00:00Z',
+  },
+  {
+    id: '15',
+    title: 'Workshop Keamanan Siber',
+    date: '2025-01-29',
+    start_time: '13:00',
+    end_time: '17:00',
+    location: 'Lab Keamanan Siber',
+    designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya'],
+    designated_attendee: 'Budi Santoso',
+    status: 'pending',
+    dress_code: 'Casual',
+    invitation_reference: 'REF-2025-021',
+    attendance_link: 'https://forms.google.com/attendance-021',
+    discussion_results: '',
+    whatsapp_reminder_enabled: true,
+    group_notification_enabled: false,
+    created_at: '2025-01-27T16:00:00Z',
+    updated_at: '2025-01-27T16:00:00Z',
+  },
+  {
+    id: '16',
+    title: 'Evaluasi Mingguan Tim',
+    date: '2025-01-30',
+    start_time: '10:00',
+    end_time: '11:30',
+    location: 'Ruang Meeting Online',
+    meeting_link: 'https://zoom.us/j/555666777',
+    designated_attendees: ['Siti Nurhaliza', 'Fitri Handayani'],
+    designated_attendee: 'Siti Nurhaliza',
+    status: 'pending',
+    dress_code: 'Business Casual',
+    invitation_reference: 'REF-2025-022',
+    discussion_results: '',
+    whatsapp_reminder_enabled: true,
+    group_notification_enabled: true,
+    created_at: '2025-01-27T17:00:00Z',
+    updated_at: '2025-01-27T17:00:00Z',
+  },
+  {
+    id: '17',
+    title: 'Briefing Operasi Mendatang',
+    date: '2025-01-31',
+    start_time: '14:30',
+    end_time: '16:00',
+    location: 'Ruang Briefing Utama',
+    designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani', 'Ahmad Rizki Pratama'],
+    designated_attendee: 'Gunawan Setiawan',
+    status: 'pending',
+    dress_code: 'Formal',
+    invitation_reference: 'REF-2025-023',
+    attendance_link: 'https://forms.google.com/attendance-023',
+    discussion_results: '',
+    whatsapp_reminder_enabled: true,
+    group_notification_enabled: true,
+    created_at: '2025-01-27T18:00:00Z',
+    updated_at: '2025-01-27T18:00:00Z',
   },
   {
     id: '6',
@@ -250,6 +342,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     location: 'Ruang Rapat Utama',
     meeting_link: 'https://zoom.us/j/123456789',
     designated_attendees: ['Fitri Handayani', 'Hesti Ramadhani'],
+    designated_attendee: 'Fitri Handayani',
+    status: 'completed',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-001',
     attendance_link: 'https://forms.google.com/attendance-001',
@@ -269,6 +363,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '12:00',
     location: 'Lab Training',
     designated_attendees: ['Ahmad Rizki Pratama', 'Budi Santoso', 'Diana Putri', 'Eko Wijaya'],
+    designated_attendee: 'Ahmad Rizki Pratama',
+    status: 'completed',
     dress_code: 'Casual',
     invitation_reference: 'REF-2025-002',
     attendance_link: 'https://forms.google.com/attendance-002',
@@ -287,6 +383,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '15:00',
     location: 'Ruang Server',
     designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani', 'Fitri Handayani'],
+    designated_attendee: 'Gunawan Setiawan',
+    status: 'completed',
     dress_code: 'Business Casual',
     invitation_reference: 'REF-2025-003',
     discussion_results: 'Audit keamanan sistem menunjukkan tingkat keamanan baik. Direkomendasikan update patch keamanan dan peningkatan monitoring sistem.',
@@ -305,6 +403,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '08:30',
     location: 'Ruang Briefing',
     designated_attendees: ['Siti Nurhaliza', 'Ahmad Rizki Pratama'],
+    designated_attendee: 'Siti Nurhaliza',
+    status: 'completed',
     dress_code: 'Formal',
     invitation_reference: 'REF-2025-004',
     attendance_link: 'https://forms.google.com/attendance-004',
@@ -324,6 +424,8 @@ const DUMMY_MEETINGS: Meeting[] = [
     end_time: '12:30',
     location: 'Ruang Rapat Kecil',
     designated_attendees: ['Budi Santoso', 'Diana Putri'],
+    designated_attendee: 'Budi Santoso',
+    status: 'completed',
     dress_code: 'Business Casual',
     invitation_reference: 'REF-2025-005',
     attendance_link: 'https://forms.google.com/attendance-005',
@@ -346,11 +448,32 @@ const DUMMY_SETTINGS: Settings = {
   updated_at: '2025-01-24T08:00:00Z',
 };
 
-const DUMMY_DASHBOARD_STATS: DashboardStats = {
-  total_meetings: 13,
-  this_week_meetings: 8,
-  notifications_sent: 20,
-  active_participants: 8,
+// Calculate dynamic dashboard stats from dummy data
+const calculateDashboardStats = (): DashboardStats => {
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6);
+  endOfWeek.setHours(23, 59, 59, 999);
+  
+  const thisWeekMeetings = DUMMY_MEETINGS.filter(meeting => {
+    const meetingDate = new Date(meeting.date);
+    return meetingDate >= startOfWeek && meetingDate <= endOfWeek;
+  });
+  
+  const notificationsSent = DUMMY_MEETINGS.filter(meeting => 
+    meeting.reminder_sent_at || meeting.group_notification_sent_at
+  ).length * 2; // Individual + group notifications
+  
+  return {
+    total_meetings: DUMMY_MEETINGS.length,
+    this_week_meetings: thisWeekMeetings.length,
+    notifications_sent: notificationsSent,
+    active_participants: DUMMY_PARTICIPANTS.length,
+  };
 };
 
 // Create axios instance with base configuration
@@ -397,7 +520,7 @@ function normalizeApiResponse<T>(body: any): ApiResponse<T> {
 }
 
 // Mock API functions that return dummy data
-const mockApiCall = <T>(data: T, delay = 500): Promise<ApiResponse<T>> => {
+const mockApiCall = <T>(data: T, delay = 300): Promise<ApiResponse<T>> => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve({ success: true, data });
@@ -408,7 +531,8 @@ const mockApiCall = <T>(data: T, delay = 500): Promise<ApiResponse<T>> => {
 // Dashboard API
 export const dashboardApi = {
   getStats: async (): Promise<ApiResponse<DashboardStats>> => {
-    return mockApiCall(DUMMY_DASHBOARD_STATS);
+    const stats = calculateDashboardStats();
+    return mockApiCall(stats);
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
@@ -417,14 +541,12 @@ export const dashboardApi = {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset time to start of day
       meetingDate.setHours(0, 0, 0, 0); // Reset meeting date time too
-      console.log('Comparing:', meetingDate, '>=', today, '=', meetingDate >= today);
-      return meetingDate > today; // Use > instead of >= to exclude today
+      return meetingDate >= today; // Include today's meetings
     }).sort((a, b) => {
       const dateA = new Date(`${a.date}T${a.start_time}`);
       const dateB = new Date(`${b.date}T${b.start_time}`);
       return dateA.getTime() - dateB.getTime();
     });
-    console.log('Upcoming meetings filtered:', upcomingMeetings);
     return mockApiCall(upcomingMeetings);
   },
 };
@@ -472,6 +594,7 @@ export const meetingsApi = {
     const newMeeting: Meeting = {
       id: (DUMMY_MEETINGS.length + 1).toString(),
       ...data,
+      designated_attendee: data.designated_attendees[0] || '',
       status: 'pending',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -484,9 +607,14 @@ export const meetingsApi = {
     const meetingIndex = DUMMY_MEETINGS.findIndex(m => m.id === id);
     if (meetingIndex === -1) throw new Error('Meeting not found');
     
+    const updateData = { ...data };
+    if (data.designated_attendees && data.designated_attendees.length > 0) {
+      updateData.designated_attendee = data.designated_attendees[0];
+    }
+    
     DUMMY_MEETINGS[meetingIndex] = {
       ...DUMMY_MEETINGS[meetingIndex],
-      ...data,
+      ...updateData,
       updated_at: new Date().toISOString(),
     };
     return mockApiCall(DUMMY_MEETINGS[meetingIndex]);

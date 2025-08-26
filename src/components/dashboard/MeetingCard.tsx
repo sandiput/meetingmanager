@@ -63,7 +63,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
 
   // Safely resolve designated attendee name
   const attendeeNames = meeting.designated_attendees || [];
-  const primaryAttendeeName = attendeeNames[0] || 'Unknown';
+  const primaryAttendeeName = attendeeNames[0] || meeting.designated_attendee || 'Unknown';
   const attendeeInitial = typeof primaryAttendeeName === 'string' && primaryAttendeeName.length > 0 ? primaryAttendeeName.charAt(0).toUpperCase() : '?';
 
   return (
@@ -220,18 +220,23 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
               <>
                 <CheckCircle className="text-green-500 w-4 h-4" />
                 <p className="text-sm font-semibold text-green-600">
-                  WhatsApp Ready
+                  Auto Reminder
                 </p>
               </>
             ) : (
               <>
-                <Clock className="text-yellow-500 w-4 h-4" />
+                <Clock className="text-gray-500 w-4 h-4" />
                 <p className="text-sm font-semibold text-yellow-600">
-                  Scheduled
+                  Manual Only
                 </p>
               </>
             )}
           </div>
+          {meeting.group_notification_enabled && (
+            <p className="text-xs text-gray-500 mt-1">
+              📢 Group notification enabled
+            </p>
+          )}
         </div>
       </div>
     </div>

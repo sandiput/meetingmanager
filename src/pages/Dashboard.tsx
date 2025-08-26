@@ -42,11 +42,13 @@ export const Dashboard: React.FC = () => {
         
         if (statsResponse && statsResponse.data) {
           setStats(statsResponse.data);
+          console.log('Stats set:', statsResponse.data);
         }
         
         if (meetingsResponse && meetingsResponse.data) {
           console.log('Fetched meetings:', meetingsResponse.data);
           setUpcomingMeetings(meetingsResponse.data);
+          console.log('Meetings set, count:', meetingsResponse.data.length);
         } else {
           console.log('No meetings data received');
           setUpcomingMeetings([]);

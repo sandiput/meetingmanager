@@ -270,22 +270,22 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">
-              Upcoming Meetings
+              All Meetings
             </h3>
             <div className="flex items-center gap-2">
               <select className="rounded-lg border-gray-200 text-sm px-3 py-2 focus:border-indigo-300 focus:ring-indigo-200">
                 <option>All Meetings</option>
-                <option>This Week</option>
-                <option>This Month</option>
+                <option>Upcoming Only</option>
+                <option>Completed Only</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-6">
-            {upcomingMeetings.length === 0 ? (
+            {allMeetings.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-600 mb-2">No upcoming meetings</h3>
+                <h3 className="text-lg font-semibold text-gray-600 mb-2">No meetings found</h3>
                 <p className="text-gray-500 mb-4">Start by creating your first meeting</p>
                 <button
                   onClick={handleNewMeeting}
@@ -295,7 +295,7 @@ export const Dashboard: React.FC = () => {
                 </button>
               </div>
             ) : (
-              upcomingMeetings.map((meeting) => (
+              allMeetings.map((meeting) => (
                 <MeetingCard
                   key={meeting.id}
                   data-meeting-id={meeting.id}

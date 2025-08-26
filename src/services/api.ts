@@ -380,35 +380,49 @@ const mockApiCall = <T>(data: T, delay = 500): Promise<ApiResponse<T>> => {
 export const dashboardApi = {
   getStats: async (): Promise<ApiResponse<DashboardStats>> => {
     console.log('🎯 Dashboard API: Getting stats...');
+    
+    // Refresh meetings to ensure current data
+    DUMMY_MEETINGS = generateDummyMeetings();
     const stats = calculateDashboardStats();
+    
     return mockApiCall(stats);
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
-    console.log('🎯 Dashboard API: Getting upcoming meetings...');
+    console.log('🎯 Dashboard API: Getting all meetings (upcoming first)...');
     
     // Always refresh meetings to ensure current dates
     DUMMY_MEETINGS = generateDummyMeetings();
     
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
-      const meetingDate = new Date(meeting.date);
-      meetingDate.setHours(0, 0, 0, 0);
-      const isUpcoming = meetingDate >= today;
+    // Sort meetings: upcoming first (by date), then completed (by date desc)
+    const sortedMeetings = DUMMY_MEETINGS.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       
-      console.log(`📅 Meeting "${meeting.title}": ${meeting.date} - ${isUpcoming ? 'UPCOMING' : 'PAST'}`);
-      return isUpcoming;
-    }).sort((a, b) => {
-      const dateA = new Date(`${a.date}T${a.start_time}`);
-      const dateB = new Date(`${b.date}T${b.start_time}`);
-      return dateA.getTime() - dateB.getTime();
+      const aIsUpcoming = dateA >= today;
+      const bIsUpcoming = dateB >= today;
+      
+      // If both are upcoming or both are completed, sort by date
+      if (aIsUpcoming === bIsUpcoming) {
+        if (aIsUpcoming) {
+          // Both upcoming: earliest first
+          return dateA.getTime() - dateB.getTime();
+        } else {
+          // Both completed: latest first
+          return dateB.getTime() - dateA.getTime();
+        }
+      }
+      
+      // Upcoming meetings come first
+      return bIsUpcoming ? 1 : -1;
     });
     
-    console.log('✅ Found upcoming meetings:', upcomingMeetings.length);
+    console.log('✅ Sorted meetings:', sortedMeetings.length);
+    console.log('📋 Meeting order:', sortedMeetings.map(m => `${m.title} (${m.date}) - ${m.status || 'pending'}`));
     
-    return mockApiCall(upcomingMeetings);
+    return mockApiCall(sortedMeetings);
   },
 };
 

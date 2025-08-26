@@ -30,11 +30,15 @@ export const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
+        console.log('Fetching dashboard data...');
         // Fetch both stats and upcoming meetings
         const [statsResponse, meetingsResponse] = await Promise.all([
           dashboardApi.getStats(),
-          meetingsApi.getUpcoming()
+          dashboardApi.getUpcomingMeetings()
         ]);
+        
+        console.log('Stats response:', statsResponse);
+        console.log('Meetings response:', meetingsResponse);
         
         if (statsResponse && statsResponse.data) {
           setStats(statsResponse.data);
@@ -57,7 +61,7 @@ export const Dashboard: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [error]);
 
   const handleEditMeeting = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -117,7 +121,7 @@ export const Dashboard: React.FC = () => {
       try {
         const [statsResponse, meetingsResponse] = await Promise.all([
           dashboardApi.getStats(),
-          meetingsApi.getUpcoming()
+          dashboardApi.getUpcomingMeetings()
         ]);
         
         if (statsResponse && statsResponse.data) {

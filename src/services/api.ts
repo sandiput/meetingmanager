@@ -105,7 +105,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '1',
     title: 'Rapat Koordinasi Mingguan Tim Intelijen',
-    date: '2025-01-27',
+    date: '2025-01-28',
     start_time: '08:30',
     end_time: '10:00',
     location: 'Ruang Rapat Lantai 3',
@@ -123,7 +123,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '2',
     title: 'Workshop Analisis Data Intelijen Lanjutan',
-    date: '2025-01-28',
+    date: '2025-01-29',
     start_time: '13:00',
     end_time: '16:30',
     location: 'Lab Komputer Gedung B',
@@ -141,7 +141,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '3',
     title: 'Evaluasi Kinerja Triwulan I-2025',
-    date: '2025-01-29',
+    date: '2025-01-30',
     start_time: '09:00',
     end_time: '12:00',
     location: 'Ruang Rapat Direktur',
@@ -158,7 +158,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '4',
     title: 'Sosialisasi Kebijakan Keamanan Baru',
-    date: '2025-01-30',
+    date: '2025-01-31',
     start_time: '10:00',
     end_time: '11:30',
     location: 'Aula Besar',
@@ -175,7 +175,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '5',
     title: 'Briefing Operasi Khusus Februari',
-    date: '2025-01-31',
+    date: '2025-02-03',
     start_time: '14:00',
     end_time: '16:00',
     location: 'Ruang Briefing Khusus',
@@ -364,14 +364,41 @@ const mockApiCall = <T>(data: T, delay = 500): Promise<ApiResponse<T>> => {
 // Dashboard API
 export const dashboardApi = {
   getStats: async (): Promise<ApiResponse<DashboardStats>> => {
-    return mockApiCall(DUMMY_DASHBOARD_STATS);
+    // Calculate stats dynamically from dummy data
+    const today = new Date();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    
+    const thisWeekMeetings = DUMMY_MEETINGS.filter(meeting => {
+      const meetingDate = new Date(meeting.date);
+      return meetingDate >= weekStart && meetingDate <= weekEnd;
+    }).length;
+    
+    const notificationsSent = DUMMY_MEETINGS.filter(m => 
+      m.reminder_sent_at || m.group_notification_sent_at
+    ).length * 2; // Individual + group notifications
+    
+    const stats: DashboardStats = {
+      total_meetings: DUMMY_MEETINGS.length,
+      this_week_meetings: thisWeekMeetings,
+      notifications_sent: notificationsSent,
+      active_participants: DUMMY_PARTICIPANTS.filter(p => p.is_active).length,
+    };
+    
+    return mockApiCall(stats);
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
     const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
-      const meetingDate = new Date(meeting.date);
+      const meetingDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
       const today = new Date();
-      return meetingDate >= today;
+      return meetingDateTime >= today;
+    }).sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.start_time}`);
+      const dateB = new Date(`${b.date}T${b.start_time}`);
+      return dateA.getTime() - dateB.getTime();
     });
     return mockApiCall(upcomingMeetings);
   },
@@ -381,9 +408,9 @@ export const dashboardApi = {
 export const meetingsApi = {
   getUpcoming: async (): Promise<ApiResponse<Meeting[]>> => {
     const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
-      const meetingDate = new Date(meeting.date);
+      const meetingDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
       const today = new Date();
-      return meetingDate >= today;
+      return meetingDateTime >= today;
     }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     return mockApiCall(upcomingMeetings);
   },

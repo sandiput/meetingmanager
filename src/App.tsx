@@ -24,9 +24,6 @@ function App() {
                 <Route path="/participants" element={
                   <Participants />
                 } />
-                <Route path="/review" element={
-                  <Review />
-                } />
                 <Route path="/settings" element={
                   <Settings />
                 } />

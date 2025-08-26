@@ -28,11 +28,6 @@ const navigationItems = [
     icon: LayoutDashboard,
   },
   {
-    name: 'Review',
-    href: '/review',
-    icon: Eye,
-  },
-  {
     name: 'Participants',
     href: '/participants',
     icon: Users,

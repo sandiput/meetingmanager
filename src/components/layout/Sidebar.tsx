@@ -43,6 +43,11 @@ const navigationItems = [
     href: '/settings',
     icon: Settings,
   },
+  {
+    name: 'Test Connection',
+    href: '/test-connection',
+    icon: CheckCircle,
+  },
 ];
 
 const recentActivities = [

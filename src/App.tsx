@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Participants } from './pages/Participants';
 import { Review } from './pages/Review';
 import { Settings } from './pages/Settings';
+import TestConnection from './pages/TestConnection';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Sidebar />
             <main className="flex-1">
               <Routes>
+                <Route path="/test-connection" element={<TestConnection />} />
                 <Route path="/" element={
                   <Dashboard />
                 } />

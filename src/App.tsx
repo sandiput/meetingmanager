@@ -7,7 +7,6 @@ import { ToastProvider } from './components/ToastProvider';
 import { Dashboard } from './pages/Dashboard';
 import { Participants } from './pages/Participants';
 import { Review } from './pages/Review';
-import { Review } from './pages/Review';
 import { Settings } from './pages/Settings';
 
 function App() {

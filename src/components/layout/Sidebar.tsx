@@ -137,7 +137,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </div>
           <div>
             <h1 className="text-lg font-bold text-gray-800">Meeting Manager</h1>
-            <p className="text-xs text-gray-500">Made by Sandi</p>
+            <p className="text-xs text-gray-500">Subdirektorat Intelijen</p>
           </div>
         </div>
 
@@ -306,8 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* App Info */}
         <div className="border-t border-gray-200 p-4">
           <div className="text-center">
-            <p className="text-sm font-semibold text-gray-800">Meeting Manager</p>
-            <p className="text-xs text-gray-500">Subdirektorat Intelijen</p>
+            <p className="text-sm font-semibold text-gray-800">Made by Sandi</p>
             <p className="text-xs text-gray-400 mt-1">v1.0.0</p>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { format, isToday, isTomorrow, differenceInDays } from 'date-fns';
 
 interface MeetingCardProps {
   meeting: Meeting;
-  isAuthenticated?: boolean;
+  isAuthenticated?: boolean; // Keep for backward compatibility but always true
   onView: (meeting: Meeting) => void;
   onEdit: (meeting: Meeting) => void;
   onDelete: (meeting: Meeting) => void;
@@ -30,7 +30,7 @@ const statusConfig = {
 
 export const MeetingCard: React.FC<MeetingCardProps> = ({
   meeting,
-  isAuthenticated = false,
+  isAuthenticated = true, // Always authenticated now
   onView,
   onEdit,
   onDelete,
@@ -113,41 +113,37 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
                 <Eye className="w-4 h-4" />
                 Lihat Detail
               </button>
-              {isAuthenticated && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEdit(meeting);
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <Edit className="w-4 h-4" />
-                    Edit Meeting
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSendReminder(meeting);
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <MessageCircle className="w-4 h-4 text-green-600" />
-                    Send WhatsApp Reminder
-                  </button>
-                  <hr className="my-1" />
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDelete(meeting);
-                    }}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete
-                  </button>
-                </>
-              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(meeting);
+                }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+              >
+                <Edit className="w-4 h-4" />
+                Edit Meeting
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSendReminder(meeting);
+                }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
+              >
+                <MessageCircle className="w-4 h-4 text-green-600" />
+                Send WhatsApp Reminder
+              </button>
+              <hr className="my-1" />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(meeting);
+                }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
             </div>
           </div>
         </div>

@@ -30,10 +30,7 @@ const apiClient = axios.create({
 // Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // No authentication required - remove token logic
     return config;
   },
   (error) => {
@@ -47,11 +44,7 @@ apiClient.interceptors.response.use(
   (error) => {
     console.error('API Error:', error.response?.data || error.message);
     
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('meeting_manager_user');
-      window.location.href = '/';
-    } else if (error.response?.status === 500) {
+    if (error.response?.status === 500) {
       console.error('Server Error:', error.response.data);
     }
     return Promise.reject(error);

@@ -19,24 +19,16 @@ function App() {
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={
-                  <ProtectedRoute requireAuth={false}>
-                    <Dashboard />
-                  </ProtectedRoute>
+                  <Dashboard />
                 } />
                 <Route path="/participants" element={
-                  <ProtectedRoute>
-                    <Participants />
-                  </ProtectedRoute>
+                  <Participants />
                 } />
                 <Route path="/review" element={
-                  <ProtectedRoute requireAuth={false}>
-                    <Review />
-                  </ProtectedRoute>
+                  <Review />
                 } />
                 <Route path="/settings" element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
+                  <Settings />
                 } />
               </Routes>
             </main>

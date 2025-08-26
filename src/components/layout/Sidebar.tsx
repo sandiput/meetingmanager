@@ -9,16 +9,11 @@ import {
   MessageCircle,
   CheckCircle,
   PlusCircle,
-  MoreVertical,
   Calendar,
-  LogOut,
-  User as UserIcon
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { meetingsApi } from '../../services/api';
 import { Meeting } from '../../types';
 import { MeetingDetailModal } from '../modals/MeetingDetailModal';
-import { UserSettingsModal } from '../modals/UserSettingsModal';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 
@@ -69,14 +64,11 @@ const recentActivities = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
-  const { user, logout, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [searchResults, setSearchResults] = React.useState<Meeting[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
   const [showResults, setShowResults] = React.useState(false);
   const [showDetailModal, setShowDetailModal] = React.useState(false);
-  const [showUserSettings, setShowUserSettings] = React.useState(false);
-  const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [selectedMeeting, setSelectedMeeting] = React.useState<Meeting | null>(null);
   const navigate = useNavigate();
 
@@ -130,16 +122,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     setTimeout(() => {
       setShowResults(false);
     }, 200);
-  };
-
-  const handleLogout = () => {
-    logout();
-    setShowUserMenu(false);
-  };
-
-  const handleUserSettings = () => {
-    setShowUserSettings(true);
-    setShowUserMenu(false);
   };
 
   return (
@@ -321,54 +303,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </div>
         </div>
 
-        {/* User Profile */}
+        {/* App Info */}
         <div className="border-t border-gray-200 p-4">
-          {isAuthenticated ? (
-            <div className="flex items-center gap-3 relative">
-              <div className="size-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
-                {user?.avatar ? (
-                  <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
-                ) : (
-                  user?.username?.charAt(0).toUpperCase() || 'A'
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-800 truncate">
-                  {user?.username || 'Administrator'}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  Admin
-                </p>
-              </div>
-              <button 
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <MoreVertical className="w-5 h-5" />
-              </button>
-              
-              {/* User Menu Dropdown */}
-              {showUserMenu && (
-                <div className="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <button
-                    onClick={handleUserSettings}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
-                  >
-                    <UserIcon className="w-4 h-4" />
-                    User Settings
-                  </button>
-                  <hr className="my-1" />
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50 text-left"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : null}
+          <div className="text-center">
+            <p className="text-sm font-semibold text-gray-800">Meeting Manager</p>
+            <p className="text-xs text-gray-500">Subdirektorat Intelijen</p>
+            <p className="text-xs text-gray-400 mt-1">v1.0.0</p>
+          </div>
         </div>
       </div>
       
@@ -380,12 +321,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           setShowDetailModal(false);
           setSelectedMeeting(null);
         }}
-      />
-      
-      {/* User Settings Modal */}
-      <UserSettingsModal
-        isOpen={showUserSettings}
-        onClose={() => setShowUserSettings(false)}
       />
     </aside>
   );

@@ -114,7 +114,7 @@ const generateDummyMeetings = (): Meeting[] => {
   console.log('🔄 Generating fresh dummy meetings with current dates...');
   
   const meetings: Meeting[] = [
-    // TODAY'S MEETINGS
+    // UPCOMING MEETINGS (8 meetings)
     {
       id: '1',
       title: 'Rapat Koordinasi Mingguan Tim Intelijen',
@@ -143,7 +143,7 @@ const generateDummyMeetings = (): Meeting[] => {
       end_time: '16:30',
       location: 'Lab Komputer Gedung B',
       meeting_link: 'https://teams.microsoft.com/workshop-456',
-      designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya'],
+      designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya', 'Fitri Handayani'],
       designated_attendee: 'Budi Santoso',
       status: 'pending',
       dress_code: 'Business Casual',
@@ -181,7 +181,7 @@ const generateDummyMeetings = (): Meeting[] => {
       start_time: '10:00',
       end_time: '11:30',
       location: 'Aula Besar',
-      designated_attendees: ['Ahmad Rizki Pratama', 'Diana Putri'],
+      designated_attendees: ['Ahmad Rizki Pratama', 'Diana Putri', 'Eko Wijaya'],
       designated_attendee: 'Ahmad Rizki Pratama',
       status: 'pending',
       dress_code: 'Business Casual',
@@ -200,7 +200,7 @@ const generateDummyMeetings = (): Meeting[] => {
       start_time: '14:00',
       end_time: '16:00',
       location: 'Ruang Briefing Khusus',
-      designated_attendees: ['Siti Nurhaliza', 'Budi Santoso'],
+      designated_attendees: ['Siti Nurhaliza', 'Budi Santoso', 'Gunawan Setiawan'],
       designated_attendee: 'Siti Nurhaliza',
       status: 'pending',
       dress_code: 'Formal',
@@ -220,8 +220,8 @@ const generateDummyMeetings = (): Meeting[] => {
       end_time: '10:00',
       location: 'Ruang Rapat Keamanan',
       meeting_link: 'https://zoom.us/j/111222333',
-      designated_attendees: ['Eko Wijaya', 'Fitri Handayani'],
-      designated_attendee: 'Eko Wijaya',
+      designated_attendees: ['Ahmad Rizki Pratama', 'Budi Santoso'],
+      designated_attendee: 'Ahmad Rizki Pratama',
       status: 'pending',
       dress_code: 'Formal',
       invitation_reference: 'REF-2025-017',
@@ -239,7 +239,7 @@ const generateDummyMeetings = (): Meeting[] => {
       start_time: '13:30',
       end_time: '17:00',
       location: 'Aula Training',
-      designated_attendees: ['Diana Putri', 'Gunawan Setiawan'],
+      designated_attendees: ['Diana Putri', 'Eko Wijaya', 'Fitri Handayani', 'Hesti Ramadhani'],
       designated_attendee: 'Diana Putri',
       status: 'pending',
       dress_code: 'Casual',
@@ -258,8 +258,8 @@ const generateDummyMeetings = (): Meeting[] => {
       start_time: '07:30',
       end_time: '08:30',
       location: 'Ruang Briefing',
-      designated_attendees: ['Hesti Ramadhani', 'Ahmad Rizki Pratama'],
-      designated_attendee: 'Hesti Ramadhani',
+      designated_attendees: ['Gunawan Setiawan', 'Siti Nurhaliza'],
+      designated_attendee: 'Gunawan Setiawan',
       status: 'pending',
       dress_code: 'Formal',
       invitation_reference: 'REF-2025-019',
@@ -270,10 +270,108 @@ const generateDummyMeetings = (): Meeting[] => {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     },
+    
+    // COMPLETED MEETINGS (5 meetings) - Past dates
+    {
+      id: '9',
+      title: 'Evaluasi Kinerja Individu',
+      date: getDateString(-1), // Yesterday
+      start_time: '14:00',
+      end_time: '16:00',
+      location: 'Ruang Meeting Kecil',
+      designated_attendees: ['Fitri Handayani'],
+      designated_attendee: 'Fitri Handayani',
+      status: 'completed',
+      dress_code: 'Business Casual',
+      invitation_reference: 'REF-2025-008',
+      attendance_link: 'https://forms.google.com/attendance-008',
+      discussion_results: 'Meeting berhasil dilaksanakan. Evaluasi kinerja menunjukkan peningkatan produktivitas tim sebesar 15%. Beberapa area yang perlu diperbaiki telah diidentifikasi dan akan ditindaklanjuti minggu depan.',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '10',
+      title: 'Rapat Koordinasi Tim',
+      date: getDateString(-2), // 2 days ago
+      start_time: '10:00',
+      end_time: '12:00',
+      location: 'Ruang Rapat Utama',
+      designated_attendees: ['Ahmad Rizki Pratama', 'Siti Nurhaliza', 'Budi Santoso'],
+      designated_attendee: 'Ahmad Rizki Pratama',
+      status: 'completed',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-007',
+      attendance_link: 'https://forms.google.com/attendance-007',
+      discussion_results: 'Koordinasi tim berjalan lancar. Pembagian tugas untuk proyek Q1 2025 telah disepakati. Target pencapaian ditetapkan 95% dengan timeline 3 bulan ke depan.',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '11',
+      title: 'Briefing Keamanan Mingguan',
+      date: getDateString(-3), // 3 days ago
+      start_time: '08:00',
+      end_time: '09:30',
+      location: 'Ruang Briefing',
+      designated_attendees: ['Diana Putri', 'Eko Wijaya'],
+      designated_attendee: 'Diana Putri',
+      status: 'completed',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-006',
+      attendance_link: 'https://forms.google.com/attendance-006',
+      discussion_results: 'Update protokol keamanan telah disampaikan. Semua peserta memahami prosedur baru. Implementasi akan dimulai minggu depan dengan monitoring ketat.',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: false,
+      created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '12',
+      title: 'Workshop Pelatihan Sistem',
+      date: getDateString(-5), // 5 days ago
+      start_time: '13:00',
+      end_time: '17:00',
+      location: 'Lab Training',
+      meeting_link: 'https://zoom.us/j/555666777',
+      designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani', 'Fitri Handayani'],
+      designated_attendee: 'Gunawan Setiawan',
+      status: 'completed',
+      dress_code: 'Casual',
+      invitation_reference: 'REF-2025-005',
+      attendance_link: 'https://forms.google.com/attendance-005',
+      discussion_results: 'Pelatihan sistem baru berhasil diselesaikan. Tingkat pemahaman peserta mencapai 90%. Materi tambahan akan diberikan untuk memperkuat kompetensi tim.',
+      whatsapp_reminder_enabled: false,
+      group_notification_enabled: true,
+      created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '13',
+      title: 'Rapat Evaluasi Bulanan',
+      date: getDateString(-7), // 1 week ago
+      start_time: '09:00',
+      end_time: '11:30',
+      location: 'Ruang Rapat Direktur',
+      designated_attendees: ['Ahmad Rizki Pratama', 'Siti Nurhaliza', 'Budi Santoso', 'Diana Putri'],
+      designated_attendee: 'Ahmad Rizki Pratama',
+      status: 'completed',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-004',
+      attendance_link: 'https://forms.google.com/attendance-004',
+      discussion_results: 'Evaluasi bulanan menunjukkan pencapaian target 98%. Beberapa inisiatif baru disetujui untuk meningkatkan efisiensi operasional. Budget tambahan dialokasikan untuk pengembangan SDM.',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    },
   ];
 
   console.log('✅ Generated meetings:', meetings.length);
-  console.log('📅 Meeting dates:', meetings.map(m => `${m.title}: ${m.date}`));
+  console.log('📅 Meeting dates:', meetings.map(m => `${m.title}: ${m.date} (${m.status || 'pending'})`));
   
   return meetings;
 };
@@ -389,7 +487,7 @@ export const dashboardApi = {
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
-    console.log('🎯 Dashboard API: Getting all meetings (upcoming first)...');
+    console.log('🎯 Dashboard API: Getting all meetings (sorted)...');
     
     // Always refresh meetings to ensure current dates
     DUMMY_MEETINGS = generateDummyMeetings();

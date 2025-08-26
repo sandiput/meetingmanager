@@ -10,11 +10,10 @@ import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModa
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
 import { meetingsApi, dashboardApi } from '../services/api';
 import { Meeting, DashboardStats } from '../types';
-import { getUpcomingMeetings } from '../utils/meetingUtils';
 import { useToast } from '../hooks/useToast';
 
 export const Dashboard: React.FC = () => {
-  const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([]);
+  const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
@@ -31,7 +30,8 @@ export const Dashboard: React.FC = () => {
       try {
         console.log('🚀 Dashboard: Starting data fetch...');
         setLoading(true);
-        // Fetch both stats and upcoming meetings
+        
+        // Fetch both stats and meetings
         const [statsResponse, meetingsResponse] = await Promise.all([
           dashboardApi.getStats(),
           dashboardApi.getUpcomingMeetings()
@@ -43,17 +43,17 @@ export const Dashboard: React.FC = () => {
         }
         
         if (meetingsResponse && meetingsResponse.data) {
-          setUpcomingMeetings(meetingsResponse.data);
-          console.log('✅ Dashboard: Upcoming meetings loaded:', meetingsResponse.data.length, 'meetings');
+          setAllMeetings(meetingsResponse.data);
+          console.log('✅ Dashboard: All meetings loaded:', meetingsResponse.data.length, 'meetings');
           console.log('📋 Dashboard: Meeting titles:', meetingsResponse.data.map(m => `${m.title} (${m.date})`));
         } else {
-          setUpcomingMeetings([]);
+          setAllMeetings([]);
           console.log('❌ Dashboard: No meetings data received');
         }
       } catch (err) {
         console.error('❌ Dashboard fetch error:', err);
         error('Failed to load dashboard data');
-        setUpcomingMeetings([]);
+        setAllMeetings([]);
       } finally {
         setLoading(false);
       }
@@ -61,35 +61,6 @@ export const Dashboard: React.FC = () => {
 
     fetchDashboardData();
   }, [error]);
-
-  // Force refresh data every 30 seconds to ensure fresh dummy data
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log('🔄 Auto-refreshing dashboard data...');
-      const fetchDashboardData = async () => {
-        try {
-          const [statsResponse, meetingsResponse] = await Promise.all([
-            dashboardApi.getStats(),
-            dashboardApi.getUpcomingMeetings()
-          ]);
-          
-          if (statsResponse && statsResponse.data) {
-            setStats(statsResponse.data);
-          }
-          
-          if (meetingsResponse && meetingsResponse.data) {
-            setUpcomingMeetings(meetingsResponse.data);
-          }
-        } catch (err) {
-          console.error('Auto-refresh error:', err);
-        }
-      };
-      
-      fetchDashboardData();
-    }, 30000); // Refresh every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
 
   const handleEditMeeting = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -113,16 +84,8 @@ export const Dashboard: React.FC = () => {
       setDeletingMeeting(true);
       await meetingsApi.delete(selectedMeeting.id);
       
-      // Smooth animation: fade out the meeting card
-      const meetingElement = document.querySelector(`[data-meeting-id="${selectedMeeting.id}"]`);
-      if (meetingElement) {
-        meetingElement.classList.add('animate-pulse', 'opacity-50');
-        setTimeout(() => {
-          setUpcomingMeetings(prev => prev.filter(m => m.id !== selectedMeeting.id));
-        }, 300);
-      } else {
-        setUpcomingMeetings(prev => prev.filter(m => m.id !== selectedMeeting.id));
-      }
+      // Remove meeting from state
+      setAllMeetings(prev => prev.filter(m => m.id !== selectedMeeting.id));
       
       success('Meeting deleted successfully');
       setShowDeleteModal(false);
@@ -158,16 +121,15 @@ export const Dashboard: React.FC = () => {
         }
         
         if (meetingsResponse && meetingsResponse.data) {
-          setUpcomingMeetings(meetingsResponse.data);
+          setAllMeetings(meetingsResponse.data);
           console.log('✅ Refreshed meetings:', meetingsResponse.data.length);
         } else {
-          setUpcomingMeetings([]);
+          setAllMeetings([]);
           console.log('❌ No meetings after refresh');
         }
       } catch (err) {
         console.error('❌ Refresh error:', err);
-        // Set empty array on error
-        setUpcomingMeetings([]);
+        setAllMeetings([]);
       }
     };
     
@@ -266,7 +228,7 @@ export const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Upcoming Meetings */}
+        {/* All Meetings */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">
@@ -298,7 +260,6 @@ export const Dashboard: React.FC = () => {
               allMeetings.map((meeting) => (
                 <MeetingCard
                   key={meeting.id}
-                  data-meeting-id={meeting.id}
                   meeting={meeting}
                   onView={handleViewMeeting}
                   onEdit={handleEditMeeting}

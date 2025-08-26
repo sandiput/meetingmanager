@@ -19,8 +19,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   onSuccess,
 }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
+  const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const { success, error } = useToast();
 
@@ -30,7 +29,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
     start_time: '',
     end_time: '',
     location: '',
-    designated_attendee: '',
+    designated_attendees: [],
     dress_code: '',
     invitation_reference: '',
     attendance_link: '',
@@ -42,13 +41,14 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   useEffect(() => {
     if (isOpen && meeting) {
       fetchParticipants();
+      setSelectedAttendees(meeting.designated_attendees || []);
       setFormData({
         title: meeting.title,
         date: meeting.date,
         start_time: meeting.start_time,
         end_time: meeting.end_time,
         location: meeting.location,
-        designated_attendee: meeting.designated_attendee,
+        designated_attendees: meeting.designated_attendees || [],
         dress_code: meeting.dress_code || '',
         invitation_reference: meeting.invitation_reference || '',
         attendance_link: meeting.attendance_link || '',
@@ -69,39 +69,38 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   };
 
   const handleInputChange = (field: keyof CreateMeetingForm, value: string | boolean) => {
+    if (field === 'designated_attendees') {
+      // This shouldn't happen with current UI, but keeping for type safety
+      return;
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleAttendeeSearch = (value: string) => {
-    handleInputChange('designated_attendee', value);
-    
-    if (value.length > 0) {
-      const filtered = participants.filter(p =>
-        p.name.toLowerCase().includes(value.toLowerCase())
-      );
-      setFilteredParticipants(filtered);
-      setShowSuggestions(filtered.length > 0);
-    } else {
-      setShowSuggestions(false);
-    }
-  };
-
-  const selectAttendee = (participant: Participant) => {
-    handleInputChange('designated_attendee', participant.name);
-    setShowSuggestions(false);
+  const handleAttendeeToggle = (participantName: string) => {
+    setSelectedAttendees(prev => {
+      if (prev.includes(participantName)) {
+        return prev.filter(name => name !== participantName);
+      } else {
+        return [...prev, participantName];
+      }
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!meeting || !formData.title || !formData.date || !formData.start_time || !formData.end_time || !formData.location || !formData.designated_attendee) {
+    if (!meeting || !formData.title || !formData.date || !formData.start_time || !formData.end_time || !formData.location || selectedAttendees.length === 0) {
       error('Please fill in all required fields');
       return;
     }
 
     try {
       setLoading(true);
-      await meetingsApi.update(meeting.id, formData);
+      const meetingData = {
+        ...formData,
+        designated_attendees: selectedAttendees,
+      };
+      await meetingsApi.update(meeting.id, meetingData);
       success('Meeting updated successfully!');
       onSuccess();
       onClose();
@@ -114,7 +113,6 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
   const handleClose = () => {
     onClose();
-    setShowSuggestions(false);
   };
 
   if (!isOpen || !meeting) return null;
@@ -228,32 +226,50 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             </div>
 
             {/* Designated Attendee */}
-            <div className="relative">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Designated Attendee *
+                <Users className="w-4 h-4 inline mr-2" />
+                Designated Attendees *
               </label>
-              <input
-                type="text"
-                value={formData.designated_attendee}
-                onChange={(e) => handleAttendeeSearch(e.target.value)}
-                className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
-                placeholder="Search and select attendee"
-                autoComplete="off"
-                required
-              />
-              {showSuggestions && (
-                <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-40 overflow-y-auto">
-                  {filteredParticipants.map((participant) => (
-                    <button
-                      key={participant.id}
-                      type="button"
-                      onClick={() => selectAttendee(participant)}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="font-medium">{participant.name}</div>
-                      <div className="text-gray-500 text-xs">{participant.whatsapp_number}</div>
-                    </button>
-                  ))}
+              <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                {participants.filter(p => p.is_active).map((participant) => (
+                  <label key={participant.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedAttendees.includes(participant.name)}
+                      onChange={() => handleAttendeeToggle(participant.name)}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-200"
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">{participant.name}</div>
+                      <div className="text-xs text-gray-500">{participant.seksi}</div>
+                      <div className="text-xs text-gray-400">{participant.whatsapp_number}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Select one or more participants who will attend this meeting
+              </p>
+              {selectedAttendees.length > 0 && (
+                <div className="mt-2 p-2 bg-indigo-50 rounded-lg">
+                  <p className="text-sm font-medium text-indigo-800">
+                    Selected: {selectedAttendees.length} attendee{selectedAttendees.length > 1 ? 's' : ''}
+                  </p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {selectedAttendees.map((name) => (
+                      <span key={name} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                        {name}
+                        <button
+                          type="button"
+                          onClick={() => handleAttendeeToggle(name)}
+                          className="text-indigo-600 hover:text-indigo-800"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

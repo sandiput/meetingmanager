@@ -62,8 +62,9 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   };
 
   // Safely resolve designated attendee name
-  const attendeeName = (meeting as any).designated_attendee || meeting.attendees?.[0]?.name || 'Unknown';
-  const attendeeInitial = typeof attendeeName === 'string' && attendeeName.length > 0 ? attendeeName.charAt(0).toUpperCase() : '?';
+  const attendeeNames = meeting.designated_attendees || [];
+  const primaryAttendeeName = attendeeNames[0] || 'Unknown';
+  const attendeeInitial = typeof primaryAttendeeName === 'string' && primaryAttendeeName.length > 0 ? primaryAttendeeName.charAt(0).toUpperCase() : '?';
 
   return (
     <div 
@@ -184,15 +185,29 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
         
         <div className="bg-gray-50 rounded-xl p-4">
           <p className="text-xs font-medium uppercase text-gray-500 mb-1">
-            Attendee
+            Attendees
           </p>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-              {attendeeInitial}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1">
+              <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                {attendeeInitial}
+              </div>
+              {attendeeNames.length > 1 && (
+                <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center text-white text-xs font-medium">
+                  +{attendeeNames.length - 1}
+                </div>
+              )}
             </div>
-            <p className="text-sm font-semibold text-gray-800 truncate">
-              {attendeeName}
-            </p>
+            <div>
+              <p className="text-sm font-semibold text-gray-800">
+                {primaryAttendeeName}
+              </p>
+              {attendeeNames.length > 1 && (
+                <p className="text-xs text-gray-500">
+                  +{attendeeNames.length - 1} others
+                </p>
+              )}
+            </div>
           </div>
         </div>
         

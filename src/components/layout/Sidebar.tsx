@@ -196,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                               📍 {meeting.location}
                             </p>
                             <p className="text-xs text-gray-400 truncate">
-                              👤 {meeting.designated_attendee}
+                              👥 {meeting.designated_attendees?.join(', ') || 'No attendees'}
                             </p>
                           </div>
                           <div className="flex-shrink-0">

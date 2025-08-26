@@ -112,18 +112,44 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
             <div className="bg-white rounded-xl p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-indigo-600" />
-                Peserta Meeting
+                Peserta Meeting ({meeting.designated_attendees?.length || 0} orang)
               </h4>
-              <div className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
-                <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
-                  {meeting.designated_attendee.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-gray-800">{meeting.designated_attendee}</p>
-                  <p className="text-sm text-gray-600">Peserta yang Ditunjuk</p>
-                </div>
+              <div className="space-y-3">
+                {meeting.designated_attendees?.map((attendee, index) => (
+                  <div key={index} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
+                    <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                      {attendee.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-gray-800">{attendee}</p>
+                      <p className="text-sm text-gray-600">Peserta yang Ditunjuk</p>
+                    </div>
+                  </div>
+                )) || (
+                  <div className="text-center py-4 text-gray-500">
+                    <p className="text-sm">Tidak ada peserta yang ditunjuk</p>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Quick Attendee Summary */}
+            {meeting.designated_attendees && meeting.designated_attendees.length > 0 && (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="w-4 h-4 text-indigo-600" />
+                  <p className="text-sm font-medium text-indigo-800">
+                    Ringkasan Peserta
+                  </p>
+                </div>
+                <div className="text-sm text-indigo-700">
+                  <p>Total: {meeting.designated_attendees.length} peserta</p>
+                  <p className="mt-1">
+                    {meeting.designated_attendees.join(', ')}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Meeting Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

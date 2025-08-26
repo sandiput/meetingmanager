@@ -7,7 +7,7 @@ export interface Meeting {
   end_time: string;
   location: string;
   meeting_link?: string;
-  designated_attendee: string;
+  designated_attendees: string[];
   dress_code?: string;
   invitation_reference?: string;
   attendance_link?: string;
@@ -72,7 +72,7 @@ export interface CreateMeetingForm {
   end_time: string;
   location: string;
   meeting_link?: string;
-  designated_attendee: string;
+  designated_attendees: string[];
   dress_code?: string;
   invitation_reference?: string;
   attendance_link?: string;

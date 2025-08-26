@@ -3,12 +3,12 @@ import { Meeting } from '../types';
 // Utility function to determine meeting status based on current time
 export const getMeetingStatus = (meeting: Meeting): 'incoming' | 'completed' => {
   const now = new Date();
-  const end = parseMeetingTime(meeting, 'end');
+  const end = parseMeetingDateTime(meeting, 'end');
   return end > now ? 'incoming' : 'completed';
 };
 
 // Robust time parser that supports either "HH:mm" or full ISO in start_time/end_time
-const parseMeetingTime = (meeting: Meeting, which: 'start' | 'end'): Date => {
+const parseMeetingDateTime = (meeting: Meeting, which: 'start' | 'end'): Date => {
   const timeStr = which === 'start' ? (meeting as any).start_time : (meeting as any).end_time;
   if (typeof timeStr === 'string' && timeStr.includes('T')) {
     return new Date(timeStr);
@@ -37,8 +37,8 @@ export const filterMeetingsByStatus = (
 export const getUpcomingMeetings = (meetings: Meeting[]): Meeting[] => {
   return filterMeetingsByStatus(meetings, 'incoming')
     .sort((a, b) => {
-      const dateA = parseMeetingTime(a, 'start').getTime();
-      const dateB = parseMeetingTime(b, 'start').getTime();
+      const dateA = parseMeetingDateTime(a, 'start').getTime();
+      const dateB = parseMeetingDateTime(b, 'start').getTime();
       return dateA - dateB;
     });
 };
@@ -47,8 +47,8 @@ export const getUpcomingMeetings = (meetings: Meeting[]): Meeting[] => {
 export const getCompletedMeetings = (meetings: Meeting[]): Meeting[] => {
   return filterMeetingsByStatus(meetings, 'completed')
     .sort((a, b) => {
-      const dateA = parseMeetingTime(a, 'start').getTime();
-      const dateB = parseMeetingTime(b, 'start').getTime();
+      const dateA = parseMeetingDateTime(a, 'start').getTime();
+      const dateB = parseMeetingDateTime(b, 'start').getTime();
       return dateB - dateA; // Most recent first
     });
 };

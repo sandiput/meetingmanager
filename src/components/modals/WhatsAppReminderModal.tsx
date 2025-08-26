@@ -134,12 +134,12 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                     {meeting.dress_code && (
                       <div className="flex items-center gap-2">
                         <span className="text-green-600 flex-shrink-0">👔</span>
-                        <span>Dress Code: <span className="font-medium">{meeting.dress_code}</span></span>
+                        <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
+                    <span className="font-medium">{formattedDate}, {formattedStartTime} - {formattedEndTime}</span>
 
               {/* Recipients Selection */}
               <div>
@@ -253,6 +253,10 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                         📱 This is an automated reminder from Meeting Manager.
                       </p>
                     </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0">👥</span>
+                    <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
                   </div>
                 </div>
               </div>

@@ -17,7 +17,15 @@ import {
 
 import { API_CONFIG } from '../utils/constants';
 
-// Dummy data for development
+// Generate current date and future dates dynamically
+const getCurrentDate = () => new Date();
+const getDateString = (daysFromNow: number) => {
+  const date = new Date();
+  date.setDate(date.getDate() + daysFromNow);
+  return date.toISOString().split('T')[0];
+};
+
+// Dummy data for development - ALWAYS FRESH DATES
 const DUMMY_PARTICIPANTS: Participant[] = [
   {
     id: '1',
@@ -101,342 +109,177 @@ const DUMMY_PARTICIPANTS: Participant[] = [
   },
 ];
 
-const DUMMY_MEETINGS: Meeting[] = [
-  {
-    id: '1',
-    title: 'Rapat Koordinasi Mingguan Tim Intelijen', 
-    date: '2025-01-28',
-    start_time: '09:00',
-    end_time: '11:00',
-    location: 'Ruang Rapat Lantai 3',
-    meeting_link: 'https://zoom.us/j/987654321',
-    designated_attendees: ['Ahmad Rizki Pratama', 'Siti Nurhaliza'],
-    designated_attendee: 'Ahmad Rizki Pratama', // For backward compatibility
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-012',
-    attendance_link: 'https://forms.google.com/attendance-012',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T08:00:00Z',
-    updated_at: '2025-01-27T08:00:00Z',
-  },
-  {
-    id: '2',
-    title: 'Workshop Analisis Data Intelijen Lanjutan',
-    date: '2025-01-29',
-    start_time: '13:00',
-    end_time: '16:30',
-    location: 'Lab Komputer Gedung B',
-    meeting_link: 'https://teams.microsoft.com/workshop-456',
-    designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya', 'Fitri Handayani'],
-    designated_attendee: 'Budi Santoso',
-    status: 'pending',
-    dress_code: 'Business Casual',
-    invitation_reference: 'REF-2025-013',
-    attendance_link: 'https://forms.google.com/attendance-013',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: false,
-    created_at: '2025-01-27T10:30:00Z',
-    updated_at: '2025-01-27T10:30:00Z',
-  },
-  {
-    id: '3',
-    title: 'Evaluasi Kinerja Triwulan I-2025',
-    date: '2025-01-30',
-    start_time: '09:00',
-    end_time: '12:00',
-    location: 'Ruang Rapat Direktur',
-    designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani'],
-    designated_attendee: 'Gunawan Setiawan',
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-014',
-    attendance_link: 'https://forms.google.com/attendance-014',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T14:15:00Z',
-    updated_at: '2025-01-27T14:15:00Z',
-  },
-  {
-    id: '4',
-    title: 'Sosialisasi Kebijakan Keamanan Baru',
-    date: '2025-01-31',
-    start_time: '10:00',
-    end_time: '11:30',
-    location: 'Aula Besar',
-    designated_attendees: ['Ahmad Rizki Pratama', 'Diana Putri', 'Eko Wijaya'],
-    designated_attendee: 'Ahmad Rizki Pratama',
-    status: 'pending',
-    dress_code: 'Business Casual',
-    invitation_reference: 'REF-2025-015',
-    attendance_link: 'https://forms.google.com/attendance-015',
-    discussion_results: '',
-    whatsapp_reminder_enabled: false,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T16:45:00Z',
-    updated_at: '2025-01-27T16:45:00Z',
-  },
-  {
-    id: '5',
-    title: 'Briefing Operasi Khusus Februari',
-    date: '2025-02-01',
-    start_time: '14:00',
-    end_time: '16:00',
-    location: 'Ruang Briefing Khusus',
-    designated_attendees: ['Siti Nurhaliza', 'Budi Santoso', 'Gunawan Setiawan'],
-    designated_attendee: 'Siti Nurhaliza',
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-016',
-    attendance_link: 'https://forms.google.com/attendance-016',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T09:20:00Z',
-    updated_at: '2025-01-27T09:20:00Z',
-  },
-  {
-    id: '11',
-    title: 'Rapat Evaluasi Sistem Keamanan',
-    date: '2025-02-03',
-    start_time: '08:00',
-    end_time: '10:00',
-    location: 'Ruang Rapat Keamanan',
-    meeting_link: 'https://zoom.us/j/111222333',
-    designated_attendees: ['Ahmad Rizki Pratama', 'Budi Santoso'],
-    designated_attendee: 'Ahmad Rizki Pratama',
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-017',
-    attendance_link: 'https://forms.google.com/attendance-017',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T08:00:00Z',
-    updated_at: '2025-01-27T08:00:00Z',
-  },
-  {
-    id: '12',
-    title: 'Training Protokol Keamanan Baru',
-    date: '2025-02-04',
-    start_time: '13:30',
-    end_time: '17:00',
-    location: 'Aula Training',
-    designated_attendees: ['Diana Putri', 'Eko Wijaya', 'Fitri Handayani', 'Hesti Ramadhani'],
-    designated_attendee: 'Diana Putri',
-    status: 'pending',
-    dress_code: 'Casual',
-    invitation_reference: 'REF-2025-018',
-    attendance_link: 'https://forms.google.com/attendance-018',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: false,
-    created_at: '2025-01-27T10:00:00Z',
-    updated_at: '2025-01-27T10:00:00Z',
-  },
-  {
-    id: '13',
-    title: 'Briefing Mingguan Operasional',
-    date: '2025-02-05',
-    start_time: '07:30',
-    end_time: '08:30',
-    location: 'Ruang Briefing',
-    designated_attendees: ['Gunawan Setiawan', 'Siti Nurhaliza'],
-    designated_attendee: 'Gunawan Setiawan',
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-019',
-    attendance_link: 'https://forms.google.com/attendance-019',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T11:00:00Z',
-    updated_at: '2025-01-27T11:00:00Z',
-  },
-  // Add more meetings for current week to make dashboard more interesting
-  {
-    id: '14',
-    title: 'Rapat Koordinasi Harian Tim',
-    date: '2025-02-06',
-    start_time: '08:00',
-    end_time: '09:00',
-    location: 'Ruang Rapat Kecil',
-    designated_attendees: ['Ahmad Rizki Pratama'],
-    designated_attendee: 'Ahmad Rizki Pratama',
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-020',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T15:00:00Z',
-    updated_at: '2025-01-27T15:00:00Z',
-  },
-  {
-    id: '15',
-    title: 'Workshop Keamanan Siber',
-    date: '2025-02-07',
-    start_time: '13:00',
-    end_time: '17:00',
-    location: 'Lab Keamanan Siber',
-    designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya'],
-    designated_attendee: 'Budi Santoso',
-    status: 'pending',
-    dress_code: 'Casual',
-    invitation_reference: 'REF-2025-021',
-    attendance_link: 'https://forms.google.com/attendance-021',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: false,
-    created_at: '2025-01-27T16:00:00Z',
-    updated_at: '2025-01-27T16:00:00Z',
-  },
-  {
-    id: '16',
-    title: 'Evaluasi Mingguan Tim',
-    date: '2025-02-10',
-    start_time: '10:00',
-    end_time: '11:30',
-    location: 'Ruang Meeting Online',
-    meeting_link: 'https://zoom.us/j/555666777',
-    designated_attendees: ['Siti Nurhaliza', 'Fitri Handayani'],
-    designated_attendee: 'Siti Nurhaliza',
-    status: 'pending',
-    dress_code: 'Business Casual',
-    invitation_reference: 'REF-2025-022',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T17:00:00Z',
-    updated_at: '2025-01-27T17:00:00Z',
-  },
-  {
-    id: '17',
-    title: 'Briefing Operasi Mendatang',
-    date: '2025-02-11',
-    start_time: '14:30',
-    end_time: '16:00',
-    location: 'Ruang Briefing Utama',
-    designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani', 'Ahmad Rizki Pratama'],
-    designated_attendee: 'Gunawan Setiawan',
-    status: 'pending',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-023',
-    attendance_link: 'https://forms.google.com/attendance-023',
-    discussion_results: '',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    created_at: '2025-01-27T18:00:00Z',
-    updated_at: '2025-01-27T18:00:00Z',
-  },
-  {
-    id: '6',
-    title: 'Rapat Koordinasi Bulanan Januari',
-    date: '2025-01-15',
-    start_time: '09:00',
-    end_time: '11:00',
-    location: 'Ruang Rapat Utama',
-    meeting_link: 'https://zoom.us/j/123456789',
-    designated_attendees: ['Fitri Handayani', 'Hesti Ramadhani'],
-    designated_attendee: 'Fitri Handayani',
-    status: 'completed',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-001',
-    attendance_link: 'https://forms.google.com/attendance-001',
-    discussion_results: 'Pembahasan target operasional bulan Januari telah tercapai 95%. Disepakati peningkatan koordinasi dengan unit terkait dan evaluasi sistem pelaporan.',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    reminder_sent_at: '2025-01-15T08:30:00Z',
-    group_notification_sent_at: '2025-01-15T07:00:00Z',
-    created_at: '2025-01-10T08:00:00Z',
-    updated_at: '2025-01-15T11:30:00Z',
-  },
-  {
-    id: '7',
-    title: 'Training Sistem Informasi Baru',
-    date: '2025-01-18',
-    start_time: '08:00',
-    end_time: '12:00',
-    location: 'Lab Training',
-    designated_attendees: ['Ahmad Rizki Pratama', 'Budi Santoso', 'Diana Putri', 'Eko Wijaya'],
-    designated_attendee: 'Ahmad Rizki Pratama',
-    status: 'completed',
-    dress_code: 'Casual',
-    invitation_reference: 'REF-2025-002',
-    attendance_link: 'https://forms.google.com/attendance-002',
-    discussion_results: 'Pelatihan sistem informasi baru berhasil dilaksanakan. Semua peserta telah memahami fitur dasar dan siap mengimplementasikan dalam operasional harian.',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: false,
-    reminder_sent_at: '2025-01-18T07:30:00Z',
-    created_at: '2025-01-12T10:00:00Z',
-    updated_at: '2025-01-18T12:30:00Z',
-  },
-  {
-    id: '8',
-    title: 'Review Keamanan Sistem IT',
-    date: '2025-01-20',
-    start_time: '13:30',
-    end_time: '15:00',
-    location: 'Ruang Server',
-    designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani', 'Fitri Handayani'],
-    designated_attendee: 'Gunawan Setiawan',
-    status: 'completed',
-    dress_code: 'Business Casual',
-    invitation_reference: 'REF-2025-003',
-    discussion_results: 'Audit keamanan sistem menunjukkan tingkat keamanan baik. Direkomendasikan update patch keamanan dan peningkatan monitoring sistem.',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    reminder_sent_at: '2025-01-20T13:00:00Z',
-    group_notification_sent_at: '2025-01-20T07:00:00Z',
-    created_at: '2025-01-15T14:00:00Z',
-    updated_at: '2025-01-20T15:30:00Z',
-  },
-  {
-    id: '9',
-    title: 'Briefing Keamanan Mingguan',
-    date: '2025-01-22',
-    start_time: '07:30',
-    end_time: '08:30',
-    location: 'Ruang Briefing',
-    designated_attendees: ['Siti Nurhaliza', 'Ahmad Rizki Pratama'],
-    designated_attendee: 'Siti Nurhaliza',
-    status: 'completed',
-    dress_code: 'Formal',
-    invitation_reference: 'REF-2025-004',
-    attendance_link: 'https://forms.google.com/attendance-004',
-    discussion_results: 'Update situasi keamanan terkini. Tidak ada ancaman signifikan. Tim siap untuk operasional minggu ini.',
-    whatsapp_reminder_enabled: true,
-    group_notification_enabled: true,
-    reminder_sent_at: '2025-01-22T07:00:00Z',
-    group_notification_sent_at: '2025-01-22T07:00:00Z',
-    created_at: '2025-01-20T16:00:00Z',
-    updated_at: '2025-01-22T09:00:00Z',
-  },
-  {
-    id: '10',
-    title: 'Evaluasi Prosedur Operasional',
-    date: '2025-01-24',
-    start_time: '10:00',
-    end_time: '12:30',
-    location: 'Ruang Rapat Kecil',
-    designated_attendees: ['Budi Santoso', 'Diana Putri'],
-    designated_attendee: 'Budi Santoso',
-    status: 'completed',
-    dress_code: 'Business Casual',
-    invitation_reference: 'REF-2025-005',
-    attendance_link: 'https://forms.google.com/attendance-005',
-    discussion_results: 'Evaluasi SOP operasional menunjukkan efektivitas 88%. Diusulkan penyederhanaan beberapa prosedur untuk meningkatkan efisiensi.',
-    whatsapp_reminder_enabled: false,
-    group_notification_enabled: true,
-    group_notification_sent_at: '2025-01-24T07:00:00Z',
-    created_at: '2025-01-22T11:00:00Z',
-    updated_at: '2025-01-24T13:00:00Z',
-  },
-];
+// Generate dummy meetings with dynamic dates - ALWAYS UPCOMING
+const generateDummyMeetings = (): Meeting[] => {
+  console.log('🔄 Generating fresh dummy meetings with current dates...');
+  
+  const meetings: Meeting[] = [
+    // TODAY'S MEETINGS
+    {
+      id: '1',
+      title: 'Rapat Koordinasi Mingguan Tim Intelijen',
+      date: getDateString(0), // Today
+      start_time: '09:00',
+      end_time: '11:00',
+      location: 'Ruang Rapat Lantai 3',
+      meeting_link: 'https://zoom.us/j/987654321',
+      designated_attendees: ['Ahmad Rizki Pratama', 'Siti Nurhaliza'],
+      designated_attendee: 'Ahmad Rizki Pratama',
+      status: 'pending',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-012',
+      attendance_link: 'https://forms.google.com/attendance-012',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '2',
+      title: 'Workshop Analisis Data Intelijen Lanjutan',
+      date: getDateString(1), // Tomorrow
+      start_time: '13:00',
+      end_time: '16:30',
+      location: 'Lab Komputer Gedung B',
+      meeting_link: 'https://teams.microsoft.com/workshop-456',
+      designated_attendees: ['Budi Santoso', 'Diana Putri', 'Eko Wijaya'],
+      designated_attendee: 'Budi Santoso',
+      status: 'pending',
+      dress_code: 'Business Casual',
+      invitation_reference: 'REF-2025-013',
+      attendance_link: 'https://forms.google.com/attendance-013',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '3',
+      title: 'Evaluasi Kinerja Triwulan I-2025',
+      date: getDateString(2), // Day after tomorrow
+      start_time: '09:00',
+      end_time: '12:00',
+      location: 'Ruang Rapat Direktur',
+      designated_attendees: ['Gunawan Setiawan', 'Hesti Ramadhani'],
+      designated_attendee: 'Gunawan Setiawan',
+      status: 'pending',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-014',
+      attendance_link: 'https://forms.google.com/attendance-014',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '4',
+      title: 'Sosialisasi Kebijakan Keamanan Baru',
+      date: getDateString(3), // 3 days from now
+      start_time: '10:00',
+      end_time: '11:30',
+      location: 'Aula Besar',
+      designated_attendees: ['Ahmad Rizki Pratama', 'Diana Putri'],
+      designated_attendee: 'Ahmad Rizki Pratama',
+      status: 'pending',
+      dress_code: 'Business Casual',
+      invitation_reference: 'REF-2025-015',
+      attendance_link: 'https://forms.google.com/attendance-015',
+      discussion_results: '',
+      whatsapp_reminder_enabled: false,
+      group_notification_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '5',
+      title: 'Briefing Operasi Khusus Februari',
+      date: getDateString(4), // 4 days from now
+      start_time: '14:00',
+      end_time: '16:00',
+      location: 'Ruang Briefing Khusus',
+      designated_attendees: ['Siti Nurhaliza', 'Budi Santoso'],
+      designated_attendee: 'Siti Nurhaliza',
+      status: 'pending',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-016',
+      attendance_link: 'https://forms.google.com/attendance-016',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '6',
+      title: 'Rapat Evaluasi Sistem Keamanan',
+      date: getDateString(5), // 5 days from now
+      start_time: '08:00',
+      end_time: '10:00',
+      location: 'Ruang Rapat Keamanan',
+      meeting_link: 'https://zoom.us/j/111222333',
+      designated_attendees: ['Eko Wijaya', 'Fitri Handayani'],
+      designated_attendee: 'Eko Wijaya',
+      status: 'pending',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-017',
+      attendance_link: 'https://forms.google.com/attendance-017',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '7',
+      title: 'Training Protokol Keamanan Baru',
+      date: getDateString(7), // 1 week from now
+      start_time: '13:30',
+      end_time: '17:00',
+      location: 'Aula Training',
+      designated_attendees: ['Diana Putri', 'Gunawan Setiawan'],
+      designated_attendee: 'Diana Putri',
+      status: 'pending',
+      dress_code: 'Casual',
+      invitation_reference: 'REF-2025-018',
+      attendance_link: 'https://forms.google.com/attendance-018',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    {
+      id: '8',
+      title: 'Briefing Mingguan Operasional',
+      date: getDateString(10), // 10 days from now
+      start_time: '07:30',
+      end_time: '08:30',
+      location: 'Ruang Briefing',
+      designated_attendees: ['Hesti Ramadhani', 'Ahmad Rizki Pratama'],
+      designated_attendee: 'Hesti Ramadhani',
+      status: 'pending',
+      dress_code: 'Formal',
+      invitation_reference: 'REF-2025-019',
+      attendance_link: 'https://forms.google.com/attendance-019',
+      discussion_results: '',
+      whatsapp_reminder_enabled: true,
+      group_notification_enabled: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+  ];
+
+  console.log('✅ Generated meetings:', meetings.length);
+  console.log('📅 Meeting dates:', meetings.map(m => `${m.title}: ${m.date}`));
+  
+  return meetings;
+};
+
+// Initialize dummy meetings
+let DUMMY_MEETINGS = generateDummyMeetings();
 
 const DUMMY_SETTINGS: Settings = {
   id: '1',
@@ -445,30 +288,37 @@ const DUMMY_SETTINGS: Settings = {
   individual_reminder_minutes: 30,
   individual_reminder_enabled: true,
   whatsapp_connected: true,
-  updated_at: '2025-01-24T08:00:00Z',
+  updated_at: new Date().toISOString(),
 };
 
 // Calculate dynamic dashboard stats from dummy data
 const calculateDashboardStats = (): DashboardStats => {
-  const now = new Date();
+  console.log('📊 Calculating dashboard stats...');
   
-  // Get upcoming meetings (future dates only)
+  // Refresh meetings data to ensure fresh dates
+  DUMMY_MEETINGS = generateDummyMeetings();
+  
+  const now = new Date();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Get upcoming meetings (today and future)
   const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
     const meetingDate = new Date(meeting.date);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
     meetingDate.setHours(0, 0, 0, 0);
     return meetingDate >= today;
   });
   
-  const notificationsSent = DUMMY_MEETINGS.filter(meeting => 
-    meeting.reminder_sent_at || meeting.group_notification_sent_at
-  ).length * 2; // Individual + group notifications
+  console.log('📈 Stats calculated:', {
+    total: DUMMY_MEETINGS.length,
+    upcoming: upcomingMeetings.length,
+    participants: DUMMY_PARTICIPANTS.length
+  });
   
   return {
     total_meetings: DUMMY_MEETINGS.length,
     this_week_meetings: upcomingMeetings.length,
-    notifications_sent: notificationsSent,
+    notifications_sent: 15,
     active_participants: DUMMY_PARTICIPANTS.length,
   };
 };
@@ -517,9 +367,10 @@ function normalizeApiResponse<T>(body: any): ApiResponse<T> {
 }
 
 // Mock API functions that return dummy data
-const mockApiCall = <T>(data: T, delay = 300): Promise<ApiResponse<T>> => {
+const mockApiCall = <T>(data: T, delay = 500): Promise<ApiResponse<T>> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      console.log('🔄 Mock API call returning data:', data);
       resolve({ success: true, data });
     }, delay);
   });
@@ -528,26 +379,34 @@ const mockApiCall = <T>(data: T, delay = 300): Promise<ApiResponse<T>> => {
 // Dashboard API
 export const dashboardApi = {
   getStats: async (): Promise<ApiResponse<DashboardStats>> => {
+    console.log('🎯 Dashboard API: Getting stats...');
     const stats = calculateDashboardStats();
-    console.log('Dashboard stats calculated:', stats);
     return mockApiCall(stats);
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
+    console.log('🎯 Dashboard API: Getting upcoming meetings...');
+    
+    // Always refresh meetings to ensure current dates
+    DUMMY_MEETINGS = generateDummyMeetings();
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
       const meetingDate = new Date(meeting.date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
       meetingDate.setHours(0, 0, 0, 0);
-      return meetingDate >= today;
+      const isUpcoming = meetingDate >= today;
+      
+      console.log(`📅 Meeting "${meeting.title}": ${meeting.date} - ${isUpcoming ? 'UPCOMING' : 'PAST'}`);
+      return isUpcoming;
     }).sort((a, b) => {
       const dateA = new Date(`${a.date}T${a.start_time}`);
       const dateB = new Date(`${b.date}T${b.start_time}`);
       return dateA.getTime() - dateB.getTime();
     });
     
-    console.log('Upcoming meetings found:', upcomingMeetings.length);
-    console.log('Meeting dates:', upcomingMeetings.map(m => m.date));
+    console.log('✅ Found upcoming meetings:', upcomingMeetings.length);
     
     return mockApiCall(upcomingMeetings);
   },
@@ -556,15 +415,25 @@ export const dashboardApi = {
 // Meetings API
 export const meetingsApi = {
   getUpcoming: async (): Promise<ApiResponse<Meeting[]>> => {
+    // Refresh meetings data
+    DUMMY_MEETINGS = generateDummyMeetings();
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
-      const meetingDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
-      const today = new Date();
-      return meetingDateTime >= today;
+      const meetingDate = new Date(meeting.date);
+      meetingDate.setHours(0, 0, 0, 0);
+      return meetingDate >= today;
     }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
     return mockApiCall(upcomingMeetings);
   },
     
   getAll: async (page = 1, filters?: Record<string, any>): Promise<ApiResponse<PaginatedResponse<Meeting>>> => {
+    // Refresh meetings data
+    DUMMY_MEETINGS = generateDummyMeetings();
+    
     const paginatedData: PaginatedResponse<Meeting> = {
       data: DUMMY_MEETINGS,
       current_page: page,

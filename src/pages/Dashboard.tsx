@@ -29,6 +29,7 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        console.log('🚀 Dashboard: Starting data fetch...');
         setLoading(true);
         // Fetch both stats and upcoming meetings
         const [statsResponse, meetingsResponse] = await Promise.all([
@@ -38,19 +39,19 @@ export const Dashboard: React.FC = () => {
         
         if (statsResponse && statsResponse.data) {
           setStats(statsResponse.data);
-          console.log('Dashboard stats loaded:', statsResponse.data);
+          console.log('✅ Dashboard stats loaded:', statsResponse.data);
         }
         
         if (meetingsResponse && meetingsResponse.data) {
           setUpcomingMeetings(meetingsResponse.data);
-          console.log('Dashboard: Upcoming meetings loaded:', meetingsResponse.data.length, 'meetings');
-          console.log('Dashboard: Meeting titles:', meetingsResponse.data.map(m => m.title));
+          console.log('✅ Dashboard: Upcoming meetings loaded:', meetingsResponse.data.length, 'meetings');
+          console.log('📋 Dashboard: Meeting titles:', meetingsResponse.data.map(m => `${m.title} (${m.date})`));
         } else {
           setUpcomingMeetings([]);
-          console.log('Dashboard: No meetings data received');
+          console.log('❌ Dashboard: No meetings data received');
         }
       } catch (err) {
-        console.error('Dashboard fetch error:', err);
+        console.error('❌ Dashboard fetch error:', err);
         error('Failed to load dashboard data');
         setUpcomingMeetings([]);
       } finally {
@@ -60,6 +61,35 @@ export const Dashboard: React.FC = () => {
 
     fetchDashboardData();
   }, [error]);
+
+  // Force refresh data every 30 seconds to ensure fresh dummy data
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('🔄 Auto-refreshing dashboard data...');
+      const fetchDashboardData = async () => {
+        try {
+          const [statsResponse, meetingsResponse] = await Promise.all([
+            dashboardApi.getStats(),
+            dashboardApi.getUpcomingMeetings()
+          ]);
+          
+          if (statsResponse && statsResponse.data) {
+            setStats(statsResponse.data);
+          }
+          
+          if (meetingsResponse && meetingsResponse.data) {
+            setUpcomingMeetings(meetingsResponse.data);
+          }
+        } catch (err) {
+          console.error('Auto-refresh error:', err);
+        }
+      };
+      
+      fetchDashboardData();
+    }, 30000); // Refresh every 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleEditMeeting = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -115,6 +145,7 @@ export const Dashboard: React.FC = () => {
 
   const handleModalSuccess = () => {
     // Refresh the meetings list
+    console.log('🔄 Refreshing data after modal success...');
     const fetchDashboardData = async () => {
       try {
         const [statsResponse, meetingsResponse] = await Promise.all([
@@ -128,11 +159,13 @@ export const Dashboard: React.FC = () => {
         
         if (meetingsResponse && meetingsResponse.data) {
           setUpcomingMeetings(meetingsResponse.data);
+          console.log('✅ Refreshed meetings:', meetingsResponse.data.length);
         } else {
           setUpcomingMeetings([]);
+          console.log('❌ No meetings after refresh');
         }
       } catch (err) {
-        error('Failed to refresh data');
+        console.error('❌ Refresh error:', err);
         // Set empty array on error
         setUpcomingMeetings([]);
       }

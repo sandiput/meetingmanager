@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, MessageCircle, Info } from 'lucide-react';
+import { X, Upload, MessageCircle, Info, Users, Search, UserPlus } from 'lucide-react';
 import { participantsApi, meetingsApi } from '../../services/api';
 import { Participant, Meeting, CreateMeetingForm } from '../../types';
 import { useToast } from '../../hooks/useToast';
@@ -20,6 +20,9 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([]);
+  const [attendeeInput, setAttendeeInput] = useState('');
+  const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const { success, error } = useToast();
 
@@ -59,6 +62,21 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
     }
   }, [isOpen, meeting]);
 
+  // Filter participants based on input
+  useEffect(() => {
+    if (attendeeInput.trim().length > 0) {
+      const filtered = participants.filter(participant =>
+        participant.name.toLowerCase().includes(attendeeInput.toLowerCase()) ||
+        participant.whatsapp_number.includes(attendeeInput) ||
+        participant.seksi.toLowerCase().includes(attendeeInput.toLowerCase())
+      ).filter(participant => !selectedAttendees.includes(participant.name));
+      setFilteredParticipants(filtered);
+      setShowSuggestions(true);
+    } else {
+      setFilteredParticipants([]);
+      setShowSuggestions(false);
+    }
+  }, [attendeeInput, participants, selectedAttendees]);
   const fetchParticipants = async () => {
     try {
       const response = await participantsApi.getAll();
@@ -76,14 +94,26 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleAttendeeToggle = (participantName: string) => {
-    setSelectedAttendees(prev => {
-      if (prev.includes(participantName)) {
-        return prev.filter(name => name !== participantName);
-      } else {
-        return [...prev, participantName];
-      }
-    });
+  const handleAttendeeSelect = (participantName: string) => {
+    if (!selectedAttendees.includes(participantName)) {
+      setSelectedAttendees(prev => [...prev, participantName]);
+    }
+    setAttendeeInput('');
+    setShowSuggestions(false);
+  };
+
+  const handleAttendeeRemove = (participantName: string) => {
+    setSelectedAttendees(prev => prev.filter(name => name !== participantName));
+  };
+
+  const handleAttendeeInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && filteredParticipants.length > 0) {
+      e.preventDefault();
+      handleAttendeeSelect(filteredParticipants[0].name);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setAttendeeInput('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -231,26 +261,53 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                 <Users className="w-4 h-4 inline mr-2" />
                 Designated Attendees *
               </label>
-              <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                {participants.filter(p => p.is_active).map((participant) => (
-                  <label key={participant.id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedAttendees.includes(participant.name)}
-                      onChange={() => handleAttendeeToggle(participant.name)}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-200"
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{participant.name}</div>
-                      <div className="text-xs text-gray-500">{participant.seksi}</div>
-                      <div className="text-xs text-gray-400">{participant.whatsapp_number}</div>
-                    </div>
-                  </label>
-                ))}
+              
+              {/* Attendee Input with Autocomplete */}
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={attendeeInput}
+                    onChange={(e) => setAttendeeInput(e.target.value)}
+                    onKeyDown={handleAttendeeInputKeyDown}
+                    onFocus={() => attendeeInput.trim().length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full rounded-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                    placeholder="Type participant name to search..."
+                  />
+                </div>
+                
+                {/* Suggestions Dropdown */}
+                {showSuggestions && filteredParticipants.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
+                    {filteredParticipants.map((participant) => (
+                      <button
+                        key={participant.id}
+                        type="button"
+                        onClick={() => handleAttendeeSelect(participant.name)}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm">
+                          {participant.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-sm text-gray-800">{participant.name}</div>
+                          <div className="text-xs text-gray-500">{participant.seksi}</div>
+                          <div className="text-xs text-gray-400">{participant.whatsapp_number}</div>
+                        </div>
+                        <UserPlus className="w-4 h-4 text-gray-400" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+              
               <p className="text-xs text-gray-500 mt-2">
-                Select one or more participants who will attend this meeting
+                Type to search and select participants who will attend this meeting
               </p>
+              
+              {/* Selected Attendees Display */}
               {selectedAttendees.length > 0 && (
                 <div className="mt-2 p-2 bg-indigo-50 rounded-lg">
                   <p className="text-sm font-medium text-indigo-800">
@@ -262,7 +319,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                         {name}
                         <button
                           type="button"
-                          onClick={() => handleAttendeeToggle(name)}
+                          onClick={() => handleAttendeeRemove(name)}
                           className="text-indigo-600 hover:text-indigo-800"
                         >
                           ×

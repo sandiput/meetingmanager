@@ -33,10 +33,17 @@ export const Dashboard: React.FC = () => {
         // Use the new upcoming meetings endpoint
         const meetingsResponse = await meetingsApi.getUpcoming();
         
-        setUpcomingMeetings(meetingsResponse.data);
+        // Add null check before accessing data
+        if (meetingsResponse && meetingsResponse.data) {
+          setUpcomingMeetings(meetingsResponse.data);
+        } else {
+          setUpcomingMeetings([]);
+        }
       } catch (err) {
         error('Failed to load dashboard data');
         console.error('Dashboard fetch error:', err);
+        // Set empty array on error
+        setUpcomingMeetings([]);
       } finally {
         setLoading(false);
       }
@@ -103,9 +110,16 @@ export const Dashboard: React.FC = () => {
       try {
         const meetingsResponse = await meetingsApi.getUpcoming();
         
-        setUpcomingMeetings(meetingsResponse.data);
+        // Add null check before accessing data
+        if (meetingsResponse && meetingsResponse.data) {
+          setUpcomingMeetings(meetingsResponse.data);
+        } else {
+          setUpcomingMeetings([]);
+        }
       } catch (err) {
         error('Failed to refresh data');
+        // Set empty array on error
+        setUpcomingMeetings([]);
       }
     };
     

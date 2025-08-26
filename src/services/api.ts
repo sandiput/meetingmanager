@@ -8,7 +8,11 @@ import {
   PaginatedResponse,
   CreateMeetingForm,
   CreateParticipantForm,
-  UpdateSettingsForm
+  UpdateSettingsForm,
+  ReviewStats,
+  TopParticipant,
+  SeksiStats,
+  MeetingTrend,
 } from '../types';
 
 import { API_CONFIG } from '../utils/constants';
@@ -54,16 +58,25 @@ apiClient.interceptors.response.use(
   }
 );
 
+// Ensure unified API response shape { success, data }
+function normalizeApiResponse<T>(body: any): ApiResponse<T> {
+  if (body && typeof body === 'object' && 'success' in body && 'data' in body) {
+    return body as ApiResponse<T>;
+  }
+  // When backend returns raw array/object/primitive, wrap it
+  return { success: true, data: body as T };
+}
+
 // Dashboard API
 export const dashboardApi = {
   getStats: async (): Promise<ApiResponse<DashboardStats>> => {
-    const response = await apiClient.get('/dashboard/stats');
-    return response.data;
+    const response = await apiClient.get('/dashboard/statistics');
+    return normalizeApiResponse<DashboardStats>(response.data);
   },
     
   getUpcomingMeetings: async (): Promise<ApiResponse<Meeting[]>> => {
     const response = await apiClient.get('/dashboard/upcoming-meetings');
-    return response.data;
+    return normalizeApiResponse<Meeting[]>(response.data);
   },
 };
 
@@ -71,59 +84,59 @@ export const dashboardApi = {
 export const meetingsApi = {
   getUpcoming: async (): Promise<ApiResponse<Meeting[]>> => {
     const response = await apiClient.get('/meetings/upcoming');
-    return response.data;
+    return normalizeApiResponse<Meeting[]>(response.data);
   },
     
   getAll: async (page = 1, filters?: Record<string, any>): Promise<ApiResponse<PaginatedResponse<Meeting>>> => {
     const params = { page, ...filters };
     const response = await apiClient.get('/meetings', { params });
-    return response.data;
+    return normalizeApiResponse<PaginatedResponse<Meeting>>(response.data);
   },
     
   getById: async (id: string): Promise<ApiResponse<Meeting>> => {
     const response = await apiClient.get(`/meetings/${id}`);
-    return response.data;
+    return normalizeApiResponse<Meeting>(response.data);
   },
     
   search: async (query: string): Promise<ApiResponse<Meeting[]>> => {
     const response = await apiClient.get('/meetings/search', { params: { q: query } });
-    return response.data;
+    return normalizeApiResponse<Meeting[]>(response.data);
   },
     
   create: async (data: CreateMeetingForm): Promise<ApiResponse<Meeting>> => {
     const response = await apiClient.post('/meetings', data);
-    return response.data;
+    return normalizeApiResponse<Meeting>(response.data);
   },
     
   update: async (id: string, data: Partial<CreateMeetingForm>): Promise<ApiResponse<Meeting>> => {
     const response = await apiClient.put(`/meetings/${id}`, data);
-    return response.data;
+    return normalizeApiResponse<Meeting>(response.data);
   },
     
   delete: async (id: string): Promise<ApiResponse<void>> => {
     const response = await apiClient.delete(`/meetings/${id}`);
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
     
   sendWhatsAppReminder: async (id: string): Promise<ApiResponse<void>> => {
     const response = await apiClient.post(`/meetings/${id}/send-reminder`);
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
     
   // Meeting attendees management
   addAttendees: async (meetingId: string, attendeeIds: string[]): Promise<ApiResponse<void>> => {
     const response = await apiClient.post(`/meetings/${meetingId}/attendees`, { attendee_ids: attendeeIds });
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
     
   removeAttendees: async (meetingId: string, attendeeIds: string[]): Promise<ApiResponse<void>> => {
     const response = await apiClient.delete(`/meetings/${meetingId}/attendees`, { data: { attendee_ids: attendeeIds } });
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
     
   syncAttendees: async (meetingId: string, attendeeIds: string[]): Promise<ApiResponse<void>> => {
     const response = await apiClient.put(`/meetings/${meetingId}/attendees`, { attendee_ids: attendeeIds });
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
 };
 
@@ -131,27 +144,27 @@ export const meetingsApi = {
 export const participantsApi = {
   getAll: async (page = 1): Promise<ApiResponse<PaginatedResponse<Participant>>> => {
     const response = await apiClient.get('/participants', { params: { page } });
-    return response.data;
+    return normalizeApiResponse<PaginatedResponse<Participant>>(response.data);
   },
     
   create: async (data: CreateParticipantForm): Promise<ApiResponse<Participant>> => {
     const response = await apiClient.post('/participants', data);
-    return response.data;
+    return normalizeApiResponse<Participant>(response.data);
   },
     
   update: async (id: string, data: Partial<CreateParticipantForm>): Promise<ApiResponse<Participant>> => {
     const response = await apiClient.put(`/participants/${id}`, data);
-    return response.data;
+    return normalizeApiResponse<Participant>(response.data);
   },
     
   delete: async (id: string): Promise<ApiResponse<void>> => {
     const response = await apiClient.delete(`/participants/${id}`);
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
     
   search: async (query: string): Promise<ApiResponse<Participant[]>> => {
     const response = await apiClient.get('/participants/search', { params: { q: query } });
-    return response.data;
+    return normalizeApiResponse<Participant[]>(response.data);
   },
 };
 
@@ -159,29 +172,29 @@ export const participantsApi = {
 export const settingsApi = {
   get: async (): Promise<ApiResponse<Settings>> => {
     const response = await apiClient.get('/settings');
-    return response.data;
+    return normalizeApiResponse<Settings>(response.data);
   },
     
   update: async (data: UpdateSettingsForm): Promise<ApiResponse<Settings>> => {
     const response = await apiClient.put('/settings', data);
-    return response.data;
+    return normalizeApiResponse<Settings>(response.data);
   },
     
   testWhatsAppConnection: async (): Promise<ApiResponse<{ connected: boolean }>> => {
     const response = await apiClient.post('/settings/test-whatsapp');
-    return response.data;
+    return normalizeApiResponse<{ connected: boolean }>(response.data);
   },
     
   previewGroupMessage: async (date?: string): Promise<ApiResponse<{ message: string; meetings: Meeting[] }>> => {
     const params = date ? { date } : {};
     const response = await apiClient.get('/settings/preview-group-message', { params });
-    return response.data;
+    return normalizeApiResponse<{ message: string; meetings: Meeting[] }>(response.data);
   },
     
   sendTestGroupMessage: async (date?: string): Promise<ApiResponse<void>> => {
     const params = date ? { date } : {};
     const response = await apiClient.post('/settings/send-test-group-message', params);
-    return response.data;
+    return normalizeApiResponse<void>(response.data ?? null);
   },
 };
 
@@ -189,21 +202,21 @@ export const settingsApi = {
 export const reviewApi = {
   getStats: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<ReviewStats>> => {
     const response = await apiClient.get('/review/stats', { params: { period } });
-    return response.data;
+    return normalizeApiResponse<ReviewStats>(response.data);
   },
 
   getTopParticipants: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<TopParticipant[]>> => {
     const response = await apiClient.get('/review/top-participants', { params: { period } });
-    return response.data;
+    return normalizeApiResponse<TopParticipant[]>(response.data);
   },
 
   getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<SeksiStats[]>> => {
     const response = await apiClient.get('/review/seksi-stats', { params: { period } });
-    return response.data;
+    return normalizeApiResponse<SeksiStats[]>(response.data);
   },
 
   getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly'): Promise<ApiResponse<MeetingTrend[]>> => {
     const response = await apiClient.get('/review/meeting-trends', { params: { period } });
-    return response.data;
+    return normalizeApiResponse<MeetingTrend[]>(response.data);
   },
 };

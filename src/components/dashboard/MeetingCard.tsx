@@ -40,14 +40,30 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   const statusInfo = statusConfig[status];
   const StatusIcon = statusInfo.icon;
   
-  const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-  const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
+  // Robust parsing for meeting date & times
+  const parseDate = (dateStr: string) => new Date(dateStr);
+  const parseTime = (timeStr: string) => {
+    // If backend returns ISO string with date part
+    if (timeStr && timeStr.includes('T')) return new Date(timeStr);
+    // Fallback: combine meeting.date (which may be ISO) with time
+    const dateOnly = meeting.date.includes('T') ? meeting.date.split('T')[0] : meeting.date;
+    return new Date(`${dateOnly}T${timeStr}`);
+  };
+
+  const startDateTime = parseTime(meeting.start_time);
+  const endDateTime = parseTime(meeting.end_time);
+  const meetingDate = parseDate(meeting.date);
+
   const formatRelativeTime = () => {
     if (isToday(startDateTime)) return 'Today';
     if (isTomorrow(startDateTime)) return 'Tomorrow';
     const daysDiff = differenceInDays(startDateTime, new Date());
     return daysDiff > 0 ? `in ${daysDiff} days` : `${Math.abs(daysDiff)} days ago`;
   };
+
+  // Safely resolve designated attendee name
+  const attendeeName = (meeting as any).designated_attendee || meeting.attendees?.[0]?.name || 'Unknown';
+  const attendeeInitial = typeof attendeeName === 'string' && attendeeName.length > 0 ? attendeeName.charAt(0).toUpperCase() : '?';
 
   return (
     <div 
@@ -143,7 +159,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
             Date & Time
           </p>
           <p className="text-sm font-semibold text-gray-800">
-            {format(startDateTime, 'dd MMM yyyy')}
+            {format(meetingDate, 'dd MMM yyyy')}
           </p>
           <p className="text-xs text-gray-600">
             {format(startDateTime, 'h:mm a')} - {format(endDateTime, 'h:mm a')}
@@ -176,10 +192,10 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
           </p>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
-              {meeting.designated_attendee.charAt(0).toUpperCase()}
+              {attendeeInitial}
             </div>
             <p className="text-sm font-semibold text-gray-800 truncate">
-              {meeting.designated_attendee}
+              {attendeeName}
             </p>
           </div>
         </div>

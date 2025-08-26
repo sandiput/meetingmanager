@@ -59,6 +59,7 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
   const formattedDate = format(startDateTime, 'dd MMM yyyy');
   const formattedStartTime = format(startDateTime, 'h:mm a');
   const formattedEndTime = format(endDateTime, 'h:mm a');
+  const formattedDateTime = `${formattedDate}, ${formattedStartTime} - ${formattedEndTime}`;
 
   return (
     <div 
@@ -134,12 +135,12 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                     {meeting.dress_code && (
                       <div className="flex items-center gap-2">
                         <span className="text-green-600 flex-shrink-0">👔</span>
-                        <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
+                        <span>Dress Code: <span className="font-medium">{meeting.dress_code}</span></span>
                       </div>
                     )}
                   </div>
                 </div>
-                    <span className="font-medium">{formattedDate}, {formattedStartTime} - {formattedEndTime}</span>
+              </div>
 
               {/* Recipients Selection */}
               <div>
@@ -247,16 +248,16 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                           <a href={meeting.meeting_link} className="text-blue-600 hover:underline font-medium">Join Meeting</a>
                         </div>
                       )}
+                      <div className="flex items-start gap-2">
+                        <span className="flex-shrink-0">👥</span>
+                        <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
+                      </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-gray-200">
                       <p className="text-xs text-gray-500 italic">
                         📱 This is an automated reminder from Meeting Manager.
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <span className="flex-shrink-0">👥</span>
-                    <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
                   </div>
                 </div>
               </div>

@@ -232,7 +232,7 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">
-              All Meetings (Chronological Order)
+              All Meetings (Upcoming First)
             </h3>
             <div className="flex items-center gap-2">
               <select className="rounded-lg border-gray-200 text-sm px-3 py-2 focus:border-indigo-300 focus:ring-indigo-200">
@@ -262,9 +262,25 @@ export const Dashboard: React.FC = () => {
                 const now = new Date();
                 const isUpcoming = meetingDateTime > now;
                 
+                // Add section divider between upcoming and completed
+                const prevMeeting = index > 0 ? allMeetings[index - 1] : null;
+                const prevMeetingDateTime = prevMeeting ? new Date(`${prevMeeting.date}T${prevMeeting.start_time}`) : null;
+                const prevIsUpcoming = prevMeetingDateTime ? prevMeetingDateTime > now : true;
+                
+                const showDivider = index > 0 && prevIsUpcoming && !isUpcoming;
+                
                 return (
+                  <React.Fragment key={meeting.id}>
+                    {showDivider && (
+                      <div className="flex items-center gap-4 py-4">
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                        <div className="bg-gray-100 px-4 py-2 rounded-full">
+                          <span className="text-sm font-medium text-gray-600">Completed Meetings</span>
+                        </div>
+                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
+                      </div>
+                    )}
                 <MeetingCard
-                  key={meeting.id}
                   meeting={meeting}
                   onView={handleViewMeeting}
                   onEdit={handleEditMeeting}
@@ -272,6 +288,7 @@ export const Dashboard: React.FC = () => {
                   onSendReminder={handleSendReminder}
                   isAuthenticated={true}
                 />
+                  </React.Fragment>
                 );
               })
             )}

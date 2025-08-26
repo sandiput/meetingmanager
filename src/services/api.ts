@@ -492,17 +492,32 @@ export const dashboardApi = {
     // Always refresh meetings to ensure current dates
     DUMMY_MEETINGS = generateDummyMeetings();
     
-    // Sort ALL meetings by date: earliest to latest (chronological order)
+    // Sort meetings: UPCOMING first (earliest to latest), then COMPLETED (latest to earliest)
     const sortedMeetings = DUMMY_MEETINGS.sort((a, b) => {
       const dateTimeA = new Date(`${a.date}T${a.start_time}`);
       const dateTimeB = new Date(`${b.date}T${b.start_time}`);
+      const now = new Date();
       
-      // Sort by date and time: earliest first, latest last
-      return dateTimeA.getTime() - dateTimeB.getTime();
+      const isUpcomingA = dateTimeA > now;
+      const isUpcomingB = dateTimeB > now;
+      
+      // If both are upcoming or both are completed, sort by date
+      if (isUpcomingA === isUpcomingB) {
+        if (isUpcomingA) {
+          // Both upcoming: earliest first
+          return dateTimeA.getTime() - dateTimeB.getTime();
+        } else {
+          // Both completed: latest first
+          return dateTimeB.getTime() - dateTimeA.getTime();
+        }
+      }
+      
+      // Upcoming meetings always come first
+      return isUpcomingA ? -1 : 1;
     });
     
     console.log('✅ Sorted meetings:', sortedMeetings.length);
-    console.log('📋 Meeting chronological order:', sortedMeetings.map(m => {
+    console.log('📋 Meeting order (Upcoming first, then Completed):', sortedMeetings.map(m => {
       const meetingDateTime = new Date(`${m.date}T${m.start_time}`);
       const now = new Date();
       const status = meetingDateTime > now ? 'UPCOMING' : 'COMPLETED';

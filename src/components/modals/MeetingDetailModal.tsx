@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calendar, Clock, MapPin, User, FileText, Link, Shirt, Hash, MessageCircle, Info } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, User, Users, FileText, Link, Shirt, Hash, MessageCircle, Info } from 'lucide-react';
 import { Meeting } from '../../types';
 import { getMeetingStatus } from '../../utils/meetingUtils';
 import { clsx } from 'clsx';

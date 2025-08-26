@@ -10,6 +10,7 @@ import {
   CheckCircle,
   PlusCircle,
   Calendar,
+  BarChart3,
 } from 'lucide-react';
 import { meetingsApi } from '../../services/api';
 import { Meeting } from '../../types';
@@ -31,6 +32,11 @@ const navigationItems = [
     name: 'Participants',
     href: '/participants',
     icon: Users,
+  },
+  {
+    name: 'Review',
+    href: '/review',
+    icon: BarChart3,
   },
   {
     name: 'Settings',

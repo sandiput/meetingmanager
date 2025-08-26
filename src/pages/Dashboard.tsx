@@ -43,9 +43,11 @@ export const Dashboard: React.FC = () => {
         
         if (meetingsResponse && meetingsResponse.data) {
           setUpcomingMeetings(meetingsResponse.data);
-          console.log('Upcoming meetings loaded:', meetingsResponse.data.length, 'meetings');
+          console.log('Dashboard: Upcoming meetings loaded:', meetingsResponse.data.length, 'meetings');
+          console.log('Dashboard: Meeting titles:', meetingsResponse.data.map(m => m.title));
         } else {
           setUpcomingMeetings([]);
+          console.log('Dashboard: No meetings data received');
         }
       } catch (err) {
         console.error('Dashboard fetch error:', err);

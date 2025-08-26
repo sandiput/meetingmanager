@@ -105,7 +105,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '1',
     title: 'Rapat Koordinasi Mingguan Tim Intelijen', 
-    date: '2025-02-03',
+    date: '2025-01-28',
     start_time: '09:00',
     end_time: '11:00',
     location: 'Ruang Rapat Lantai 3',
@@ -125,7 +125,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '2',
     title: 'Workshop Analisis Data Intelijen Lanjutan',
-    date: '2025-02-04',
+    date: '2025-01-29',
     start_time: '13:00',
     end_time: '16:30',
     location: 'Lab Komputer Gedung B',
@@ -145,7 +145,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '3',
     title: 'Evaluasi Kinerja Triwulan I-2025',
-    date: '2025-02-05',
+    date: '2025-01-30',
     start_time: '09:00',
     end_time: '12:00',
     location: 'Ruang Rapat Direktur',
@@ -164,7 +164,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '4',
     title: 'Sosialisasi Kebijakan Keamanan Baru',
-    date: '2025-02-06',
+    date: '2025-01-31',
     start_time: '10:00',
     end_time: '11:30',
     location: 'Aula Besar',
@@ -183,7 +183,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '5',
     title: 'Briefing Operasi Khusus Februari',
-    date: '2025-02-07',
+    date: '2025-02-01',
     start_time: '14:00',
     end_time: '16:00',
     location: 'Ruang Briefing Khusus',
@@ -202,7 +202,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '11',
     title: 'Rapat Evaluasi Sistem Keamanan',
-    date: '2025-02-10',
+    date: '2025-02-03',
     start_time: '08:00',
     end_time: '10:00',
     location: 'Ruang Rapat Keamanan',
@@ -222,7 +222,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '12',
     title: 'Training Protokol Keamanan Baru',
-    date: '2025-02-11',
+    date: '2025-02-04',
     start_time: '13:30',
     end_time: '17:00',
     location: 'Aula Training',
@@ -241,7 +241,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '13',
     title: 'Briefing Mingguan Operasional',
-    date: '2025-02-12',
+    date: '2025-02-05',
     start_time: '07:30',
     end_time: '08:30',
     location: 'Ruang Briefing',
@@ -260,8 +260,8 @@ const DUMMY_MEETINGS: Meeting[] = [
   // Add more meetings for current week to make dashboard more interesting
   {
     id: '14',
-    title: 'Rapat Koordinasi Harian',
-    date: '2025-01-28',
+    title: 'Rapat Koordinasi Harian Tim',
+    date: '2025-02-06',
     start_time: '08:00',
     end_time: '09:00',
     location: 'Ruang Rapat Kecil',
@@ -279,7 +279,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '15',
     title: 'Workshop Keamanan Siber',
-    date: '2025-01-29',
+    date: '2025-02-07',
     start_time: '13:00',
     end_time: '17:00',
     location: 'Lab Keamanan Siber',
@@ -298,7 +298,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '16',
     title: 'Evaluasi Mingguan Tim',
-    date: '2025-01-30',
+    date: '2025-02-10',
     start_time: '10:00',
     end_time: '11:30',
     location: 'Ruang Meeting Online',
@@ -317,7 +317,7 @@ const DUMMY_MEETINGS: Meeting[] = [
   {
     id: '17',
     title: 'Briefing Operasi Mendatang',
-    date: '2025-01-31',
+    date: '2025-02-11',
     start_time: '14:30',
     end_time: '16:00',
     location: 'Ruang Briefing Utama',
@@ -451,17 +451,14 @@ const DUMMY_SETTINGS: Settings = {
 // Calculate dynamic dashboard stats from dummy data
 const calculateDashboardStats = (): DashboardStats => {
   const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
   
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59, 999);
-  
-  const thisWeekMeetings = DUMMY_MEETINGS.filter(meeting => {
+  // Get upcoming meetings (future dates only)
+  const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
     const meetingDate = new Date(meeting.date);
-    return meetingDate >= startOfWeek && meetingDate <= endOfWeek;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    meetingDate.setHours(0, 0, 0, 0);
+    return meetingDate >= today;
   });
   
   const notificationsSent = DUMMY_MEETINGS.filter(meeting => 
@@ -470,7 +467,7 @@ const calculateDashboardStats = (): DashboardStats => {
   
   return {
     total_meetings: DUMMY_MEETINGS.length,
-    this_week_meetings: thisWeekMeetings.length,
+    this_week_meetings: upcomingMeetings.length,
     notifications_sent: notificationsSent,
     active_participants: DUMMY_PARTICIPANTS.length,
   };
@@ -532,6 +529,7 @@ const mockApiCall = <T>(data: T, delay = 300): Promise<ApiResponse<T>> => {
 export const dashboardApi = {
   getStats: async (): Promise<ApiResponse<DashboardStats>> => {
     const stats = calculateDashboardStats();
+    console.log('Dashboard stats calculated:', stats);
     return mockApiCall(stats);
   },
     
@@ -539,14 +537,18 @@ export const dashboardApi = {
     const upcomingMeetings = DUMMY_MEETINGS.filter(meeting => {
       const meetingDate = new Date(meeting.date);
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Reset time to start of day
-      meetingDate.setHours(0, 0, 0, 0); // Reset meeting date time too
-      return meetingDate >= today; // Include today's meetings
+      today.setHours(0, 0, 0, 0);
+      meetingDate.setHours(0, 0, 0, 0);
+      return meetingDate >= today;
     }).sort((a, b) => {
       const dateA = new Date(`${a.date}T${a.start_time}`);
       const dateB = new Date(`${b.date}T${b.start_time}`);
       return dateA.getTime() - dateB.getTime();
     });
+    
+    console.log('Upcoming meetings found:', upcomingMeetings.length);
+    console.log('Meeting dates:', upcomingMeetings.map(m => m.date));
+    
     return mockApiCall(upcomingMeetings);
   },
 };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Calendar } from 'lucide-react';
+import { Plus, Calendar, Users, TrendingUp, MessageCircle, Clock } from 'lucide-react';
 import { Header } from '../components/layout/Header';
+import { StatsCard } from '../components/dashboard/StatsCard';
 import { MeetingCard } from '../components/dashboard/MeetingCard';
 import { NewMeetingModal } from '../components/modals/NewMeetingModal';
 import { EditMeetingModal } from '../components/modals/EditMeetingModal';
@@ -8,12 +9,13 @@ import { MeetingDetailModal } from '../components/modals/MeetingDetailModal';
 import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModal';
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
 import { meetingsApi, dashboardApi } from '../services/api';
-import { Meeting } from '../types';
+import { Meeting, DashboardStats } from '../types';
 import { getUpcomingMeetings } from '../utils/meetingUtils';
 import { useToast } from '../hooks/useToast';
 
 export const Dashboard: React.FC = () => {
   const [upcomingMeetings, setUpcomingMeetings] = useState<Meeting[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
   const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
@@ -28,19 +30,26 @@ export const Dashboard: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Use the new upcoming meetings endpoint
-        const meetingsResponse = await meetingsApi.getUpcoming();
+        // Fetch both stats and upcoming meetings
+        const [statsResponse, meetingsResponse] = await Promise.all([
+          dashboardApi.getStats(),
+          meetingsApi.getUpcoming()
+        ]);
         
-        // Add null check before accessing data
+        if (statsResponse && statsResponse.data) {
+          setStats(statsResponse.data);
+        }
+        
         if (meetingsResponse && meetingsResponse.data) {
+          console.log('Fetched meetings:', meetingsResponse.data);
           setUpcomingMeetings(meetingsResponse.data);
         } else {
+          console.log('No meetings data received');
           setUpcomingMeetings([]);
         }
       } catch (err) {
-        error('Failed to load dashboard data');
         console.error('Dashboard fetch error:', err);
-        // Set empty array on error
+        error('Failed to load dashboard data');
         setUpcomingMeetings([]);
       } finally {
         setLoading(false);
@@ -48,7 +57,7 @@ export const Dashboard: React.FC = () => {
     };
 
     fetchDashboardData();
-  }, [error]);
+  }, []);
 
   const handleEditMeeting = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -106,9 +115,15 @@ export const Dashboard: React.FC = () => {
     // Refresh the meetings list
     const fetchDashboardData = async () => {
       try {
-        const meetingsResponse = await meetingsApi.getUpcoming();
+        const [statsResponse, meetingsResponse] = await Promise.all([
+          dashboardApi.getStats(),
+          meetingsApi.getUpcoming()
+        ]);
         
-        // Add null check before accessing data
+        if (statsResponse && statsResponse.data) {
+          setStats(statsResponse.data);
+        }
+        
         if (meetingsResponse && meetingsResponse.data) {
           setUpcomingMeetings(meetingsResponse.data);
         } else {
@@ -149,6 +164,36 @@ export const Dashboard: React.FC = () => {
       />
       
       <div className="container mx-auto px-6 py-8 sm:px-8">
+        {/* Dashboard Stats */}
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatsCard
+              title="Total Meetings"
+              value={stats.total_meetings}
+              icon={Calendar}
+              iconColor="bg-blue-100 text-blue-600"
+            />
+            <StatsCard
+              title="This Week"
+              value={stats.this_week_meetings}
+              icon={Clock}
+              iconColor="bg-green-100 text-green-600"
+            />
+            <StatsCard
+              title="Notifications Sent"
+              value={stats.notifications_sent}
+              icon={MessageCircle}
+              iconColor="bg-purple-100 text-purple-600"
+            />
+            <StatsCard
+              title="Active Participants"
+              value={stats.active_participants}
+              icon={Users}
+              iconColor="bg-orange-100 text-orange-600"
+            />
+          </div>
+        )}
+
         {/* Upcoming Meetings */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">

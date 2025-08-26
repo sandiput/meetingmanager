@@ -115,7 +115,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-007',
     attendance_link: 'https://forms.google.com/attendance-007',
     discussion_results: 'Pembahasan strategi operasional minggu ini. Disepakati fokus pada peningkatan koordinasi antar seksi dan monitoring aktivitas mencurigakan di wilayah perbatasan.',
-    status: 'confirmed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     created_at: '2025-01-25T08:00:00Z',
@@ -134,7 +133,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-008',
     attendance_link: 'https://forms.google.com/attendance-008',
     discussion_results: '',
-    status: 'confirmed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: false,
     created_at: '2025-01-25T10:30:00Z',
@@ -152,7 +150,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-009',
     attendance_link: 'https://forms.google.com/attendance-009',
     discussion_results: '',
-    status: 'confirmed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     created_at: '2025-01-25T14:15:00Z',
@@ -170,7 +167,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-010',
     attendance_link: 'https://forms.google.com/attendance-010',
     discussion_results: '',
-    status: 'confirmed',
     whatsapp_reminder_enabled: false,
     group_notification_enabled: true,
     created_at: '2025-01-25T16:45:00Z',
@@ -188,7 +184,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-011',
     attendance_link: 'https://forms.google.com/attendance-011',
     discussion_results: '',
-    status: 'confirmed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     created_at: '2025-01-26T09:20:00Z',
@@ -207,7 +202,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-001',
     attendance_link: 'https://forms.google.com/attendance-001',
     discussion_results: 'Pembahasan target operasional bulan Januari telah tercapai 95%. Disepakati peningkatan koordinasi dengan unit terkait dan evaluasi sistem pelaporan.',
-    status: 'completed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     reminder_sent_at: '2025-01-15T08:30:00Z',
@@ -227,7 +221,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-002',
     attendance_link: 'https://forms.google.com/attendance-002',
     discussion_results: 'Pelatihan sistem informasi baru berhasil dilaksanakan. Semua peserta telah memahami fitur dasar dan siap mengimplementasikan dalam operasional harian.',
-    status: 'completed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: false,
     reminder_sent_at: '2025-01-18T07:30:00Z',
@@ -245,7 +238,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     dress_code: 'Business Casual',
     invitation_reference: 'REF-2025-003',
     discussion_results: 'Audit keamanan sistem menunjukkan tingkat keamanan baik. Direkomendasikan update patch keamanan dan peningkatan monitoring sistem.',
-    status: 'completed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     reminder_sent_at: '2025-01-20T13:00:00Z',
@@ -265,7 +257,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-004',
     attendance_link: 'https://forms.google.com/attendance-004',
     discussion_results: 'Update situasi keamanan terkini. Tidak ada ancaman signifikan. Tim siap untuk operasional minggu ini.',
-    status: 'completed',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     reminder_sent_at: '2025-01-22T07:00:00Z',
@@ -285,7 +276,6 @@ const DUMMY_MEETINGS: Meeting[] = [
     invitation_reference: 'REF-2025-005',
     attendance_link: 'https://forms.google.com/attendance-005',
     discussion_results: 'Evaluasi SOP operasional menunjukkan efektivitas 88%. Diusulkan penyederhanaan beberapa prosedur untuk meningkatkan efisiensi.',
-    status: 'completed',
     whatsapp_reminder_enabled: false,
     group_notification_enabled: true,
     group_notification_sent_at: '2025-01-24T07:00:00Z',
@@ -305,10 +295,18 @@ const DUMMY_SETTINGS: Settings = {
 };
 
 const DUMMY_DASHBOARD_STATS: DashboardStats = {
-  total_meetings: 10,
-  this_week_meetings: 5,
-  notifications_sent: 28,
-  active_participants: 8,
+  total_meetings: DUMMY_MEETINGS.length,
+  this_week_meetings: DUMMY_MEETINGS.filter(meeting => {
+    const meetingDate = new Date(meeting.date);
+    const today = new Date();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    return meetingDate >= weekStart && meetingDate <= weekEnd;
+  }).length,
+  notifications_sent: DUMMY_MEETINGS.filter(m => m.reminder_sent_at || m.group_notification_sent_at).length * 2,
+  active_participants: DUMMY_PARTICIPANTS.filter(p => p.is_active).length,
 };
 
 // Create axios instance with base configuration

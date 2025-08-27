@@ -27,17 +27,41 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
   
   try {
     if (meeting.date && meeting.start_time) {
-      const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-      if (!isNaN(startDateTime.getTime())) {
-        formattedDate = format(startDateTime, 'dd MMM yyyy');
-        formattedStartTime = format(startDateTime, 'h:mm a');
+      // Validasi format waktu sebelum membuat objek Date
+      let startTime = meeting.start_time;
+      // Pastikan format waktu adalah HH:mm:ss atau HH:mm
+      if (!startTime.match(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/)) {
+        console.warn(`Invalid start_time format: ${startTime}`);
+      } else {
+        // Tambahkan detik jika formatnya hanya HH:mm
+        if (startTime.split(':').length === 2) {
+          startTime = `${startTime}:00`;
+        }
+        
+        const startDateTime = new Date(`${meeting.date}T${startTime}`);
+        if (!isNaN(startDateTime.getTime())) {
+          formattedDate = format(startDateTime, 'dd MMM yyyy');
+          formattedStartTime = format(startDateTime, 'h:mm a');
+        }
       }
     }
     
     if (meeting.date && meeting.end_time) {
-      const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
-      if (!isNaN(endDateTime.getTime())) {
-        formattedEndTime = format(endDateTime, 'h:mm a');
+      // Validasi format waktu sebelum membuat objek Date
+      let endTime = meeting.end_time;
+      // Pastikan format waktu adalah HH:mm:ss atau HH:mm
+      if (!endTime.match(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/)) {
+        console.warn(`Invalid end_time format: ${endTime}`);
+      } else {
+        // Tambahkan detik jika formatnya hanya HH:mm
+        if (endTime.split(':').length === 2) {
+          endTime = `${endTime}:00`;
+        }
+        
+        const endDateTime = new Date(`${meeting.date}T${endTime}`);
+        if (!isNaN(endDateTime.getTime())) {
+          formattedEndTime = format(endDateTime, 'h:mm a');
+        }
       }
     }
   } catch (error) {
@@ -142,10 +166,23 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
             <div className="bg-white rounded-xl p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-indigo-600" />
-                Peserta Meeting ({meeting.attendees?.length || meeting.designated_attendees?.length || 0} orang)
+                Peserta Meeting ({meeting.participants?.length || meeting.attendees?.length || meeting.designated_attendees?.length || 0} orang)
               </h4>
               <div className="space-y-3">
-                {meeting.attendees && meeting.attendees.length > 0 ? (
+                {meeting.participants && meeting.participants.length > 0 ? (
+                  meeting.participants.map((participant, index) => (
+                    <div key={participant.id || index} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
+                      <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                        {participant.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-gray-800">{participant.name}</p>
+                        <p className="text-sm text-gray-600">{participant.seksi}</p>
+                        <p className="text-xs text-gray-500">{participant.whatsapp_number}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : meeting.attendees && meeting.attendees.length > 0 ? (
                   meeting.attendees.map((attendee, index) => (
                     <div key={attendee.id || index} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
                       <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
@@ -177,7 +214,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
             </div>
 
             {/* Quick Attendee Summary */}
-            {((meeting.attendees && meeting.attendees.length > 0) || (meeting.designated_attendees && meeting.designated_attendees.length > 0)) && (
+            {((meeting.participants && meeting.participants.length > 0) || (meeting.attendees && meeting.attendees.length > 0) || (meeting.designated_attendees && meeting.designated_attendees.length > 0)) && (
               <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-indigo-600" />
@@ -186,11 +223,13 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                   </p>
                 </div>
                 <div className="text-sm text-indigo-700">
-                  <p>Total: {meeting.attendees?.length || meeting.designated_attendees?.length || 0} peserta</p>
+                  <p>Total: {meeting.participants?.length || meeting.attendees?.length || meeting.designated_attendees?.length || 0} peserta</p>
                   <p className="mt-1">
-                    {meeting.attendees && meeting.attendees.length > 0 
-                      ? meeting.attendees.map(a => a.name).join(', ')
-                      : meeting.designated_attendees?.join(', ')}
+                    {meeting.participants && meeting.participants.length > 0 
+                      ? meeting.participants.map(p => p.name).join(', ')
+                      : meeting.attendees && meeting.attendees.length > 0
+                        ? meeting.attendees.map(a => a.name).join(', ')
+                        : meeting.designated_attendees?.join(', ')}
                   </p>
                 </div>
               </div>
@@ -313,8 +352,38 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                     Informasi Meeting
                   </h4>
                   <div className="text-sm text-blue-700 space-y-1">
-                    <p>Dibuat: {format(new Date(meeting.created_at), 'dd MMM yyyy, HH:mm')}</p>
-                    <p>Terakhir diubah: {format(new Date(meeting.updated_at), 'dd MMM yyyy, HH:mm')}</p>
+                    {meeting.created_at && (
+                      <p>Dibuat: {
+                        (() => {
+                          try {
+                            const date = new Date(meeting.created_at);
+                            if (!isNaN(date.getTime())) {
+                              return format(date, 'dd MMM yyyy, HH:mm');
+                            }
+                            return 'N/A';
+                          } catch (error) {
+                            console.error('Error formatting created_at:', error);
+                            return 'N/A';
+                          }
+                        })()
+                      }</p>
+                    )}
+                    {meeting.updated_at && (
+                      <p>Terakhir diubah: {
+                        (() => {
+                          try {
+                            const date = new Date(meeting.updated_at);
+                            if (!isNaN(date.getTime())) {
+                              return format(date, 'dd MMM yyyy, HH:mm');
+                            }
+                            return 'N/A';
+                          } catch (error) {
+                            console.error('Error formatting updated_at:', error);
+                            return 'N/A';
+                          }
+                        })()
+                      }</p>
+                    )}
                   </div>
                 </div>
               </div>

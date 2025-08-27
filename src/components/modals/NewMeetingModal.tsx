@@ -160,13 +160,22 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     try {
       setLoading(true);
       
-      // Format time values to match backend expectations (HH:MM format without seconds)
+      // Format time values to match backend expectations (HH:mm:ss format)
       const formatTimeValue = (timeValue: string) => {
-        if (timeValue.includes(':')) {
-          // Extract only hours and minutes (HH:MM) from time string if it has seconds
-          const timeParts = timeValue.split(':');
-          return `${timeParts[0]}:${timeParts[1]}`;
+        if (!timeValue) return '';
+        
+        // If time is already in HH:mm:ss format, return it as is
+        if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/.test(timeValue)) {
+          const [hours, minutes, seconds] = timeValue.split(':');
+          return `${hours.padStart(2, '0')}:${minutes}:${seconds}`;
         }
+        
+        // If time is in HH:mm format, add seconds
+        if (/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(timeValue)) {
+          const [hours, minutes] = timeValue.split(':');
+          return `${hours.padStart(2, '0')}:${minutes}:00`;
+        }
+        
         return timeValue;
       };
       

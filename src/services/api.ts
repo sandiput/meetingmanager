@@ -297,7 +297,13 @@ export const participantsApi = {
     
   update: async (id: string, data: Partial<CreateParticipantForm>): Promise<ApiResponse<Participant>> => {
     try {
-      const response = await apiClient.put(`/participants/${id}`, data);
+      // Format WhatsApp number to remove '+' before sending to backend
+      const formattedData = {
+        ...data,
+        whatsapp_number: data.whatsapp_number ? data.whatsapp_number.replace(/^\+/, '') : data.whatsapp_number
+      };
+      
+      const response = await apiClient.put(`/participants/${id}`, formattedData);
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error(`Failed to update participant with id ${id}:`, error);

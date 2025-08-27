@@ -146,7 +146,7 @@ export const EditParticipantModal: React.FC<EditParticipantModalProps> = ({
 
         {/* Body */}
         <div className="flex-grow overflow-y-auto p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" id="edit-participant-form">
             {/* Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -197,7 +197,7 @@ export const EditParticipantModal: React.FC<EditParticipantModalProps> = ({
                   </div>
                   <input
                     type="tel"
-                    value={formData.whatsapp_number.replace('+62 ', '').replace('+62', '').replace(/\s/g, '')}
+                    value={formData.whatsapp_number.startsWith('+62') ? formData.whatsapp_number.substring(3) : formData.whatsapp_number}
                     onChange={(e) => handleWhatsAppChange(e.target.value)}
                     className="flex-1 px-4 py-3 text-sm bg-white focus:outline-none"
                     placeholder="8123456789"
@@ -257,7 +257,8 @@ export const EditParticipantModal: React.FC<EditParticipantModalProps> = ({
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            type="submit"
+            form="edit-participant-form"
             disabled={loading}
             className={clsx(
               'flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all',

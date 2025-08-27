@@ -281,7 +281,13 @@ export const participantsApi = {
     
   create: async (data: CreateParticipantForm): Promise<ApiResponse<Participant>> => {
     try {
-      const response = await apiClient.post('/participants', data);
+      // Format WhatsApp number to remove '+' before sending to backend
+      const formattedData = {
+        ...data,
+        whatsapp_number: data.whatsapp_number.replace(/^\+/, '')
+      };
+      
+      const response = await apiClient.post('/participants', formattedData);
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to create participant:', error);

@@ -249,9 +249,9 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       
       // Check if any of the selected attendees exist in the participants database
       try {
-        const participantsResponse = await fetch('http://localhost:8000/api/participants');
+        const participantsResponse = await fetch('http://localhost:8000/api/participants?limit=1000');
         const participantsData = await participantsResponse.json();
-        const existingParticipants = participantsData.data.data || [];
+        const existingParticipants = participantsData.data.participants || [];
         
         console.log('Available participants in database:', existingParticipants.map((p: { name: string }) => p.name));
         

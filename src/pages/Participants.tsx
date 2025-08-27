@@ -33,7 +33,7 @@ export const Participants: React.FC = () => {
     try {
       setLoading(true);
       const response = await participantsApi.getAll(page);
-      setParticipants(response.data.data);
+      setParticipants(response.data.participants);
       setPagination({
         current_page: response.data.current_page,
         last_page: response.data.last_page,

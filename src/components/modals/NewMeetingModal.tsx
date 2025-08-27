@@ -67,25 +67,70 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
 
   // Filter participants based on input
   useEffect(() => {
-    if (attendeeInput.trim().length > 0) {
+    if (attendeeInput.trim().length > 0 && participants && participants.length > 0) {
       const filtered = participants.filter(participant =>
         participant.name.toLowerCase().includes(attendeeInput.toLowerCase()) ||
         participant.whatsapp_number.includes(attendeeInput) ||
         participant.seksi.toLowerCase().includes(attendeeInput.toLowerCase())
       ).filter(participant => !selectedAttendees.includes(participant.name));
       setFilteredParticipants(filtered);
-      setShowSuggestions(true);
+      setShowSuggestions(filtered.length > 0);
     } else {
       setFilteredParticipants([]);
       setShowSuggestions(false);
     }
   }, [attendeeInput, participants, selectedAttendees]);
+  
+  // Fetch participants when component mounts
+  useEffect(() => {
+    if (isOpen) {
+      fetchParticipants();
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      // Set default start time to current hour + 1
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      const startTimeString = now.toTimeString().slice(0, 5);
+      // Set default end time to start time + 1 hour
+      now.setHours(now.getHours() + 1);
+      const endTimeString = now.toTimeString().slice(0, 5);
+      
+      setFormData(prev => ({
+        ...prev,
+        date: today,
+        start_time: startTimeString,
+        end_time: endTimeString,
+      }));
+    }
+    
+    // Cleanup function
+    return () => {
+      // Reset state when modal closes
+      if (!isOpen) {
+        setFilteredParticipants([]);
+        setShowSuggestions(false);
+      }
+    };
+  }, [isOpen]);
+
   const fetchParticipants = async () => {
     try {
+      console.log('Fetching participants...');
       const response = await participantsApi.getAll();
-      setParticipants(response.data.data);
+      if (response && response.data && Array.isArray(response.data.participants)) {
+        console.log('Participants fetched:', response.data.participants.length);
+        setParticipants(response.data.participants);
+      } else if (response && response.data && Array.isArray(response.data.data)) {
+        // Fallback untuk format respons yang berbeda
+        console.log('Participants fetched (fallback):', response.data.data.length);
+        setParticipants(response.data.data);
+      } else {
+        console.error('Invalid participants data format:', response);
+        setParticipants([]);
+      }
     } catch (err) {
       console.error('Failed to fetch participants:', err);
+      setParticipants([]);
     }
   };
 
@@ -398,29 +443,29 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               {/* Attendee Input with Autocomplete */}
               <div className="relative">
                 <div className="relative">
-                  <div className="flex w-full items-center">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        type="text"
-                        value={attendeeInput}
-                        onChange={(e) => setAttendeeInput(e.target.value)}
-                        onKeyDown={handleAttendeeInputKeyDown}
-                        onFocus={() => attendeeInput.trim().length > 0 && setShowSuggestions(true)}
-                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                        className="w-full rounded-l-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
-                        placeholder="Type participant name to search..."
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleAddNewParticipant}
-                      className="rounded-r-lg border-2 border-l-0 border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100 transition-colors"
-                      title="Add new participant"
-                    >
-                      <UserPlus className="h-5 w-5 text-indigo-600" />
-                    </button>
-                  </div>
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={attendeeInput}
+                    onChange={(e) => setAttendeeInput(e.target.value)}
+                    onKeyDown={handleAttendeeInputKeyDown}
+                    onFocus={() => {
+                      if (attendeeInput.trim().length > 0) {
+                        setShowSuggestions(true);
+                      } else if (participants && participants.length > 0) {
+                        // Jika input kosong, tampilkan semua peserta yang belum dipilih
+                        const filtered = participants.filter(participant => 
+                          !selectedAttendees.includes(participant.name)
+                        );
+                        setFilteredParticipants(filtered);
+                        setShowSuggestions(filtered.length > 0);
+                      }
+                    }}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 500)}
+                    className="w-full rounded-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                    placeholder="Type participant name to search..."
+                    autoComplete="off"
+                  />
                 </div>
                 
                 {/* Suggestions Dropdown */}
@@ -430,7 +475,10 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
                       <button
                         key={participant.id}
                         type="button"
-                        onClick={() => handleAttendeeSelect(participant.name)}
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // Prevent blur event from firing before click
+                          handleAttendeeSelect(participant.name);
+                        }}
                         className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
                       >
                         <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm">
@@ -446,13 +494,6 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
                     ))}
                   </div>
                 )}
-                {showSuggestions && attendeeInput.trim() !== '' && filteredParticipants.length === 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="px-4 py-3 text-sm text-gray-500">
-                      No participants found. Click the + button to add a new participant.
-                    </div>
-                  </div>
-                )}
               </div>
               
               <p className="text-xs text-gray-500 mt-2">
@@ -461,18 +502,34 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               
               {/* Selected Attendees Display */}
               {selectedAttendees.length > 0 && (
-                <div className="mt-2 p-2 bg-indigo-50 rounded-lg">
-                  <p className="text-sm font-medium text-indigo-800">
-                    Selected: {selectedAttendees.length} attendee{selectedAttendees.length > 1 ? 's' : ''}
-                  </p>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-indigo-800">
+                      Selected: {selectedAttendees.length} attendee{selectedAttendees.length > 1 ? 's' : ''}
+                    </p>
+                    {selectedAttendees.length > 1 && (
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to remove all attendees?')) {
+                            setSelectedAttendees([]);
+                            setFormData(prev => ({ ...prev, designated_attendees: [] }));
+                          }
+                        }}
+                        className="text-xs text-indigo-600 hover:text-indigo-800"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {selectedAttendees.map((name) => (
-                      <span key={name} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                      <span key={name} className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-indigo-200 text-indigo-800 text-xs rounded-full shadow-sm">
                         {name}
                         <button
                           type="button"
                           onClick={() => handleAttendeeRemove(name)}
-                          className="text-indigo-600 hover:text-indigo-800"
+                          className="text-indigo-600 hover:text-indigo-800 font-bold ml-1"
                         >
                           ×
                         </button>

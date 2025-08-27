@@ -271,7 +271,7 @@ export const meetingsApi = {
 export const participantsApi = {
   getAll: async (page = 1): Promise<ApiResponse<PaginatedResponse<Participant>>> => {
     try {
-      const response = await apiClient.get('/participants', { params: { page } });
+      const response = await apiClient.get('/participants', { params: { page, limit:1000 } });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to fetch participants:', error);

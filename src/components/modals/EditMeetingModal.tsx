@@ -27,6 +27,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   const { success, error } = useToast();
 
   const [formData, setFormData] = useState<CreateMeetingForm>({
+    id: '',
     title: '',
     date: '',
     start_time: '',
@@ -43,46 +44,115 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
   useEffect(() => {
     if (isOpen && meeting) {
+      // Pastikan designated_attendees selalu array dan tangani berbagai format data
+      let attendees = [];
+      
+      // Prioritaskan participants jika tersedia
+      if (meeting.participants && Array.isArray(meeting.participants) && meeting.participants.length > 0) {
+        // Ekstrak nama dari objek participants
+        attendees = meeting.participants.map(participant => participant.name);
+        console.log('Using participants data:', attendees);
+      }
+      // Fallback ke attendees (untuk kompatibilitas mundur)
+      else if (meeting.attendees && Array.isArray(meeting.attendees) && meeting.attendees.length > 0) {
+        // Ekstrak nama dari objek attendees
+        attendees = meeting.attendees.map(attendee => attendee.name);
+        console.log('Using attendees data:', attendees);
+      }
+      // Cek apakah designated_attendees ada dan merupakan array
+      else if (Array.isArray(meeting.designated_attendees)) {
+        attendees = meeting.designated_attendees;
+      } 
+      // Cek apakah designated_attendees adalah string yang bisa di-parse sebagai array
+      else if (typeof meeting.designated_attendees === 'string' && (meeting.designated_attendees as string).trim() !== '') {
+        try {
+          // Coba parse jika string adalah JSON array
+          const parsed = JSON.parse(meeting.designated_attendees);
+          if (Array.isArray(parsed)) {
+            attendees = parsed;
+          } else {
+            // Jika bukan array, tambahkan sebagai single item
+            attendees = [meeting.designated_attendees];
+          }
+        } catch (e) {
+          // Jika gagal parse, gunakan sebagai single string
+          attendees = [meeting.designated_attendees];
+        }
+      }
+      // Fallback ke designated_attendee jika tidak ada designated_attendees
+      else if (meeting.designated_attendee && typeof meeting.designated_attendee === 'string') {
+        attendees = [meeting.designated_attendee];
+      }
+      
+      console.log('Setting initial attendees:', attendees);
+      
       fetchParticipants();
-      setSelectedAttendees(meeting.designated_attendees || []);
+      setSelectedAttendees(attendees);
       setFormData({
+        id: meeting.id,
         title: meeting.title,
         date: meeting.date,
         start_time: meeting.start_time,
         end_time: meeting.end_time,
         location: meeting.location,
-        designated_attendees: meeting.designated_attendees || [],
+        designated_attendees: attendees,
         dress_code: meeting.dress_code || '',
         invitation_reference: meeting.invitation_reference || '',
         attendance_link: meeting.attendance_link || '',
         discussion_results: meeting.discussion_results || '',
         whatsapp_reminder_enabled: meeting.whatsapp_reminder_enabled,
         group_notification_enabled: meeting.group_notification_enabled,
+        meeting_link: meeting.meeting_link || '',
       });
     }
   }, [isOpen, meeting]);
 
   // Filter participants based on input
   useEffect(() => {
-    if (attendeeInput.trim().length > 0) {
+    if (attendeeInput.trim().length > 0 && participants && participants.length > 0) {
       const filtered = participants.filter(participant =>
         participant.name.toLowerCase().includes(attendeeInput.toLowerCase()) ||
         participant.whatsapp_number.includes(attendeeInput) ||
         participant.seksi.toLowerCase().includes(attendeeInput.toLowerCase())
       ).filter(participant => !selectedAttendees.includes(participant.name));
       setFilteredParticipants(filtered);
-      setShowSuggestions(true);
+      setShowSuggestions(filtered.length > 0);
     } else {
       setFilteredParticipants([]);
       setShowSuggestions(false);
     }
   }, [attendeeInput, participants, selectedAttendees]);
+  
+  // Fetch participants when component mounts
+  useEffect(() => {
+    if (isOpen) {
+      fetchParticipants();
+    }
+    
+    // Cleanup function
+    return () => {
+      // Reset state when modal closes
+      if (!isOpen) {
+        setFilteredParticipants([]);
+        setShowSuggestions(false);
+      }
+    };
+  }, [isOpen]);
+  
   const fetchParticipants = async () => {
     try {
+      console.log('Fetching participants...');
       const response = await participantsApi.getAll();
-      setParticipants(response.data.data);
+      if (response && response.data && Array.isArray(response.data.participants)) {
+        console.log('Participants fetched:', response.data.participants.length);
+        setParticipants(response.data.participants);
+      } else {
+        console.error('Invalid participants data format:', response);
+        setParticipants([]);
+      }
     } catch (err) {
       console.error('Failed to fetch participants:', err);
+      setParticipants([]);
     }
   };
 
@@ -96,14 +166,39 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
   const handleAttendeeSelect = (participantName: string) => {
     if (!selectedAttendees.includes(participantName)) {
-      setSelectedAttendees(prev => [...prev, participantName]);
+      const newSelectedAttendees = [...selectedAttendees, participantName];
+      setSelectedAttendees(newSelectedAttendees);
+      // Update formData to include the new attendee
+      setFormData(prev => ({
+        ...prev,
+        designated_attendees: newSelectedAttendees
+      }));
+      
+      console.log('Added attendee:', participantName);
+      console.log('Updated attendees:', newSelectedAttendees);
     }
     setAttendeeInput('');
     setShowSuggestions(false);
+    // Focus back on the input field to allow adding more attendees
+    setTimeout(() => {
+      const inputElement = document.querySelector('input[placeholder="Type participant name to search..."]');
+      if (inputElement) {
+        (inputElement as HTMLInputElement).focus();
+      }
+    }, 50);
   };
 
   const handleAttendeeRemove = (participantName: string) => {
-    setSelectedAttendees(prev => prev.filter(name => name !== participantName));
+    const newSelectedAttendees = selectedAttendees.filter(name => name !== participantName);
+    setSelectedAttendees(newSelectedAttendees);
+    // Also update formData to remove the attendee
+    setFormData(prev => ({
+      ...prev,
+      designated_attendees: newSelectedAttendees
+    }));
+    
+    console.log('Removed attendee:', participantName);
+    console.log('Updated attendees:', newSelectedAttendees);
   };
 
   const handleAttendeeInputKeyDown = (e: React.KeyboardEvent) => {
@@ -118,24 +213,78 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted', formData);
+    console.log('meeting', meeting);
     
-    if (!meeting || !formData.title || !formData.date || !formData.start_time || !formData.end_time || !formData.location || selectedAttendees.length === 0) {
+    if (!meeting || !formData.id || !formData.title || !formData.date || !formData.start_time || !formData.end_time || !formData.location || selectedAttendees.length === 0) {
       error('Please fill in all required fields');
+      console.log('Validation failed', { formData, selectedAttendees });
       return;
     }
 
     try {
       setLoading(true);
-      const meetingData = {
-        ...formData,
-        designated_attendees: selectedAttendees,
+      console.log('Updating meeting with data:', { ...formData, designated_attendees: selectedAttendees });
+      // Format time values to match backend expectations (HH:MM format without seconds)
+      const formatTimeValue = (timeValue: string) => {
+        if (timeValue.includes(':')) {
+          // Extract only hours and minutes (HH:MM) from time string if it has seconds
+          const timeParts = timeValue.split(':');
+          return `${timeParts[0]}:${timeParts[1]}`;
+        }
+        return timeValue;
       };
-      await meetingsApi.update(meeting.id, meetingData);
+      
+      // Prepare data for backend, removing any fields that might cause issues
+      const meetingData = {
+        id: formData.id,
+        title: formData.title,
+        date: formData.date,
+        start_time: formatTimeValue(formData.start_time),
+        end_time: formatTimeValue(formData.end_time),
+        location: formData.location,
+        dress_code: formData.dress_code,
+        invitation_reference: formData.invitation_reference,
+        attendance_link: formData.attendance_link,
+        discussion_results: formData.discussion_results,
+        whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,
+        group_notification_enabled: formData.group_notification_enabled,
+        designated_attendees: selectedAttendees,
+        participants: selectedAttendees.map(name => ({ name })),
+        // Include designated_attendee for backward compatibility
+        designated_attendee: selectedAttendees.length > 0 ? selectedAttendees[0] : '',
+      };
+      
+      console.log('Final meeting data being sent:', meetingData);
+      
+      // Ensure data format is correct for the API
+      if (!meetingData.designated_attendee && meetingData.designated_attendees && meetingData.designated_attendees.length > 0) {
+        meetingData.designated_attendee = meetingData.designated_attendees[0];
+      }
+      
+      // Validate meeting ID before sending request
+      if (!meeting || !meeting.id) {
+        throw new Error('Meeting ID is missing. Cannot update meeting.');
+      }
+      
+      console.log('Final meeting data being sent:', meetingData);
+      console.log('Meeting ID being used:', meeting.id);
+      const result = await meetingsApi.update(meeting.id, meetingData);
+      console.log('Update result:', result);
       success('Meeting updated successfully!');
       onSuccess();
       onClose();
-    } catch (err) {
-      error('Failed to update meeting');
+    } catch (err: any) {
+      console.error('Failed to update meeting:', err);
+      
+      // Provide more specific error message if available
+      if (err.response && err.response.data && err.response.data.message) {
+        error(`Failed to update meeting: ${err.response.data.message}`);
+      } else if (err.message) {
+        error(`Failed to update meeting: ${err.message}`);
+      } else {
+        error('Failed to update meeting. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -175,7 +324,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
         {/* Body */}
         <div className="flex-grow overflow-y-auto p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form id="editMeetingForm" onSubmit={handleSubmit} className="space-y-6">
             {/* Meeting Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -271,10 +420,22 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                     value={attendeeInput}
                     onChange={(e) => setAttendeeInput(e.target.value)}
                     onKeyDown={handleAttendeeInputKeyDown}
-                    onFocus={() => attendeeInput.trim().length > 0 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onFocus={() => {
+                      if (attendeeInput.trim().length > 0) {
+                        setShowSuggestions(true);
+                      } else if (participants && participants.length > 0) {
+                        // Jika input kosong, tampilkan semua peserta yang belum dipilih
+                        const filtered = participants.filter(participant => 
+                          !selectedAttendees.includes(participant.name)
+                        );
+                        setFilteredParticipants(filtered);
+                        setShowSuggestions(filtered.length > 0);
+                      }
+                    }}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 500)}
                     className="w-full rounded-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
                     placeholder="Type participant name to search..."
+                    autoComplete="off"
                   />
                 </div>
                 
@@ -285,7 +446,10 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                       <button
                         key={participant.id}
                         type="button"
-                        onClick={() => handleAttendeeSelect(participant.name)}
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // Prevent blur event from firing before click
+                          handleAttendeeSelect(participant.name);
+                        }}
                         className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
                       >
                         <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-semibold text-sm">
@@ -309,18 +473,34 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
               
               {/* Selected Attendees Display */}
               {selectedAttendees.length > 0 && (
-                <div className="mt-2 p-2 bg-indigo-50 rounded-lg">
-                  <p className="text-sm font-medium text-indigo-800">
-                    Selected: {selectedAttendees.length} attendee{selectedAttendees.length > 1 ? 's' : ''}
-                  </p>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                <div className="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium text-indigo-800">
+                      Selected: {selectedAttendees.length} attendee{selectedAttendees.length > 1 ? 's' : ''}
+                    </p>
+                    {selectedAttendees.length > 1 && (
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to remove all attendees?')) {
+                            setSelectedAttendees([]);
+                            setFormData(prev => ({ ...prev, designated_attendees: [] }));
+                          }
+                        }}
+                        className="text-xs text-indigo-600 hover:text-indigo-800"
+                      >
+                        Clear all
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap gap-2 mt-1">
                     {selectedAttendees.map((name) => (
-                      <span key={name} className="inline-flex items-center gap-1 px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full">
+                      <span key={name} className="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-indigo-200 text-indigo-800 text-xs rounded-full shadow-sm">
                         {name}
                         <button
                           type="button"
                           onClick={() => handleAttendeeRemove(name)}
-                          className="text-indigo-600 hover:text-indigo-800"
+                          className="text-indigo-600 hover:text-indigo-800 font-bold ml-1"
                         >
                           ×
                         </button>
@@ -485,7 +665,8 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
             Cancel
           </button>
           <button
-            onClick={handleSubmit}
+            type="submit"
+            form="editMeetingForm"
             disabled={loading}
             className={clsx(
               'flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all',

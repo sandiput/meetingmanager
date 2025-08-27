@@ -13,14 +13,15 @@ export interface Meeting {
   invitation_reference?: string;
   attendance_link?: string;
   discussion_results?: string;
-  status?: 'confirmed' | 'pending' | 'completed' | 'cancelled';
+  status?: 'incoming' | 'completed';
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
   reminder_sent_at?: string;
   group_notification_sent_at?: string;
   created_at: string;
   updated_at: string;
-  attendees?: Participant[];
+  participants?: Participant[];
+  attendees?: Participant[]; // For backward compatibility
 }
 
 export interface Participant {
@@ -67,6 +68,7 @@ export interface PaginatedResponse<T> {
 
 // Form Types
 export interface CreateMeetingForm {
+  id: string;
   title: string;
   date: string;
   start_time: string;

@@ -3,7 +3,8 @@ import { X, Upload, MessageCircle, Info, Users, Search, UserPlus } from 'lucide-
 import { participantsApi, meetingsApi } from '../../services/api';
 import { Participant, CreateMeetingForm } from '../../types';
 import { useToast } from '../../hooks/useToast';
-import { clsx } from 'clsx';
+import clsx from 'clsx';
+import { NewParticipantModal } from './NewParticipantModal';
 
 interface NewMeetingModalProps {
   isOpen: boolean;
@@ -22,14 +23,17 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showNewParticipantModal, setShowNewParticipantModal] = useState(false);
   const { success, error } = useToast();
 
   const [formData, setFormData] = useState<CreateMeetingForm>({
+    id: '0', // Default ID for new meeting
     title: '',
     date: '',
     start_time: '',
     end_time: '',
     location: '',
+    meeting_link: '',
     designated_attendees: [],
     dress_code: '',
     invitation_reference: '',
@@ -106,12 +110,42 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   };
 
   const handleAttendeeInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && filteredParticipants.length > 0) {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      handleAttendeeSelect(filteredParticipants[0].name);
+      if (filteredParticipants.length > 0) {
+        handleAttendeeSelect(filteredParticipants[0].name);
+      } else if (attendeeInput.trim() !== '') {
+        // If no matching participant found, open the new participant modal
+        setShowNewParticipantModal(true);
+      }
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setAttendeeInput('');
+    }
+  };
+  
+  const handleAddNewParticipant = () => {
+    if (attendeeInput.trim() !== '') {
+      setShowNewParticipantModal(true);
+    }
+  };
+  
+  const handleParticipantAdded = async () => {
+    // Refresh participants list
+    try {
+      const response = await participantsApi.getAll();
+      setParticipants(response.data.data);
+      
+      // If the new participant matches the current input, add them to selected attendees
+      const newParticipant = response.data.data.find(p => 
+        p.name.toLowerCase() === attendeeInput.toLowerCase()
+      );
+      
+      if (newParticipant) {
+        handleAttendeeSelect(newParticipant.name);
+      }
+    } catch (err) {
+      console.error('Failed to refresh participants:', err);
     }
   };
 
@@ -125,17 +159,76 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
 
     try {
       setLoading(true);
-      const meetingData = {
-        ...formData,
-        designated_attendees: selectedAttendees,
+      
+      // Format time values to match backend expectations (HH:MM format without seconds)
+      const formatTimeValue = (timeValue: string) => {
+        if (timeValue.includes(':')) {
+          // Extract only hours and minutes (HH:MM) from time string if it has seconds
+          const timeParts = timeValue.split(':');
+          return `${timeParts[0]}:${timeParts[1]}`;
+        }
+        return timeValue;
       };
-      await meetingsApi.create(meetingData);
+      
+      // Prepare data for backend, removing any fields that might cause issues
+      const meetingData = {
+        title: formData.title,
+        date: formData.date,
+        start_time: formatTimeValue(formData.start_time),
+        end_time: formatTimeValue(formData.end_time),
+        location: formData.location,
+        meeting_link: formData.meeting_link,
+        dress_code: formData.dress_code,
+        invitation_reference: formData.invitation_reference,
+        attendance_link: formData.attendance_link,
+        discussion_results: formData.discussion_results,
+        whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,
+        group_notification_enabled: formData.group_notification_enabled,
+        designated_attendees: selectedAttendees,
+        participants: selectedAttendees.map(name => ({ name })),
+        // Include designated_attendee for backward compatibility
+        designated_attendee: selectedAttendees.length > 0 ? selectedAttendees[0] : '',
+      };
+      
+      console.log('Final meeting data being sent:', meetingData);
+      console.log('Selected attendees:', selectedAttendees);
+      
+      // Check if any of the selected attendees exist in the participants database
+      try {
+        const participantsResponse = await fetch('http://localhost:8000/api/participants');
+        const participantsData = await participantsResponse.json();
+        const existingParticipants = participantsData.data.data || [];
+        
+        console.log('Available participants in database:', existingParticipants.map((p: { name: string }) => p.name));
+        
+        const matchingParticipants = existingParticipants.filter((p: { name: string }) =>
+          selectedAttendees.includes(p.name)
+        );
+        
+        console.log('Matching participants found:', matchingParticipants.map((p: { name: string }) => p.name));
+        
+        if (matchingParticipants.length === 0) {
+          console.warn('Warning: None of the selected attendees exist in the participants database');
+          error('Selected attendees do not exist in the database. Please add them as participants first.');
+          setLoading(false);
+          return;
+        }
+      } catch (participantErr) {
+        console.error('Error checking participants:', participantErr);
+      }
+      
+      const response = await meetingsApi.create({
+        ...meetingData,
+        id: '0' // Add required id field with default value
+      });
+      console.log('Response from backend:', response);
       
       success('Meeting created successfully!');
       onSuccess();
       onClose();
       resetForm();
     } catch (err) {
+      console.error('Failed to create meeting:', err);
       error('Failed to create meeting');
     } finally {
       setLoading(false);
@@ -144,11 +237,13 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
 
   const resetForm = () => {
     setFormData({
+      id: '0',
       title: '',
       date: '',
       start_time: '',
       end_time: '',
       location: '',
+      meeting_link: '',
       designated_attendees: [],
       dress_code: '',
       invitation_reference: '',
@@ -170,14 +265,21 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          handleClose();
-        }
-      }}
-    >
+    <>
+      <NewParticipantModal 
+        isOpen={showNewParticipantModal}
+        onClose={() => setShowNewParticipantModal(false)}
+        onSuccess={handleParticipantAdded}
+        initialName={attendeeInput}
+      />
+      <div 
+        className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            handleClose();
+          }
+        }}
+      >
       <div className="flex w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl m-4 max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 p-6">
@@ -287,17 +389,29 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               {/* Attendee Input with Autocomplete */}
               <div className="relative">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    value={attendeeInput}
-                    onChange={(e) => setAttendeeInput(e.target.value)}
-                    onKeyDown={handleAttendeeInputKeyDown}
-                    onFocus={() => attendeeInput.trim().length > 0 && setShowSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className="w-full rounded-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
-                    placeholder="Type participant name to search..."
-                  />
+                  <div className="flex w-full items-center">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        value={attendeeInput}
+                        onChange={(e) => setAttendeeInput(e.target.value)}
+                        onKeyDown={handleAttendeeInputKeyDown}
+                        onFocus={() => attendeeInput.trim().length > 0 && setShowSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        className="w-full rounded-l-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                        placeholder="Type participant name to search..."
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddNewParticipant}
+                      className="rounded-r-lg border-2 border-l-0 border-gray-200 bg-gray-50 px-4 py-3 hover:bg-gray-100 transition-colors"
+                      title="Add new participant"
+                    >
+                      <UserPlus className="h-5 w-5 text-indigo-600" />
+                    </button>
+                  </div>
                 </div>
                 
                 {/* Suggestions Dropdown */}
@@ -321,6 +435,13 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
                         <UserPlus className="w-4 h-4 text-gray-400" />
                       </button>
                     ))}
+                  </div>
+                )}
+                {showSuggestions && attendeeInput.trim() !== '' && filteredParticipants.length === 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="px-4 py-3 text-sm text-gray-500">
+                      No participants found. Click the + button to add a new participant.
+                    </div>
                   </div>
                 )}
               </div>
@@ -521,5 +642,6 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
         </div>
       </div>
     </div>
+    </>
   );
 };

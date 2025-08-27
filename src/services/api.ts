@@ -181,10 +181,34 @@ export const meetingsApi = {
     
   update: async (id: string, data: Partial<CreateMeetingForm>): Promise<ApiResponse<Meeting>> => {
     try {
-      const response = await apiClient.put(`/meetings/${id}`, data);
+      // Validate meeting ID
+      if (!id) {
+        throw new Error('Meeting ID is required for update operation');
+      }
+      
+      // Log the data being sent to the API for debugging
+      console.log(`Sending update request for meeting ${id} with data:`, data);
+      
+      // Ensure we're not sending an id in the data object to prevent conflicts
+      const cleanData = { ...data };
+      if ('id' in cleanData) {
+        console.warn('Removing id from update data to prevent conflicts');
+        delete cleanData.id;
+      }
+      
+      const response = await apiClient.put(`/meetings/${id}`, cleanData);
       return normalizeApiResponse(response.data);
-    } catch (error) {
-      console.error(`Failed to update meeting with id ${id}:`, error);
+    } catch (error: any) {
+      // Enhanced error logging with response details if available
+      if (error.response) {
+        console.error(`Failed to update meeting with id ${id}:`, {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        });
+      } else {
+        console.error(`Failed to update meeting with id ${id}:`, error);
+      }
       throw error;
     }
   },

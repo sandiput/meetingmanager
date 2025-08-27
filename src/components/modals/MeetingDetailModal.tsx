@@ -19,11 +19,30 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
   if (!isOpen || !meeting) return null;
 
   const status = getMeetingStatus(meeting);
-  const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-  const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
-  const formattedDate = format(startDateTime, 'dd MMM yyyy');
-  const formattedStartTime = format(startDateTime, 'h:mm a');
-  const formattedEndTime = format(endDateTime, 'h:mm a');
+  
+  // Validasi data tanggal dan waktu sebelum membuat objek Date
+  let formattedDate = 'N/A';
+  let formattedStartTime = 'N/A';
+  let formattedEndTime = 'N/A';
+  
+  try {
+    if (meeting.date && meeting.start_time) {
+      const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+      if (!isNaN(startDateTime.getTime())) {
+        formattedDate = format(startDateTime, 'dd MMM yyyy');
+        formattedStartTime = format(startDateTime, 'h:mm a');
+      }
+    }
+    
+    if (meeting.date && meeting.end_time) {
+      const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
+      if (!isNaN(endDateTime.getTime())) {
+        formattedEndTime = format(endDateTime, 'h:mm a');
+      }
+    }
+  } catch (error) {
+    console.error('Error formatting date/time:', error);
+  }
 
   const statusConfig = {
     incoming: {
@@ -34,9 +53,20 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
       label: 'Completed',
       className: 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800',
     },
+    default: {
+      label: 'Unknown',
+      className: 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800',
+    }
   };
 
-  const statusInfo = statusConfig[status];
+  // Pastikan statusInfo selalu memiliki nilai valid
+  let statusInfo;
+  try {
+    statusInfo = statusConfig[status] || statusConfig.default;
+  } catch (error) {
+    console.error('Error getting status info:', error);
+    statusInfo = statusConfig.default;
+  }
 
   return (
     <div 
@@ -112,10 +142,23 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
             <div className="bg-white rounded-xl p-6 border border-gray-200">
               <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-indigo-600" />
-                Peserta Meeting ({meeting.designated_attendees?.length || 0} orang)
+                Peserta Meeting ({meeting.attendees?.length || meeting.designated_attendees?.length || 0} orang)
               </h4>
               <div className="space-y-3">
-                {meeting.designated_attendees?.map((attendee, index) => (
+                {meeting.attendees && meeting.attendees.length > 0 ? (
+                  meeting.attendees.map((attendee, index) => (
+                    <div key={attendee.id || index} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
+                      <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
+                        {attendee.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-lg font-semibold text-gray-800">{attendee.name}</p>
+                        <p className="text-sm text-gray-600">{attendee.seksi}</p>
+                        <p className="text-xs text-gray-500">{attendee.whatsapp_number}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : meeting.designated_attendees?.map((attendee, index) => (
                   <div key={index} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
                     <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
                       {attendee.charAt(0).toUpperCase()}
@@ -134,7 +177,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
             </div>
 
             {/* Quick Attendee Summary */}
-            {meeting.designated_attendees && meeting.designated_attendees.length > 0 && (
+            {((meeting.attendees && meeting.attendees.length > 0) || (meeting.designated_attendees && meeting.designated_attendees.length > 0)) && (
               <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-indigo-600" />
@@ -143,9 +186,11 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                   </p>
                 </div>
                 <div className="text-sm text-indigo-700">
-                  <p>Total: {meeting.designated_attendees.length} peserta</p>
+                  <p>Total: {meeting.attendees?.length || meeting.designated_attendees?.length || 0} peserta</p>
                   <p className="mt-1">
-                    {meeting.designated_attendees.join(', ')}
+                    {meeting.attendees && meeting.attendees.length > 0 
+                      ? meeting.attendees.map(a => a.name).join(', ')
+                      : meeting.designated_attendees?.join(', ')}
                   </p>
                 </div>
               </div>

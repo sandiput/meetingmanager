@@ -2,19 +2,98 @@ import { Meeting } from '../types';
 
 // Utility function to determine meeting status based on current time
 export const getMeetingStatus = (meeting: Meeting): 'incoming' | 'completed' => {
-  const now = new Date();
-  const start = parseMeetingDateTime(meeting, 'start');
-  return start > now ? 'incoming' : 'completed';
+  try {
+    const now = new Date();
+    const start = parseMeetingDateTime(meeting, 'start');
+    return start > now ? 'incoming' : 'completed';
+  } catch (error) {
+    console.error('Error determining meeting status:', error);
+    return 'completed'; // Default fallback status
+  }
 };
 
 // Robust time parser that supports either "HH:mm" or full ISO in start_time/end_time
-const parseMeetingDateTime = (meeting: Meeting, which: 'start' | 'end'): Date => {
-  const timeStr = which === 'start' ? (meeting as any).start_time : (meeting as any).end_time;
-  if (typeof timeStr === 'string' && timeStr.includes('T')) {
-    return new Date(timeStr);
+export const parseMeetingDateTime = (meeting: Meeting, which: 'start' | 'end'): Date => {
+  try {
+    // Default to current date if parsing fails
+    const defaultDate = new Date();
+    
+    // Validasi data meeting - pengecekan lebih ketat
+    if (!meeting) {
+      console.warn('Invalid meeting data: meeting object is null or undefined');
+      return defaultDate;
+    }
+    
+    if (!meeting.date) {
+      console.warn('Invalid meeting data: missing date');
+      return defaultDate;
+    }
+    
+    const timeStr = which === 'start' ? meeting.start_time : meeting.end_time;
+    
+    // Validasi timeStr lebih ketat
+    if (!timeStr) {
+      console.warn(`Invalid meeting data: missing ${which}_time`);
+      return defaultDate;
+    }
+    
+    // Jika timeStr sudah dalam format ISO dengan T
+    if (typeof timeStr === 'string' && timeStr.includes('T')) {
+      try {
+        const date = new Date(timeStr);
+        if (isNaN(date.getTime())) {
+          console.warn(`Invalid ISO time format: ${timeStr}`);
+          return defaultDate;
+        }
+        return date;
+      } catch (e) {
+        console.error(`Error parsing ISO time: ${timeStr}`, e);
+        return defaultDate;
+      }
+    }
+    
+    // Ekstrak tanggal dari meeting.date dengan validasi lebih ketat
+    let dateOnly;
+    try {
+      dateOnly = typeof meeting.date === 'string' && meeting.date.includes('T') 
+        ? meeting.date.split('T')[0] 
+        : meeting.date;
+        
+      if (!dateOnly || typeof dateOnly !== 'string' || dateOnly.trim() === '') {
+        console.warn(`Invalid date format: ${meeting.date}`);
+        return defaultDate;
+      }
+    } catch (e) {
+      console.error(`Error extracting date: ${meeting.date}`, e);
+      return defaultDate;
+    }
+    
+    // Validasi format waktu
+    if (typeof timeStr !== 'string' || !timeStr.match(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/)) {
+      console.warn(`Time format may be invalid: ${timeStr}`);
+      // Tetap lanjutkan, mungkin masih bisa diproses
+    }
+    
+    // Buat objek Date dari kombinasi tanggal dan waktu dengan try-catch tambahan
+    try {
+      const dateTimeStr = `${dateOnly}T${timeStr}`;
+      const dateTime = new Date(dateTimeStr);
+      
+      // Validasi hasil dengan pesan error yang lebih jelas
+      if (isNaN(dateTime.getTime())) {
+        console.error(`Invalid date/time combination: ${dateTimeStr}`);
+        return defaultDate;
+      }
+      
+      return dateTime;
+    } catch (e) {
+      console.error(`Error creating Date object from: ${dateOnly}T${timeStr}`, e);
+      return defaultDate;
+    }
+  } catch (error) {
+    console.error(`Error parsing meeting ${which} time:`, error);
+    return new Date(); // Return current date as fallback
   }
-  const dateOnly = meeting.date.includes('T') ? meeting.date.split('T')[0] : meeting.date;
-  return new Date(`${dateOnly}T${timeStr}`);
 };
 
 // Utility function to get meetings with computed status

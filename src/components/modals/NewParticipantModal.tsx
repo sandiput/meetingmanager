@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, User, Phone, Car as IdCard, Building2 } from 'lucide-react';
 import { participantsApi } from '../../services/api';
 import { CreateParticipantForm } from '../../types';
-import { SEKSI_OPTIONS } from '../../utils/constants';
+import { SEKSI_OPTIONS, VALIDATION_RULES } from '../../utils/constants';
 import { useToast } from '../../hooks/useToast';
 import { clsx } from 'clsx';
 
@@ -10,22 +10,31 @@ interface NewParticipantModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialName?: string;
 }
 
 export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialName = '',
 }) => {
   const [loading, setLoading] = useState(false);
   const { success, error } = useToast();
 
   const [formData, setFormData] = useState<CreateParticipantForm>({
-    name: '',
+    name: initialName,
     whatsapp_number: '',
     nip: '',
     seksi: SEKSI_OPTIONS[0],
   });
+  
+  // Update form data when initialName changes
+  React.useEffect(() => {
+    if (initialName) {
+      setFormData(prev => ({ ...prev, name: initialName }));
+    }
+  }, [initialName]);
 
   const handleInputChange = (field: keyof CreateParticipantForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

@@ -74,10 +74,25 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
       return `${absDays} day${absDays > 1 ? 's' : ''} ago`;
     }
   };
-
-  // Safely resolve designated attendee name
-  const attendeeNames = meeting.designated_attendees || [];
-  const primaryAttendeeName = attendeeNames[0] || meeting.designated_attendee || 'Unknown';
+console.log('meeting : ',meeting);
+  // Safely resolve attendee names - prioritize participants array if available
+  let attendeeNames = [];
+  let primaryAttendeeName = 'Unknown';
+  
+  // Check if we have participants data from the relationship
+  if (meeting.participants && meeting.participants.length > 0) {
+    attendeeNames = meeting.participants.map(participant => participant.name);
+    primaryAttendeeName = attendeeNames[0];
+  } else if (meeting.designated_attendees && meeting.designated_attendees.length > 0) {
+    // Fall back to designated_attendees if participants not available
+    attendeeNames = meeting.designated_attendees;
+    primaryAttendeeName = attendeeNames[0];
+  } else if (meeting.designated_attendee) {
+    // Last fallback to legacy field
+    attendeeNames = [meeting.designated_attendee];
+    primaryAttendeeName = meeting.designated_attendee;
+  }
+  
   const attendeeInitial = typeof primaryAttendeeName === 'string' && primaryAttendeeName.length > 0 ? primaryAttendeeName.charAt(0).toUpperCase() : '?';
 
   // Add visual indicator for completed meetings

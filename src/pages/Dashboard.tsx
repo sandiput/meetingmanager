@@ -11,9 +11,39 @@ import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmation
 import { meetingsApi, dashboardApi } from '../services/api';
 import { Meeting, DashboardStats } from '../types';
 import { useToast } from '../hooks/useToast';
+import { format, parseISO } from 'date-fns';
+
+type MeetingFilterType = 'all' | 'incoming' | 'completed';
+
+// Fungsi untuk mengurutkan meeting: incoming terlebih dahulu, lalu completed
+// Untuk incoming, urutkan berdasarkan tanggal terdekat
+// Untuk completed, urutkan berdasarkan tanggal terbaru
+const sortMeetings = (meetings: Meeting[]): Meeting[] => {
+  // Pisahkan meeting berdasarkan status
+  const incomingMeetings = meetings.filter(meeting => meeting.status === 'incoming');
+  const completedMeetings = meetings.filter(meeting => meeting.status === 'completed');
+  
+  // Urutkan incoming meetings berdasarkan tanggal terdekat
+  incomingMeetings.sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.start_time}`);
+    const dateB = new Date(`${b.date}T${b.start_time}`);
+    return dateA.getTime() - dateB.getTime(); // Ascending (terdekat dulu)
+  });
+  
+  // Urutkan completed meetings berdasarkan tanggal terbaru
+  completedMeetings.sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.start_time}`);
+    const dateB = new Date(`${b.date}T${b.start_time}`);
+    return dateB.getTime() - dateA.getTime(); // Descending (terbaru dulu)
+  });
+  
+  // Gabungkan kembali: incoming terlebih dahulu, lalu completed
+  return [...incomingMeetings, ...completedMeetings];
+};
 
 export const Dashboard: React.FC = () => {
   const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
+  const [filteredMeetings, setFilteredMeetings] = useState<Meeting[]>([]);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
@@ -23,6 +53,7 @@ export const Dashboard: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [deletingMeeting, setDeletingMeeting] = useState(false);
+  const [filterType, setFilterType] = useState<MeetingFilterType>('all');
   const { success, error } = useToast();
 
   useEffect(() => {
@@ -34,7 +65,9 @@ export const Dashboard: React.FC = () => {
         // Fetch both stats and meetings
         const [statsResponse, meetingsResponse] = await Promise.all([
           dashboardApi.getStats(),
-          dashboardApi.getUpcomingMeetings()
+          filterType === 'all' 
+            ? meetingsApi.getAll(1) 
+            : meetingsApi.getAll(1, { status: filterType })
         ]);
         
         if (statsResponse && statsResponse.data) {
@@ -43,24 +76,38 @@ export const Dashboard: React.FC = () => {
         }
         
         if (meetingsResponse && meetingsResponse.data) {
-          setAllMeetings(meetingsResponse.data);
-          console.log('✅ Dashboard: All meetings loaded:', meetingsResponse.data.length, 'meetings');
-          console.log('📋 Dashboard: Meeting titles:', meetingsResponse.data.map(m => `${m.title} (${m.date})`));
+          // Handle paginated response from meetingsApi.getAll()
+          let meetings = [];
+          if (meetingsResponse.data.data) {
+            meetings = meetingsResponse.data.data;
+            
+            // Urutkan meeting: incoming terlebih dahulu, lalu completed
+            // Untuk incoming, urutkan berdasarkan tanggal terdekat
+            // Untuk completed, tetap gunakan urutan default dari API
+            meetings = sortMeetings(meetings);
+          }
+          
+          setAllMeetings(meetings);
+          setFilteredMeetings(meetings);
+          console.log('✅ Dashboard: All meetings loaded:', meetings.length, 'meetings');
+          console.log('📋 Dashboard: Meeting titles:', meetings.map(m => `${m.title} (${m.date})`));
         } else {
           setAllMeetings([]);
+          setFilteredMeetings([]);
           console.log('❌ Dashboard: No meetings data received');
         }
       } catch (err) {
         console.error('❌ Dashboard fetch error:', err);
         error('Failed to load dashboard data');
         setAllMeetings([]);
+        setFilteredMeetings([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, [error]);
+  }, [error, filterType]);
 
   const handleEditMeeting = (meeting: Meeting) => {
     setSelectedMeeting(meeting);
@@ -107,33 +154,54 @@ export const Dashboard: React.FC = () => {
   };
 
   const handleModalSuccess = () => {
-    // Refresh the meetings list
+    // Refresh the meetings list after creating, editing or deleting a meeting
     console.log('🔄 Refreshing data after modal success...');
     const fetchDashboardData = async () => {
       try {
         const [statsResponse, meetingsResponse] = await Promise.all([
           dashboardApi.getStats(),
-          dashboardApi.getUpcomingMeetings()
+          filterType === 'all' 
+            ? meetingsApi.getAll(1) 
+            : meetingsApi.getAll(1, { status: filterType })
         ]);
         
         if (statsResponse && statsResponse.data) {
           setStats(statsResponse.data);
+          console.log('✅ Dashboard stats refreshed');
         }
         
         if (meetingsResponse && meetingsResponse.data) {
-          setAllMeetings(meetingsResponse.data);
-          console.log('✅ Refreshed meetings:', meetingsResponse.data.length);
+          // Handle paginated response from meetingsApi.getAll()
+          let meetings = [];
+          if (meetingsResponse.data.data) {
+            meetings = meetingsResponse.data.data;
+            
+            // Urutkan meeting: incoming terlebih dahulu, lalu completed
+            meetings = sortMeetings(meetings);
+          }
+          
+          setAllMeetings(meetings);
+          setFilteredMeetings(meetings);
+          console.log('✅ Refreshed meetings:', meetings.length);
         } else {
           setAllMeetings([]);
+          setFilteredMeetings([]);
           console.log('❌ No meetings after refresh');
         }
       } catch (err) {
         console.error('❌ Refresh error:', err);
+        error('Failed to refresh dashboard data');
         setAllMeetings([]);
+        setFilteredMeetings([]);
       }
     };
     
     fetchDashboardData();
+  };
+  
+  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as MeetingFilterType;
+    setFilterType(value);
   };
 
   if (loading) {
@@ -232,19 +300,23 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">
-              All Meetings (Upcoming First)
+              All Meetings (Incoming First by Date, Completed Latest First)
             </h3>
             <div className="flex items-center gap-2">
-              <select className="rounded-lg border-gray-200 text-sm px-3 py-2 focus:border-indigo-300 focus:ring-indigo-200">
-                <option>All Meetings</option>
-                <option>Upcoming Only</option>
-                <option>Completed Only</option>
+              <select 
+                className="rounded-lg border-gray-200 text-sm px-3 py-2 focus:border-indigo-300 focus:ring-indigo-200"
+                value={filterType}
+                onChange={handleFilterChange}
+              >
+                <option value="all">All Meetings</option>
+                <option value="incoming">Upcoming Only</option>
+                <option value="completed">Completed Only</option>
               </select>
             </div>
           </div>
 
           <div className="space-y-6">
-            {allMeetings.length === 0 ? (
+            {filteredMeetings.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-600 mb-2">No meetings found</h3>
@@ -257,15 +329,13 @@ export const Dashboard: React.FC = () => {
                 </button>
               </div>
             ) : (
-              allMeetings.map((meeting, index) => {
-                const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-                const now = new Date();
-                const isUpcoming = meetingDateTime > now;
+              filteredMeetings.map((meeting, index) => {
+                // Use the status from the API instead of calculating based on date
+                const isUpcoming = meeting.status === 'incoming';
                 
                 // Add section divider between upcoming and completed
-                const prevMeeting = index > 0 ? allMeetings[index - 1] : null;
-                const prevMeetingDateTime = prevMeeting ? new Date(`${prevMeeting.date}T${prevMeeting.start_time}`) : null;
-                const prevIsUpcoming = prevMeetingDateTime ? prevMeetingDateTime > now : true;
+                const prevMeeting = index > 0 ? filteredMeetings[index - 1] : null;
+                const prevIsUpcoming = prevMeeting ? prevMeeting.status === 'incoming' : true;
                 
                 const showDivider = index > 0 && prevIsUpcoming && !isUpcoming;
                 

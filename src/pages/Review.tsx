@@ -6,6 +6,7 @@ import { ReviewStats, TopParticipant, SeksiStats, MeetingTrend } from '../types'
 import { useToast } from '../hooks/useToast';
 import { clsx } from 'clsx';
 import { format, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type PeriodType = 'weekly' | 'monthly' | 'yearly';
 
@@ -149,10 +150,10 @@ export const Review: React.FC = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">Attendance Rate</p>
-                  <p className="text-2xl font-bold text-gray-800">{stats.attendance_rate}%</p>
+                  <p className="text-sm text-gray-600 mb-1">Registered Participants</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.active_participants}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {stats.total_attendees} total attendees
+                    Currently active members
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-green-100">
@@ -165,7 +166,7 @@ export const Review: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Avg Duration</p>
-                  <p className="text-2xl font-bold text-gray-800">{stats.avg_duration}h</p>
+                  <p className="text-2xl font-bold text-gray-800">  {Math.round(stats.avg_duration)} min</p>
                   <p className="text-xs text-gray-500 mt-1">
                     Per meeting average
                   </p>
@@ -283,21 +284,51 @@ export const Review: React.FC = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {meetingTrends.map((trend, index) => (
-              <div key={index} className="bg-gray-50 rounded-lg p-4">
-                <div className="text-center">
-                  <p className="text-sm text-gray-500 mb-2">{trend.period}</p>
-                  <p className="text-2xl font-bold text-indigo-600 mb-2">{trend.count}</p>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="h-2 rounded-full bg-indigo-600 transition-all duration-700"
-                      style={{ width: `${(trend.count / Math.max(...meetingTrends.map(t => t.count))) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={meetingTrends}
+                margin={{
+                  top: 20,
+                  right: 30,
+                  left: 20,
+                  bottom: 20,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis 
+                  dataKey="period" 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis 
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip 
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  }}
+                  labelStyle={{ color: '#374151', fontWeight: 'semibold' }}
+                  itemStyle={{ color: '#4f46e5' }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="count" 
+                  stroke="#4f46e5" 
+                  strokeWidth={3}
+                  dot={{ fill: '#4f46e5', strokeWidth: 2, r: 6 }}
+                  activeDot={{ r: 8, stroke: '#4f46e5', strokeWidth: 2, fill: '#ffffff' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 

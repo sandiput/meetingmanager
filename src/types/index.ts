@@ -68,7 +68,6 @@ export interface PaginatedResponse<T> {
 
 // Form Types
 export interface CreateMeetingForm {
-  id: string;
   title: string;
   date: string;
   start_time: string;

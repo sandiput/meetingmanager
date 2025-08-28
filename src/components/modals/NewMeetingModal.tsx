@@ -27,7 +27,6 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   const { success, error } = useToast();
 
   const [formData, setFormData] = useState<CreateMeetingForm>({
-    id: '0', // Default ID for new meeting
     title: '',
     date: '',
     start_time: '',
@@ -120,10 +119,10 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       if (response && response.data && Array.isArray(response.data.participants)) {
         console.log('Participants fetched:', response.data.participants.length);
         setParticipants(response.data.participants);
-      } else if (response && response.data && Array.isArray(response.data.data)) {
+      } else if (response && response.data && Array.isArray(response.data.participants)) {
         // Fallback untuk format respons yang berbeda
-        console.log('Participants fetched (fallback):', response.data.data.length);
-        setParticipants(response.data.data);
+        console.log('Participants fetched (fallback):', response.data.participants.length);
+        setParticipants(response.data.participants);
       } else {
         console.error('Invalid participants data format:', response);
         setParticipants([]);
@@ -179,10 +178,10 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     // Refresh participants list
     try {
       const response = await participantsApi.getAll();
-      setParticipants(response.data.data);
+      setParticipants(response.data.participants);
       
       // If the new participant matches the current input, add them to selected attendees
-      const newParticipant = response.data.data.find(p => 
+      const newParticipant = response.data.participants.find(p => 
         p.name.toLowerCase() === attendeeInput.toLowerCase()
       );
       
@@ -273,7 +272,6 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       
       const response = await meetingsApi.create({
         ...meetingData,
-        id: '0' // Add required id field with default value
       });
       console.log('Response from backend:', response);
       
@@ -291,7 +289,6 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
 
   const resetForm = () => {
     setFormData({
-      id: '0',
       title: '',
       date: '',
       start_time: '',

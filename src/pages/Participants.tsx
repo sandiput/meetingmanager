@@ -33,7 +33,10 @@ export const Participants: React.FC = () => {
     try {
       setLoading(true);
       const response = await participantsApi.getAll(page);
-      setParticipants(response.data.participants);
+      setParticipants(response.data.participants.map(participant => ({
+        ...participant,
+        whatsapp_number: participant.whatsapp_number.replace(/^(\+62|62|0)/, ""),
+      })));
       setPagination({
         current_page: response.data.current_page,
         last_page: response.data.last_page,

@@ -129,8 +129,10 @@ export { apiClient };
 // Meetings API
 export const meetingsApi = {
   getUpcoming: async (): Promise<ApiResponse<Meeting[]>> => {
+    
     try {
       const response = await apiClient.get('/meetings/upcoming');
+      console.log('coba baru', response)
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to fetch upcoming meetings:', error);

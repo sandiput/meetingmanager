@@ -99,6 +99,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         dress_code: meeting.dress_code || '',
         invitation_reference: meeting.invitation_reference || '',
         attendance_link: meeting.attendance_link || '',
+        agenda: meeting.agenda || '',
         discussion_results: meeting.discussion_results || '',
         whatsapp_reminder_enabled: meeting.whatsapp_reminder_enabled,
         group_notification_enabled: meeting.group_notification_enabled,
@@ -255,6 +256,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         dress_code: formData.dress_code,
         invitation_reference: formData.invitation_reference,
         attendance_link: formData.attendance_link,
+        agenda: formData.agenda,
         discussion_results: formData.discussion_results,
         whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,
         group_notification_enabled: formData.group_notification_enabled,
@@ -583,6 +585,20 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                   <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
                 </div>
               </div>
+            </div>
+
+            {/* Agenda */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meeting Agenda
+              </label>
+              <textarea
+                value={formData.agenda}
+                onChange={(e) => handleInputChange('agenda', e.target.value)}
+                rows={4}
+                className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300 resize-none"
+                placeholder="Enter meeting agenda and topics to be discussed..."
+              />
             </div>
 
             {/* Discussion Results */}

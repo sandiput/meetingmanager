@@ -232,7 +232,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                         : meeting.designated_attendees?.join(', ')}
                   </p>
                 </div>
-              </div>
+            </div>
             )}
 
             {/* Meeting Details */}
@@ -298,20 +298,33 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
               </div>
             </div>
 
-            {/* Discussion Results */}
-            {meeting.discussion_results && (
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-indigo-600" />
-                  Hasil Diskusi Meeting
-                </h4>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {meeting.discussion_results}
-                  </p>
-                </div>
-              </div>
-            )}
+            {/* Agenda */}
+             <div className="bg-white rounded-xl p-6 border border-gray-200">
+               <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                 <FileText className="w-5 h-5 text-indigo-600" />
+                 Agenda Meeting
+               </h4>
+                 <div className="bg-gray-50 rounded-lg p-4">
+                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                     {meeting.agenda || 'Tidak ada agenda'}
+                   </p>
+                 </div>
+             </div>
+
+             {/* Discussion Results */}
+             {meeting.discussion_results && (
+               <div className="bg-white rounded-xl p-6 border border-gray-200">
+                 <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                   <FileText className="w-5 h-5 text-indigo-600" />
+                   Hasil Diskusi Meeting
+                 </h4>
+                 <div className="bg-gray-50 rounded-lg p-4">
+                   <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                     {meeting.discussion_results}
+                   </p>
+                 </div>
+               </div>
+             )}
 
             {/* WhatsApp Notification Settings */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-6">

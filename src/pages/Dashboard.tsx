@@ -19,33 +19,24 @@ type MeetingFilterType = 'all' | 'upcoming' | 'completed';
 // Upcoming: meeting yang tanggal dan jam >= waktu saat ini
 // Completed: meeting yang tanggal dan jam < waktu saat ini
 const sortMeetings = (meetings: Meeting[]): Meeting[] => {
-  const now = new Date();
-  
-  // Pisahkan meeting berdasarkan waktu saat ini, bukan status database
-  const upcomingMeetings = meetings.filter(meeting => {
-    const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-    return meetingDateTime >= now;
-  });
-  
-  const completedMeetings = meetings.filter(meeting => {
-    const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-    return meetingDateTime < now;
-  });
-  
+  // Pisahkan berdasarkan status dari backend
+  const upcomingMeetings = meetings.filter(meeting => meeting.status === 'upcoming');
+  const completedMeetings = meetings.filter(meeting => meeting.status === 'completed');
+
   // Urutkan upcoming meetings berdasarkan tanggal terdekat (ascending)
   upcomingMeetings.sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.start_time}`);
     const dateB = new Date(`${b.date}T${b.start_time}`);
     return dateA.getTime() - dateB.getTime();
   });
-  
+
   // Urutkan completed meetings berdasarkan tanggal terbaru (descending)
   completedMeetings.sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.start_time}`);
     const dateB = new Date(`${b.date}T${b.start_time}`);
     return dateB.getTime() - dateA.getTime();
   });
-  
+
   // Gabungkan: upcoming terlebih dahulu, lalu completed
   return [...upcomingMeetings, ...completedMeetings];
 };
@@ -339,18 +330,12 @@ export const Dashboard: React.FC = () => {
               </div>
             ) : (
               filteredMeetings.map((meeting, index) => {
-                // Determine if meeting is upcoming based on current time, not database status
-                const now = new Date();
-                const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-                const isUpcoming = meetingDateTime >= now;
-                
-                // Add section divider between upcoming and completed
+                // Gunakan status dari backend, bukan waktu real-time
+                const isUpcoming = meeting.status === 'upcoming';
                 const prevMeeting = index > 0 ? filteredMeetings[index - 1] : null;
-                const prevMeetingDateTime = prevMeeting ? new Date(`${prevMeeting.date}T${prevMeeting.start_time}`) : null;
-                const prevIsUpcoming = prevMeetingDateTime ? prevMeetingDateTime >= now : true;
-                
+                const prevIsUpcoming = prevMeeting ? prevMeeting.status === 'upcoming' : true;
                 const showDivider = index > 0 && prevIsUpcoming && !isUpcoming;
-                
+              
                 return (
                   <React.Fragment key={meeting.id}>
                     {showDivider && (
@@ -362,14 +347,14 @@ export const Dashboard: React.FC = () => {
                         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
                       </div>
                     )}
-                <MeetingCard
-                  meeting={meeting}
-                  onView={handleViewMeeting}
-                  onEdit={handleEditMeeting}
-                  onDelete={handleDeleteMeeting}
-                  onSendReminder={handleSendReminder}
-                  isAuthenticated={true}
-                />
+                    <MeetingCard
+                      meeting={meeting}
+                      onView={handleViewMeeting}
+                      onEdit={handleEditMeeting}
+                      onDelete={handleDeleteMeeting}
+                      onSendReminder={handleSendReminder}
+                      isAuthenticated={true}
+                    />
                   </React.Fragment>
                 );
               })

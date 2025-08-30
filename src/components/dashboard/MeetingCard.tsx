@@ -2,7 +2,7 @@ import React from 'react';
 import { Clock, MapPin, User, CheckCircle, Ruler as Schedule, MoreVertical, MessageCircle, Edit, Trash2 } from 'lucide-react';
 import { Eye } from 'lucide-react';
 import { Meeting } from '../../types';
-import { getMeetingStatus } from '../../utils/meetingUtils';
+// Removed getMeetingStatus import - using status from database
 import { clsx } from 'clsx';
 import { format, isToday, isTomorrow, differenceInDays, isPast } from 'date-fns';
 
@@ -16,8 +16,8 @@ interface MeetingCardProps {
 }
 
 const statusConfig = {
-  incoming: {
-    label: 'Incoming',
+  upcoming: {
+    label: 'Upcoming',
     icon: CheckCircle,
     className: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border-green-200',
   },
@@ -36,7 +36,7 @@ export const MeetingCard: React.FC<MeetingCardProps> = ({
   onDelete,
   onSendReminder,
 }) => {
-  const status = getMeetingStatus(meeting);
+  const status = meeting.status || 'upcoming';
   const statusInfo = statusConfig[status];
   const StatusIcon = statusInfo.icon;
   
@@ -126,12 +126,12 @@ console.log('meeting : ',meeting);
               {statusInfo.label}
             </span>
           </div>
-          {meeting.discussion_results && (
+          {meeting.agenda && (
             <p className={clsx(
               "text-sm mb-3 line-clamp-2",
               isCompleted ? "text-gray-500" : "text-gray-600"
             )}>
-              {meeting.discussion_results}
+              {meeting.agenda}
             </p>
           )}
         </div>

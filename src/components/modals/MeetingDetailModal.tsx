@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Calendar, Clock, MapPin, User, Users, FileText, Link, Shirt, Hash, MessageCircle, Info } from 'lucide-react';
 import { Meeting } from '../../types';
-import { getMeetingStatus } from '../../utils/meetingUtils';
+// Removed getMeetingStatus import - using status from database
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 
@@ -18,7 +18,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
 }) => {
   if (!isOpen || !meeting) return null;
 
-  const status = getMeetingStatus(meeting);
+  const status = meeting.status || 'upcoming';
   
   // Validasi data tanggal dan waktu sebelum membuat objek Date
   let formattedDate = 'N/A';
@@ -69,8 +69,8 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
   }
 
   const statusConfig = {
-    incoming: {
-      label: 'Incoming',
+    upcoming: {
+    label: 'Upcoming',
       className: 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800',
     },
     completed: {

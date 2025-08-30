@@ -13,7 +13,7 @@ export interface Meeting {
   invitation_reference?: string;
   attendance_link?: string;
   discussion_results?: string;
-  status?: 'incoming' | 'completed';
+  status?: 'upcoming' | 'completed';
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
   reminder_sent_at?: string;

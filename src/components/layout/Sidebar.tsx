@@ -208,11 +208,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                           <div className="flex-shrink-0">
                             <span className={clsx(
                               'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium',
-                              meeting.status === 'incoming'
+                              meeting.status === 'upcoming'
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-gray-100 text-gray-800'
                             )}>
-                              {meeting.status === 'incoming' ? 'Incoming' : 'Completed'}
+                              {meeting.status === 'upcoming' ? 'Upcoming' : 'Completed'}
                             </span>
                           </div>
                         </div>

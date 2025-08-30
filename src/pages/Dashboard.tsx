@@ -13,32 +13,41 @@ import { Meeting, DashboardStats } from '../types';
 import { useToast } from '../hooks/useToast';
 import { format, parseISO } from 'date-fns';
 
-type MeetingFilterType = 'all' | 'incoming' | 'completed';
+type MeetingFilterType = 'all' | 'upcoming' | 'completed';
 
-// Fungsi untuk mengurutkan meeting: incoming terlebih dahulu, lalu completed
-// Untuk incoming, urutkan berdasarkan tanggal terdekat
-// Untuk completed, urutkan berdasarkan tanggal terbaru
+// Fungsi untuk mengurutkan meeting: upcoming terlebih dahulu, lalu completed
+// Upcoming: meeting yang tanggal dan jam >= waktu saat ini
+// Completed: meeting yang tanggal dan jam < waktu saat ini
 const sortMeetings = (meetings: Meeting[]): Meeting[] => {
-  // Pisahkan meeting berdasarkan status
-  const incomingMeetings = meetings.filter(meeting => meeting.status === 'incoming');
-  const completedMeetings = meetings.filter(meeting => meeting.status === 'completed');
+  const now = new Date();
   
-  // Urutkan incoming meetings berdasarkan tanggal terdekat
-  incomingMeetings.sort((a, b) => {
-    const dateA = new Date(`${a.date}T${a.start_time}`);
-    const dateB = new Date(`${b.date}T${b.start_time}`);
-    return dateA.getTime() - dateB.getTime(); // Ascending (terdekat dulu)
+  // Pisahkan meeting berdasarkan waktu saat ini, bukan status database
+  const upcomingMeetings = meetings.filter(meeting => {
+    const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+    return meetingDateTime >= now;
   });
   
-  // Urutkan completed meetings berdasarkan tanggal terbaru
+  const completedMeetings = meetings.filter(meeting => {
+    const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+    return meetingDateTime < now;
+  });
+  
+  // Urutkan upcoming meetings berdasarkan tanggal terdekat (ascending)
+  upcomingMeetings.sort((a, b) => {
+    const dateA = new Date(`${a.date}T${a.start_time}`);
+    const dateB = new Date(`${b.date}T${b.start_time}`);
+    return dateA.getTime() - dateB.getTime();
+  });
+  
+  // Urutkan completed meetings berdasarkan tanggal terbaru (descending)
   completedMeetings.sort((a, b) => {
     const dateA = new Date(`${a.date}T${a.start_time}`);
     const dateB = new Date(`${b.date}T${b.start_time}`);
-    return dateB.getTime() - dateA.getTime(); // Descending (terbaru dulu)
+    return dateB.getTime() - dateA.getTime();
   });
   
-  // Gabungkan kembali: incoming terlebih dahulu, lalu completed
-  return [...incomingMeetings, ...completedMeetings];
+  // Gabungkan: upcoming terlebih dahulu, lalu completed
+  return [...upcomingMeetings, ...completedMeetings];
 };
 
 export const Dashboard: React.FC = () => {
@@ -81,9 +90,8 @@ export const Dashboard: React.FC = () => {
           if (meetingsResponse.data.data) {
             meetings = meetingsResponse.data.data;
             
-            // Urutkan meeting: incoming terlebih dahulu, lalu completed
-            // Untuk incoming, urutkan berdasarkan tanggal terdekat
-            // Untuk completed, tetap gunakan urutan default dari API
+            // Urutkan meeting berdasarkan waktu saat ini:
+            // Upcoming (>= waktu saat ini) terlebih dahulu, lalu completed (< waktu saat ini)
             meetings = sortMeetings(meetings);
           }
           
@@ -176,7 +184,8 @@ export const Dashboard: React.FC = () => {
           if (meetingsResponse.data.data) {
             meetings = meetingsResponse.data.data;
             
-            // Urutkan meeting: incoming terlebih dahulu, lalu completed
+            // Urutkan meeting berdasarkan waktu saat ini:
+            // Upcoming (>= waktu saat ini) terlebih dahulu, lalu completed (< waktu saat ini)
             meetings = sortMeetings(meetings);
           }
           
@@ -300,7 +309,7 @@ export const Dashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-gray-800">
-              All Meetings (Incoming First by Date, Completed Latest First)
+              All Meetings (Upcoming First by Date, Completed Latest First)
             </h3>
             <div className="flex items-center gap-2">
               <select 
@@ -309,7 +318,7 @@ export const Dashboard: React.FC = () => {
                 onChange={handleFilterChange}
               >
                 <option value="all">All Meetings</option>
-                <option value="incoming">Upcoming Only</option>
+                <option value="upcoming">Upcoming Only</option>
                 <option value="completed">Completed Only</option>
               </select>
             </div>
@@ -330,12 +339,15 @@ export const Dashboard: React.FC = () => {
               </div>
             ) : (
               filteredMeetings.map((meeting, index) => {
-                // Use the status from the API instead of calculating based on date
-                const isUpcoming = meeting.status === 'incoming';
+                // Determine if meeting is upcoming based on current time, not database status
+                const now = new Date();
+                const meetingDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
+                const isUpcoming = meetingDateTime >= now;
                 
                 // Add section divider between upcoming and completed
                 const prevMeeting = index > 0 ? filteredMeetings[index - 1] : null;
-                const prevIsUpcoming = prevMeeting ? prevMeeting.status === 'incoming' : true;
+                const prevMeetingDateTime = prevMeeting ? new Date(`${prevMeeting.date}T${prevMeeting.start_time}`) : null;
+                const prevIsUpcoming = prevMeetingDateTime ? prevMeetingDateTime >= now : true;
                 
                 const showDivider = index > 0 && prevIsUpcoming && !isUpcoming;
                 

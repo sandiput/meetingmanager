@@ -1,16 +1,6 @@
 import { Meeting } from '../types';
 
-// Utility function to determine meeting status based on current time
-export const getMeetingStatus = (meeting: Meeting): 'incoming' | 'completed' => {
-  try {
-    const now = new Date();
-    const start = parseMeetingDateTime(meeting, 'start');
-    return start > now ? 'incoming' : 'completed';
-  } catch (error) {
-    console.error('Error determining meeting status:', error);
-    return 'completed'; // Default fallback status
-  }
-};
+// Removed getMeetingStatus function - now using status from database
 
 // Robust time parser that supports either "HH:mm" or full ISO in start_time/end_time
 export const parseMeetingDateTime = (meeting: Meeting, which: 'start' | 'end'): Date => {
@@ -96,25 +86,25 @@ export const parseMeetingDateTime = (meeting: Meeting, which: 'start' | 'end'): 
   }
 };
 
-// Utility function to get meetings with computed status
-export const getMeetingsWithStatus = (meetings: Meeting[]): (Meeting & { status: 'incoming' | 'completed' })[] => {
+// Utility function to get meetings with status from database
+export const getMeetingsWithStatus = (meetings: Meeting[]): (Meeting & { status: 'upcoming' | 'completed' })[] => {
   return meetings.map(meeting => ({
     ...meeting,
-    status: getMeetingStatus(meeting)
+    status: meeting.status || 'upcoming'
   }));
 };
 
 // Utility function to filter meetings by status
 export const filterMeetingsByStatus = (
   meetings: Meeting[], 
-  status: 'incoming' | 'completed'
+  status: 'upcoming' | 'completed'
 ): Meeting[] => {
-  return meetings.filter(meeting => getMeetingStatus(meeting) === status);
+  return meetings.filter(meeting => (meeting.status || 'upcoming') === status);
 };
 
-// Utility function to get upcoming meetings (incoming only)
+// Utility function to get upcoming meetings (upcoming only)
 export const getUpcomingMeetings = (meetings: Meeting[]): Meeting[] => {
-  return filterMeetingsByStatus(meetings, 'incoming')
+  return filterMeetingsByStatus(meetings, 'upcoming')
     .sort((a, b) => {
       const dateA = parseMeetingDateTime(a, 'start').getTime();
       const dateB = parseMeetingDateTime(b, 'start').getTime();

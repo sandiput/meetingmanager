@@ -6,7 +6,7 @@ import { ReviewStats, TopParticipant, SeksiStats, MeetingTrend } from '../types'
 import { useToast } from '../hooks/useToast';
 import { clsx } from 'clsx';
 import { format, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 type PeriodType = 'weekly' | 'monthly' | 'yearly' | 'custom';
 
@@ -293,42 +293,173 @@ export const Review: React.FC = () => {
             </div>
           </div>
 
-          {/* Seksi Statistics */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-purple-100">
-                <BarChart3 className="w-5 h-5 text-purple-600" />
+          {/* Right Column with vertical layout */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Meeting Distribution by Seksi */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-purple-100">
+                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">Meeting Distribution by Seksi</h3>
+                  <p className="text-sm text-gray-500">Participation breakdown by department</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Meeting Distribution by Seksi</h3>
-                <p className="text-sm text-gray-500">Participation breakdown by department</p>
+              
+              <div className="space-y-4">
+                {seksiStats.map((seksi, index) => {
+                  const percentage = stats ? (seksi.meeting_count / stats.total_meetings * 100) : 0;
+                  return (
+                    <div key={seksi.seksi} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={clsx('w-4 h-4 rounded-full', getSeksiColor(index))} />
+                          <span className="text-sm font-medium text-gray-700">{seksi.seksi}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-lg font-bold text-indigo-600">{seksi.meeting_count}</span>
+                          <span className="text-xs text-gray-400 ml-2">({percentage.toFixed(1)}%)</span>
+                        </div>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={clsx('h-2 rounded-full transition-all duration-700', getSeksiColor(index))}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-            
-            <div className="space-y-4">
-              {seksiStats.map((seksi, index) => {
-                const percentage = stats ? (seksi.meeting_count / stats.total_meetings * 100) : 0;
-                return (
-                  <div key={seksi.seksi} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={clsx('w-4 h-4 rounded-full', getSeksiColor(index))} />
-                        <span className="text-sm font-medium text-gray-700">{seksi.seksi}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-lg font-bold text-indigo-600">{seksi.meeting_count}</span>
-                        <span className="text-xs text-gray-400 ml-2">({percentage.toFixed(1)}%)</span>
-                      </div>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+
+            {/* Participants per Seksi Pie Chart */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-indigo-50">
+                  <Users className="w-5 h-5 text-indigo-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Participants by Seksi</h3>
+                  <p className="text-sm text-gray-500">Distribution overview</p>
+                </div>
+              </div>
+              
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={seksiStats.map((seksi, index) => ({
+                        name: seksi.seksi,
+                        value: seksi.participant_count || seksi.meeting_count,
+                        color: getSeksiColor(index).replace('bg-', '#').replace('-500', '')
+                      }))}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      innerRadius={60}
+                      fill="#8884d8"
+                      dataKey="value"
+                      animationBegin={0}
+                      animationDuration={800}
+                      onMouseEnter={(data, index) => {
+                        // Add hover effect by modifying the pie chart
+                        const pieChart = document.querySelector('.recharts-pie');
+                        if (pieChart) {
+                          const sectors = pieChart.querySelectorAll('.recharts-pie-sector');
+                          sectors.forEach((sector, i) => {
+                            if (i === index) {
+                              // Highlight the hovered sector
+                              sector.style.transform = 'scale(1.05)';
+                              sector.style.transformOrigin = 'center';
+                              sector.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))';
+                              sector.style.transition = 'all 0.3s ease';
+                            } else {
+                              // Dim other sectors
+                              sector.style.opacity = '0.6';
+                              sector.style.transition = 'all 0.3s ease';
+                            }
+                          });
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        // Reset all sectors
+                        const pieChart = document.querySelector('.recharts-pie');
+                        if (pieChart) {
+                          const sectors = pieChart.querySelectorAll('.recharts-pie-sector');
+                          sectors.forEach((sector) => {
+                            sector.style.transform = 'scale(1)';
+                            sector.style.opacity = '1';
+                            sector.style.filter = 'none';
+                            sector.style.transition = 'all 0.3s ease';
+                          });
+                        }
+                      }}
+                    >
+                      {seksiStats.map((entry, index) => {
+                        const colorMap = {
+                          'bg-blue-500': '#3b82f6',
+                          'bg-green-500': '#10b981',
+                          'bg-purple-500': '#8b5cf6',
+                          'bg-orange-500': '#f97316',
+                          'bg-red-500': '#ef4444',
+                          'bg-indigo-500': '#6366f1'
+                        };
+                        const colorClass = getSeksiColor(index);
+                        const color = colorMap[colorClass as keyof typeof colorMap] || '#6366f1';
+                        return (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={color}
+                            stroke="#ffffff"
+                            strokeWidth={3}
+                            style={{
+                              cursor: 'pointer',
+                              transition: 'all 0.3s ease'
+                            }}
+                          />
+                        );
+                      })}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{
+                        backgroundColor: '#ffffff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                        fontSize: '14px'
+                      }}
+                      formatter={(value, name) => [`${value} participants`, name]}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              
+              {/* Simple Legend */}
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {seksiStats.slice(0, 6).map((seksi, index) => {
+                  const colorMap = {
+                    'bg-blue-500': '#3b82f6',
+                    'bg-green-500': '#10b981',
+                    'bg-purple-500': '#8b5cf6',
+                    'bg-orange-500': '#f97316',
+                    'bg-red-500': '#ef4444',
+                    'bg-indigo-500': '#6366f1'
+                  };
+                  const colorClass = getSeksiColor(index);
+                  const color = colorMap[colorClass as keyof typeof colorMap] || '#6366f1';
+                  return (
+                    <div key={index} className="flex items-center gap-2">
                       <div 
-                        className={clsx('h-2 rounded-full transition-all duration-700', getSeksiColor(index))}
-                        style={{ width: `${percentage}%` }}
-                      />
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: color }}
+                      ></div>
+                      <span className="text-xs text-gray-600 truncate">{seksi.seksi}</span>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

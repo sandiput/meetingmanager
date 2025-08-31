@@ -84,9 +84,10 @@ export const dashboardApi = {
 };
 // Review API
 export const reviewApi = {
-  getStats: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<ApiResponse<ReviewStats>> => {
+  getStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<ReviewStats>> => {
     try {
-      const response = await apiClient.get('/review/stats', { params: { period } });
+      const params = { period, ...queryParams };
+      const response = await apiClient.get('/review/stats', { params });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error(`Failed to fetch review stats for period ${period}:`, error);
@@ -94,9 +95,10 @@ export const reviewApi = {
     }
   },
     
-  getTopParticipants: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<ApiResponse<TopParticipant[]>> => {
+  getTopParticipants: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<TopParticipant[]>> => {
     try {
-      const response = await apiClient.get('/review/top-participants', { params: { period } });
+      const params = { period, ...queryParams };
+      const response = await apiClient.get('/review/top-participants', { params });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error(`Failed to fetch top participants for period ${period}:`, error);
@@ -104,18 +106,21 @@ export const reviewApi = {
     }
   },
     
-  getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<ApiResponse<SeksiStats[]>> => {
+  getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<SeksiStats[]>> => {
     try {
-      const response = await apiClient.get('/review/seksi-stats', { params: { period } });
+      const params = { period, ...queryParams };
+      const response = await apiClient.get('/review/seksi-stats', { params });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error(`Failed to fetch seksi stats for period ${period}:`, error);
       throw error;
     }
   },
-  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<ApiResponse<MeetingTrend[]>> => {
+    
+  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<MeetingTrend[]>> => {
     try {
-      const response = await apiClient.get('/review/meeting-trends', { params: { period } });
+      const params = { period, ...queryParams };
+      const response = await apiClient.get('/review/meeting-trends', { params });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error(`Failed to fetch meeting trends for period ${period}:`, error);
@@ -123,24 +128,16 @@ export const reviewApi = {
     }
   },
   
-  exportExcel: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<Blob> => {
+  exportExcel: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<Blob> => {
     try {
+      const params = { period, ...queryParams };
       const response = await apiClient.get('/review/export-excel', {
-        params: { period },
+        params,
         responseType: 'blob'
       });
       return response.data;
     } catch (error) {
       console.error(`Failed to export Excel for period ${period}:`, error);
-      throw error;
-    }
-  },
-  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<ApiResponse<MeetingTrend[]>> => {
-    try {
-      const response = await apiClient.get('/review/meeting-trends', { params: { period } });
-      return normalizeApiResponse(response.data);
-    } catch (error) {
-      console.error(`Failed to fetch meeting trends for period ${period}:`, error);
       throw error;
     }
   },

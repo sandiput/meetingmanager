@@ -8,7 +8,7 @@ import { clsx } from 'clsx';
 import { format, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-type PeriodType = 'weekly' | 'monthly' | 'yearly';
+type PeriodType = 'weekly' | 'monthly' | 'yearly' | 'custom';
 
 export const Review: React.FC = () => {
   const [stats, setStats] = useState<ReviewStats | null>(null);
@@ -17,20 +17,30 @@ export const Review: React.FC = () => {
   const [meetingTrends, setMeetingTrends] = useState<MeetingTrend[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('monthly');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
   const { error } = useToast();
 
   useEffect(() => {
-    fetchReviewData();
+    if (selectedPeriod !== 'custom') {
+      fetchReviewData();
+    }
   }, [selectedPeriod]);
 
   const fetchReviewData = async () => {
     try {
       setLoading(true);
+      
+      // Prepare query parameters for custom period
+      const queryParams = selectedPeriod === 'custom' && customStartDate && customEndDate 
+        ? { startDate: customStartDate, endDate: customEndDate }
+        : {};
+      
       const [statsResponse, participantsResponse, seksiResponse, trendsResponse] = await Promise.all([
-        reviewApi.getStats(selectedPeriod),
-        reviewApi.getTopParticipants(selectedPeriod),
-        reviewApi.getSeksiStats(selectedPeriod),
-        reviewApi.getMeetingTrends(selectedPeriod),
+        reviewApi.getStats(selectedPeriod, queryParams),
+        reviewApi.getTopParticipants(selectedPeriod, queryParams),
+        reviewApi.getSeksiStats(selectedPeriod, queryParams),
+        reviewApi.getMeetingTrends(selectedPeriod, queryParams),
       ]);
       
       setStats(statsResponse.data);
@@ -54,6 +64,11 @@ export const Review: React.FC = () => {
         return format(startOfMonth(now), 'MMMM yyyy');
       case 'yearly':
         return format(startOfYear(now), 'yyyy');
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          return `${format(new Date(customStartDate), 'dd MMM yyyy')} - ${format(new Date(customEndDate), 'dd MMM yyyy')}`;
+        }
+        return 'Custom Period';
       default:
         return '';
     }
@@ -73,11 +88,21 @@ export const Review: React.FC = () => {
 
   const exportReport = async () => {
     try {
-      const blob = await reviewApi.exportExcel(selectedPeriod);
+      // Prepare query parameters for custom period
+      const queryParams = selectedPeriod === 'custom' && customStartDate && customEndDate 
+        ? { startDate: customStartDate, endDate: customEndDate }
+        : {};
+        
+      const blob = await reviewApi.exportExcel(selectedPeriod, queryParams);
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `meeting-review-${selectedPeriod}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
+      
+      const dateLabel = selectedPeriod === 'custom' && customStartDate && customEndDate
+        ? `${customStartDate}_to_${customEndDate}`
+        : selectedPeriod;
+      
+      link.download = `meeting-review-${dateLabel}-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
       link.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -103,13 +128,56 @@ export const Review: React.FC = () => {
           <div className="flex items-center gap-3">
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value as PeriodType)}
+              onChange={(e) => {
+                const newPeriod = e.target.value as PeriodType;
+                setSelectedPeriod(newPeriod);
+                if (newPeriod !== 'custom') {
+                  setCustomStartDate('');
+                  setCustomEndDate('');
+                }
+              }}
               className="rounded-lg border-gray-200 text-sm px-3 py-2 focus:border-indigo-300 focus:ring-indigo-200"
             >
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
+              <option value="custom">Custom</option>
             </select>
+            
+            {selectedPeriod === 'custom' && (
+              <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="rounded-md border-gray-300 text-sm px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-xs font-medium text-gray-600 mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="rounded-md border-gray-300 text-sm px-3 py-2 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm"
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    if (customStartDate && customEndDate) {
+                      fetchReviewData();
+                    }
+                  }}
+                  disabled={!customStartDate || !customEndDate}
+                  className="mt-5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+                >
+                  Apply
+                </button>
+              </div>
+            )}
+            
             <button
               onClick={exportReport}
               className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-colors"

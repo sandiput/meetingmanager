@@ -122,6 +122,28 @@ export const reviewApi = {
       throw error;
     }
   },
+  
+  exportExcel: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<Blob> => {
+    try {
+      const response = await apiClient.get('/review/export-excel', {
+        params: { period },
+        responseType: 'blob'
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to export Excel for period ${period}:`, error);
+      throw error;
+    }
+  },
+  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly' = 'monthly'): Promise<ApiResponse<MeetingTrend[]>> => {
+    try {
+      const response = await apiClient.get('/review/meeting-trends', { params: { period } });
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to fetch meeting trends for period ${period}:`, error);
+      throw error;
+    }
+  },
 };
 
 export { apiClient };

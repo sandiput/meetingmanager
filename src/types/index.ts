@@ -42,6 +42,11 @@ export interface Settings {
   individual_reminder_minutes: number; // Minutes before meeting
   individual_reminder_enabled: boolean;
   whatsapp_connected: boolean;
+  whatsapp_group_id?: string;
+  notification_templates: {
+    group_daily: string;
+    individual_reminder: string;
+  };
   updated_at: string;
 }
 
@@ -95,6 +100,11 @@ export interface UpdateSettingsForm {
   group_notification_enabled: boolean;
   individual_reminder_minutes: number;
   individual_reminder_enabled: boolean;
+  whatsapp_group_id?: string;
+  notification_templates?: {
+    group_daily?: string;
+    individual_reminder?: string;
+  };
 }
 
 // Review & Analytics Types

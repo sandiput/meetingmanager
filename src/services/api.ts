@@ -420,16 +420,6 @@ export const settingsApi = {
       throw error;
     }
   },
-
-  sendTestGroupMessage: async (date: string): Promise<ApiResponse<void>> => {
-    try {
-      const response = await apiClient.post('/settings/send-test-group-message', { date });
-      return normalizeApiResponse(response.data);
-    } catch (error) {
-      console.error('Failed to send test group message:', error);
-      throw error;
-    }
-  },
 };
 
 // Review API section removed to fix duplicate declaration

@@ -32,7 +32,10 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
 
     try {
       setLoading(true);
-      await meetingsApi.sendWhatsAppReminder(meeting.id);
+      await meetingsApi.sendWhatsAppReminder(meeting.id, {
+        sendToAttendee,
+        sendToGroup
+      });
       
       let message = 'WhatsApp reminder sent successfully';
       if (sendToAttendee && sendToGroup) {

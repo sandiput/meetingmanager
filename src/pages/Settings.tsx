@@ -25,10 +25,13 @@ export const Settings: React.FC = () => {
   const [sendingTest, setSendingTest] = useState(false);
   const [selectedPersonalMeeting, setSelectedPersonalMeeting] = useState<Meeting | null>(null);
   const [sendingPersonalTest, setSendingPersonalTest] = useState(false);
+  const [whatsappGroups, setWhatsappGroups] = useState<{ id: string; name: string; participants: number }[]>([]);
+  const [loadingGroups, setLoadingGroups] = useState(false);
   const { success, error } = useToast();
 
   useEffect(() => {
     fetchSettings();
+    fetchWhatsAppGroups();
   }, []);
 
   const fetchSettings = async () => {
@@ -48,6 +51,19 @@ export const Settings: React.FC = () => {
       console.error('Settings fetch error:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWhatsAppGroups = async () => {
+    try {
+      setLoadingGroups(true);
+      const response = await settingsApi.getWhatsAppGroups();
+      setWhatsappGroups(response.data);
+    } catch (err) {
+      console.error('Failed to load WhatsApp groups:', err);
+      // Don't show error toast as this is optional feature
+    } finally {
+      setLoadingGroups(false);
     }
   };
 
@@ -103,16 +119,11 @@ export const Settings: React.FC = () => {
   };
 
   const generatePersonalMessage = (meeting: Meeting): string => {
-    const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-    const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
-    const formattedDate = format(startDateTime, 'dd MMM yyyy');
-    const formattedStartTime = format(startDateTime, 'HH:mm');
-    const formattedEndTime = format(endDateTime, 'HH:mm');
-
-    let message = `⏰ *Meeting Reminder*\n\n`;
-    message += `📋 *${meeting.title}*\n`;
-    message += `📅 ${formattedDate}\n`;
-    message += `⏰ ${formattedStartTime} - ${formattedEndTime}\n`;
+    // Use the same format as backend Settings model formatIndividualMessage
+    let message = `⏰ _Meeting Reminder_\n\n`;
+    message += `📋 _${meeting.title}_\n`;
+    message += `📅 ${meeting.date}\n`;
+    message += `⏰ ${meeting.start_time} - ${meeting.end_time}\n`;
     message += `📍 ${meeting.location}\n`;
     
     if (meeting.meeting_link) {
@@ -208,6 +219,85 @@ export const Settings: React.FC = () => {
                   <div className="relative w-10 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                 </label>
               </div>
+            </div>
+          </div>
+
+          {/* WhatsApp Groups List */}
+          <div className="rounded-lg bg-white p-6 shadow-md border">
+            <h3 className="mb-1 text-xl font-bold text-gray-800">
+              Available WhatsApp Groups
+            </h3>
+            <p className="mb-6 text-sm text-gray-600">
+              List of WhatsApp groups that the bot is currently part of.
+            </p>
+            
+            {loadingGroups ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <span className="ml-2 text-gray-600">Loading groups...</span>
+              </div>
+            ) : whatsappGroups.length > 0 ? (
+              <div className="space-y-3">
+                {whatsappGroups.map((group) => (
+                  <div key={group.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center gap-4">
+                      <Users className="w-6 h-6 text-green-500" />
+                      <div>
+                        <p className="font-semibold text-gray-800">{group.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {group.participants} participants • ID: {group.id}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(group.id);
+                          success('Group ID copied to clipboard!');
+                        }}
+                        className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                      >
+                        Copy ID
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-blue-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">How to use:</p>
+                      <p className="text-sm text-blue-700 mt-1">
+                        The bot will automatically detect when it's added to new groups. 
+                        You can copy the Group ID to configure notifications for specific groups.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium">No WhatsApp groups found</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Add the bot to a WhatsApp group to see it listed here.
+                </p>
+              </div>
+            )}
+            
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={fetchWhatsAppGroups}
+                disabled={loadingGroups}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              >
+                {loadingGroups ? 'Refreshing...' : 'Refresh Groups'}
+              </button>
             </div>
           </div>
 

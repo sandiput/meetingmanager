@@ -244,9 +244,12 @@ export const meetingsApi = {
     }
   },
     
-  sendWhatsAppReminder: async (id: string): Promise<ApiResponse<void>> => {
+  sendWhatsAppReminder: async (id: string, options?: { sendToAttendee?: boolean; sendToGroup?: boolean }): Promise<ApiResponse<void>> => {
     try {
-      const response = await apiClient.post(`/meetings/${id}/send-reminder`);
+      const response = await apiClient.post(`/meetings/${id}/send-reminder`, {
+        sendToAttendee: options?.sendToAttendee ?? true,
+        sendToGroup: options?.sendToGroup ?? false
+      });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error(`Failed to send WhatsApp reminder for meeting ${id}:`, error);
@@ -385,21 +388,42 @@ export const settingsApi = {
     }
   },
     
-  previewGroupMessage: async (date?: string): Promise<ApiResponse<{ message: string; meetings: Meeting[] }>> => {
+
+    
+  sendTestGroupMessage: async (date?: string): Promise<ApiResponse<void>> => {
     try {
       const params = date ? { date } : {};
-      const response = await apiClient.get('/settings/whatsapp/preview-message', { params });
+      const response = await apiClient.post('/settings/whatsapp/send-test', params);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to send test group message:', error);
+      throw error;
+    }
+  },
+
+  getWhatsAppGroups: async (): Promise<ApiResponse<{ id: string; name: string; participants: number }[]>> => {
+    try {
+      const response = await apiClient.get('/settings/whatsapp-groups');
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to fetch WhatsApp groups:', error);
+      throw error;
+    }
+  },
+
+  previewGroupMessage: async (date: string): Promise<ApiResponse<{ message: string; meetings: Meeting[] }>> => {
+    try {
+      const response = await apiClient.get(`/settings/preview-group-message?date=${date}`);
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to preview group message:', error);
       throw error;
     }
   },
-    
-  sendTestGroupMessage: async (date?: string): Promise<ApiResponse<void>> => {
+
+  sendTestGroupMessage: async (date: string): Promise<ApiResponse<void>> => {
     try {
-      const params = date ? { date } : {};
-      const response = await apiClient.post('/settings/whatsapp/send-test', params);
+      const response = await apiClient.post('/settings/send-test-group-message', { date });
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to send test group message:', error);

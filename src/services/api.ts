@@ -380,7 +380,7 @@ export const settingsApi = {
     
   testWhatsAppConnection: async (): Promise<ApiResponse<{ connected: boolean }>> => {
     try {
-      const response = await apiClient.get('/settings/whatsapp/test');
+      const response = await apiClient.get('/settings/test-whatsapp');
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to test WhatsApp connection:', error);
@@ -393,7 +393,7 @@ export const settingsApi = {
   sendTestGroupMessage: async (date?: string): Promise<ApiResponse<void>> => {
     try {
       const params = date ? { date } : {};
-      const response = await apiClient.post('/settings/whatsapp/send-test', params);
+      const response = await apiClient.post('/settings/whatsapp-test-message', params);
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to send test group message:', error);
@@ -403,7 +403,7 @@ export const settingsApi = {
 
   getWhatsAppGroups: async (): Promise<ApiResponse<{ id: string; name: string; participants: number }[]>> => {
     try {
-      const response = await apiClient.get('/settings/whatsapp-groups');
+      const response = await apiClient.get('/settings/whatsapp-available-groups');
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to fetch WhatsApp groups:', error);
@@ -417,6 +417,36 @@ export const settingsApi = {
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to preview group message:', error);
+      throw error;
+    }
+  },
+
+  getWhatsAppStatus: async (): Promise<ApiResponse<{ isInitialized: boolean; isConnected: boolean; isEnabled: boolean }>> => {
+    try {
+      const response = await apiClient.get('/settings/whatsapp-status');
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to get WhatsApp status:', error);
+      throw error;
+    }
+  },
+
+  reinitializeWhatsApp: async (): Promise<ApiResponse<void>> => {
+    try {
+      const response = await apiClient.post('/settings/whatsapp-reinitialize');
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to reinitialize WhatsApp:', error);
+      throw error;
+    }
+  },
+
+  getWhatsAppQRCode: async (): Promise<ApiResponse<{ qrCode: string; isAvailable: boolean }>> => {
+    try {
+      const response = await apiClient.get('/settings/whatsapp-qr-code');
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to get WhatsApp QR code:', error);
       throw error;
     }
   },

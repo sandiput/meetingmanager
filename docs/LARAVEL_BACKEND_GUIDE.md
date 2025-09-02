@@ -11,12 +11,6 @@ composer require spatie/laravel-permission
 ## Environment Variables (.env)
 
 ```env
-# WhatsApp Bot Configuration
-WHATSAPP_BOT_TOKEN=your_bot_token_here
-WHATSAPP_WEBHOOK_VERIFY_TOKEN=your_verify_token
-WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id
-WHATSAPP_BUSINESS_ACCOUNT_ID=your_business_account_id
-
 # Application Settings
 APP_NAME="Meeting Manager"
 APP_URL=http://localhost:8000
@@ -31,7 +25,6 @@ QUEUE_CONNECTION=database
 - `Meeting.php` - Meeting model with relationships
 - `Participant.php` - Participant model  
 - `Settings.php` - Application settings model
-- `WhatsappNotification.php` - Notification logging
 - `MeetingAttachment.php` - File attachments
 
 ### 2. Controllers
@@ -39,17 +32,14 @@ QUEUE_CONNECTION=database
 - `MeetingController.php` - CRUD operations for meetings
 - `ParticipantController.php` - CRUD operations for participants  
 - `SettingsController.php` - Application settings management
-- `WhatsAppController.php` - WhatsApp webhook and messaging
 
 ### 3. Jobs (Queue)
 - `SendDailyMeetingNotification.php` - Daily group notifications
 - `SendMeetingReminder.php` - Individual meeting reminders
-- `ProcessWhatsAppWebhook.php` - Handle incoming WhatsApp messages
 
 ### 4. Commands (Artisan)
 - `meeting:send-daily-notifications` - Send daily notifications
 - `meeting:send-reminders` - Send meeting reminders
-- `whatsapp:test-connection` - Test WhatsApp connectivity
 
 ## Example Model Implementation
 
@@ -73,7 +63,6 @@ class Meeting extends Model
     protected $casts = [
         'date' => 'date',
         'time' => 'datetime:H:i',
-        'whatsapp_reminder_enabled' => 'boolean',
         'group_notification_enabled' => 'boolean',
     ];
 
@@ -101,76 +90,7 @@ class Meeting extends Model
 }
 ```
 
-## WhatsApp Integration Service
 
-```php
-<?php
-// app/Services/WhatsAppService.php
-namespace App\Services;
-
-use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Log;
-
-class WhatsAppService
-{
-    private $client;
-    private $baseUrl;
-    private $accessToken;
-    private $phoneNumberId;
-
-    public function __construct()
-    {
-        $this->client = new Client();
-        $this->baseUrl = 'https://graph.facebook.com/v18.0';
-        $this->accessToken = config('services.whatsapp.access_token');
-        $this->phoneNumberId = config('services.whatsapp.phone_number_id');
-    }
-
-    public function sendMessage($to, $message)
-    {
-        try {
-            $response = $this->client->post("{$this->baseUrl}/{$this->phoneNumberId}/messages", [
-                'headers' => [
-                    'Authorization' => "Bearer {$this->accessToken}",
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'messaging_product' => 'whatsapp',
-                    'to' => $to,
-                    'type' => 'text',
-                    'text' => [
-                        'body' => $message
-                    ]
-                ]
-            ]);
-
-            return json_decode($response->getBody(), true);
-        } catch (\Exception $e) {
-            Log::error('WhatsApp message failed', [
-                'to' => $to,
-                'message' => $message,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
-
-    public function testConnection()
-    {
-        try {
-            $response = $this->client->get("{$this->baseUrl}/{$this->phoneNumberId}", [
-                'headers' => [
-                    'Authorization' => "Bearer {$this->accessToken}",
-                ],
-            ]);
-            
-            return $response->getStatusCode() === 200;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
-}
-```
 
 ## Scheduled Jobs Configuration
 

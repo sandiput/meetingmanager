@@ -72,8 +72,13 @@ export const Settings: React.FC = () => {
       const response = await fetch('/api/whatsapp/status');
       const data = await response.json();
       if (data.success) {
-        setWhatsappStatus(data.data);
-        if (data.data.connected) {
+        setWhatsappStatus({
+          connected: data.data.isConnected,
+          authenticated: data.data.isInitialized,
+          qrCode: data.data.qrCode,
+          clientInfo: null
+        });
+        if (data.data.isConnected) {
           fetchWhatsAppGroups();
         }
       }

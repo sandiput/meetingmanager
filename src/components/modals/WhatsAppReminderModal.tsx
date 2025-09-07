@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { X, MessageCircle, Send, Clock, Users } from 'lucide-react';
-import { meetingsApi } from '../../services/api';
+import React, { useState, useEffect } from 'react';
+import { X, MessageCircle, Send, Clock, Users, CheckCircle, XCircle } from 'lucide-react';
+import { meetingsApi, api } from '../../services/api';
 import { Meeting } from '../../types';
 import { useToast } from '../../hooks/useToast';
-import { clsx } from 'clsx';
+import clsx from 'clsx';
 import { format } from 'date-fns';
 
 interface WhatsAppReminderModalProps {
@@ -20,36 +20,64 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [sendToAttendee, setSendToAttendee] = useState(true);
   const [sendToGroup, setSendToGroup] = useState(false);
+  const [message, setMessage] = useState('');
+  const [whatsappStatus, setWhatsappStatus] = useState<'checking' | 'connected' | 'disconnected'>('checking');
   const { success, error } = useToast();
+
+  useEffect(() => {
+     if (isOpen) {
+       checkWhatsAppStatus();
+     }
+   }, [isOpen]);
+
+  const checkWhatsAppStatus = async () => {
+    try {
+      setWhatsappStatus('checking');
+      const response = await api.settings.getWhatsAppStatus();
+      const isConnected = response.data.whatsapp_connected || response.data.isConnected;
+      setWhatsappStatus(isConnected ? 'connected' : 'disconnected');
+    } catch (err) {
+      console.error('Failed to check WhatsApp status:', err);
+      setWhatsappStatus('disconnected');
+    }
+  };
 
   const handleSendReminder = async () => {
     if (!meeting) return;
-
-    if (!sendToAttendee && !sendToGroup) {
-      error('Please select at least one recipient');
-      return;
-    }
-
+    
+    setLoading(true);
     try {
-      setLoading(true);
+      // Check WhatsApp status before sending
+      if (whatsappStatus !== 'connected') {
+        error('WhatsApp is not connected. Please check the connection first.');
+        return;
+      }
+
+      if (!sendToAttendee && !sendToGroup) {
+        error('Please select at least one recipient option');
+        return;
+      }
+
       await meetingsApi.sendWhatsAppReminder(meeting.id, {
         sendToAttendee,
-        sendToGroup
+        sendToGroup,
+        customMessage: message || undefined
       });
       
-      let message = 'WhatsApp reminder sent successfully';
+      let successMessage = 'WhatsApp reminder sent successfully';
       if (sendToAttendee && sendToGroup) {
-        message += ' to attendee and group';
+        successMessage += ' to attendee and group';
       } else if (sendToAttendee) {
-        message += ' to attendee';
+        successMessage += ' to attendee';
       } else {
-        message += ' to group';
+        successMessage += ' to group';
       }
       
-      success(message);
+      success(successMessage);
       onClose();
     } catch (err) {
-      error('Failed to send WhatsApp reminder');
+      console.error('Failed to send WhatsApp reminder:', err);
+      error('Failed to send WhatsApp reminder. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -104,54 +132,47 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
             <div className="space-y-6">
               {/* Meeting Details */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                  Meeting Details
-                </h4>
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">Meeting Details</h4>
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
-                  <h5 className="font-semibold text-green-800 mb-3 text-base">{meeting.title}</h5>
-                  {meeting.discussion_results && (
-                    <div className="mb-3 p-3 bg-green-100 rounded-lg">
-                      <div className="flex items-start gap-2">
-                        <span className="text-green-600 flex-shrink-0">📝</span>
-                        <div>
-                          <span className="font-medium text-green-800">Description:</span>
-                          <p className="text-green-700 mt-1 leading-relaxed text-sm">
-                            {meeting.discussion_results.substring(0, 150)}{meeting.discussion_results.length > 150 ? '...' : ''}
-                          </p>
-                        </div>
+                  {/* Meeting Title */}
+                  <div className="mb-3 p-3 bg-green-100 rounded-lg">
+                    <div className="flex items-start gap-2">
+                      <span className="flex-shrink-0">📋</span>
+                      <div>
+                        <h5 className="font-semibold text-green-800 text-base">{meeting.title}</h5>
+                        <p className="text-sm text-green-700 mt-1">{meeting.discussion_results || 'No description available'}</p>
                       </div>
                     </div>
-                  )}
+                  </div>
+                  
                   <div className="space-y-2 text-sm text-green-700">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 flex-shrink-0" />
-                      <span className="font-medium">{formattedDate}, {formattedStartTime} - {formattedEndTime}</span>
+                      <span>{formattedDateTime}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 flex-shrink-0" />
-                      <span>Attendee: <span className="font-medium">{meeting.designated_attendee}</span></span>
+                      <span>Attendees: {meeting.designated_attendees?.join(', ') || 'None'}</span>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-green-600 flex-shrink-0">📍</span>
-                      <span className="font-medium">{meeting.location}</span>
+                      <span className="flex-shrink-0">💻</span>
+                      <span>Meeting Link: {meeting.meeting_link || 'Not provided'}</span>
                     </div>
-                    {meeting.dress_code && (
+                    {meeting.location && (
                       <div className="flex items-center gap-2">
-                        <span className="text-green-600 flex-shrink-0">👔</span>
-                        <span>Dress Code: <span className="font-medium">{meeting.dress_code}</span></span>
+                        <span className="flex-shrink-0">📍</span>
+                        <span>Location: {meeting.location}</span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* Recipients Selection */}
+              {/* Recipients */}
               <div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                  Select Recipients
-                </h4>
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">Send To</h4>
                 <div className="space-y-4">
-                  <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
+                  <label className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
                     <input
                       type="checkbox"
                       checked={sendToAttendee}
@@ -160,15 +181,15 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                     />
                     <div className="flex-1">
                       <span className="text-base text-gray-800 font-semibold block">
-                        Send to designated attendee
+                        Send to attendee
                       </span>
                       <p className="text-sm text-gray-600 mt-1">
-                        Individual reminder to {meeting.designated_attendee}
+                        Send reminder to individual attendees
                       </p>
                     </div>
                   </label>
                   
-                  <label className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
+                  <label className="flex items-start gap-3 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors">
                     <input
                       type="checkbox"
                       checked={sendToGroup}
@@ -187,14 +208,58 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                 </div>
               </div>
 
+              {/* Custom Message */}
+              <div>
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                  Custom Message (Optional)
+                </h4>
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Enter custom message for the reminder..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                  rows={4}
+                />
+              </div>
+
               {/* Status Info */}
-              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+              <div className={clsx(
+                "rounded-xl p-4 border",
+                whatsappStatus === 'connected' ? "bg-green-50 border-green-100" :
+                whatsappStatus === 'disconnected' ? "bg-red-50 border-red-100" :
+                "bg-yellow-50 border-yellow-100"
+              )}>
                 <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse flex-shrink-0"></div>
-                  <span className="text-base text-blue-800 font-semibold">
-                    WhatsApp Bot is connected and ready
-                  </span>
+                  {whatsappStatus === 'checking' && (
+                    <>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse flex-shrink-0"></div>
+                      <span className="text-base text-yellow-800 font-semibold">
+                        Checking WhatsApp connection...
+                      </span>
+                    </>
+                  )}
+                  {whatsappStatus === 'connected' && (
+                    <>
+                      <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                      <span className="text-base text-green-800 font-semibold">
+                        WhatsApp Bot is connected and ready
+                      </span>
+                    </>
+                  )}
+                  {whatsappStatus === 'disconnected' && (
+                    <>
+                      <XCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                      <span className="text-base text-red-800 font-semibold">
+                        WhatsApp Bot is not connected
+                      </span>
+                    </>
+                  )}
                 </div>
+                {whatsappStatus === 'disconnected' && (
+                  <div className="mt-2 text-sm text-red-700">
+                    Please check the WhatsApp connection in settings before sending reminders.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -226,25 +291,13 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                         </div>
                       )}
                       <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0">📅</span>
-                        <span className="font-medium">{formattedDateTime}</span>
+                        <span className="flex-shrink-0">⏰</span>
+                        <span><strong className="text-gray-800">Time:</strong> {formattedDateTime}</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="flex-shrink-0">📍</span>
-                        <span className="font-medium">{meeting.location}</span>
+                        <span><strong className="text-gray-800">Location:</strong> {meeting.location || 'Not specified'}</span>
                       </div>
-                      {meeting.dress_code && (
-                        <div className="flex items-start gap-2">
-                          <span className="flex-shrink-0">👔</span>
-                          <span>Dress Code: <span className="font-medium">{meeting.dress_code}</span></span>
-                        </div>
-                      )}
-                      {meeting.attendance_link && (
-                        <div className="flex items-start gap-2">
-                          <span className="flex-shrink-0">🔗</span>
-                          <a href={meeting.attendance_link} className="text-blue-600 hover:underline font-medium">Attendance Link</a>
-                        </div>
-                      )}
                       {meeting.meeting_link && (
                         <div className="flex items-start gap-2">
                           <span className="flex-shrink-0">💻</span>
@@ -255,6 +308,15 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                         <span className="flex-shrink-0">👥</span>
                         <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
                       </div>
+                      {message && (
+                        <div className="flex items-start gap-2 mt-3 pt-3 border-t border-gray-200">
+                          <span className="flex-shrink-0">💬</span>
+                          <div>
+                            <span className="font-medium text-gray-800">Custom Message:</span>
+                            <p className="text-gray-700 mt-1 leading-relaxed text-xs">{message}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="mt-4 pt-3 border-t border-gray-200">
                       <p className="text-xs text-gray-500 italic">
@@ -278,10 +340,10 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
           </button>
           <button
             onClick={handleSendReminder}
-            disabled={loading || (!sendToAttendee && !sendToGroup)}
+            disabled={loading || (!sendToAttendee && !sendToGroup) || whatsappStatus !== 'connected'}
             className={clsx(
               'flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all',
-              loading || (!sendToAttendee && !sendToGroup)
+              loading || (!sendToAttendee && !sendToGroup) || whatsappStatus !== 'connected'
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-green-600 hover:bg-green-700'
             )}

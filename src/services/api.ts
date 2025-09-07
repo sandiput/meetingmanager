@@ -244,11 +244,20 @@ export const meetingsApi = {
     }
   },
     
-  sendWhatsAppReminder: async (id: string, options?: { sendToAttendee?: boolean; sendToGroup?: boolean }): Promise<ApiResponse<void>> => {
+  sendWhatsAppReminder: async (id: string, options?: { sendToAttendee?: boolean; sendToGroup?: boolean; customMessage?: string; recipients?: string[] }): Promise<ApiResponse<void>> => {
     try {
+      // Determine type based on frontend options
+      let type = 'both';
+      if (options?.sendToAttendee && !options?.sendToGroup) {
+        type = 'individual';
+      } else if (!options?.sendToAttendee && options?.sendToGroup) {
+        type = 'group';
+      }
+      
       const response = await apiClient.post(`/meetings/${id}/send-reminder`, {
-        sendToAttendee: options?.sendToAttendee ?? true,
-        sendToGroup: options?.sendToGroup ?? false
+        type,
+        recipients: options?.recipients || [],
+        customMessage: options?.customMessage
       });
       return normalizeApiResponse(response.data);
     } catch (error) {
@@ -421,9 +430,9 @@ export const settingsApi = {
     }
   },
 
-  getWhatsAppStatus: async (): Promise<ApiResponse<{ isInitialized: boolean; isConnected: boolean; isEnabled: boolean }>> => {
+  getWhatsAppStatus: async (): Promise<ApiResponse<{ isInitialized: boolean; isConnected: boolean; isEnabled: boolean; qrCode?: string; whatsapp_connected?: boolean }>> => {
     try {
-      const response = await apiClient.get('/settings/whatsapp-status');
+      const response = await apiClient.get('/whatsapp/status');
       return normalizeApiResponse(response.data);
     } catch (error) {
       console.error('Failed to get WhatsApp status:', error);

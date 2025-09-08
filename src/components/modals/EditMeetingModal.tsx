@@ -53,35 +53,15 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         attendees = meeting.participants.map(participant => participant.name);
         console.log('Using participants data:', attendees);
       }
-      // Fallback ke attendees (untuk kompatibilitas mundur)
-      else if (meeting.attendees && Array.isArray(meeting.attendees) && meeting.attendees.length > 0) {
-        // Ekstrak nama dari objek attendees
-        attendees = meeting.attendees.map(attendee => attendee.name);
-        console.log('Using attendees data:', attendees);
+      // Use participants from backend as primary data source
+      else if (meeting.participants && Array.isArray(meeting.participants) && meeting.participants.length > 0) {
+        // Extract names from participants objects
+        attendees = meeting.participants.map(participant => participant.name);
+        console.log('Using participants data:', attendees);
       }
-      // Cek apakah designated_attendees ada dan merupakan array
-      else if (Array.isArray(meeting.designated_attendees)) {
-        attendees = meeting.designated_attendees;
-      } 
-      // Cek apakah designated_attendees adalah string yang bisa di-parse sebagai array
-      else if (typeof meeting.designated_attendees === 'string' && (meeting.designated_attendees as string).trim() !== '') {
-        try {
-          // Coba parse jika string adalah JSON array
-          const parsed = JSON.parse(meeting.designated_attendees);
-          if (Array.isArray(parsed)) {
-            attendees = parsed;
-          } else {
-            // Jika bukan array, tambahkan sebagai single item
-            attendees = [meeting.designated_attendees];
-          }
-        } catch (e) {
-          // Jika gagal parse, gunakan sebagai single string
-          attendees = [meeting.designated_attendees];
-        }
-      }
-      // Fallback ke designated_attendee jika tidak ada designated_attendees
-      else if (meeting.designated_attendee && typeof meeting.designated_attendee === 'string') {
-        attendees = [meeting.designated_attendee];
+      // If no participants, set empty array
+      else {
+        attendees = [];
       }
       
       console.log('Setting initial attendees:', attendees);
@@ -95,7 +75,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         start_time: meeting.start_time,
         end_time: meeting.end_time,
         location: meeting.location,
-        designated_attendees: attendees,
+        participants: attendees,
         dress_code: meeting.dress_code || '',
         invitation_reference: meeting.invitation_reference || '',
         attendance_link: meeting.attendance_link || '',
@@ -195,7 +175,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
     // Also update formData to remove the attendee
     setFormData(prev => ({
       ...prev,
-      designated_attendees: newSelectedAttendees
+      participants: newSelectedAttendees
     }));
     
     console.log('Removed attendee:', participantName);
@@ -260,18 +240,11 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         discussion_results: formData.discussion_results,
         whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,
         group_notification_enabled: formData.group_notification_enabled,
-        designated_attendees: selectedAttendees,
+        // Send participants as array of objects (backend format)
         participants: selectedAttendees.map(name => ({ name })),
-        // Include designated_attendee for backward compatibility
-        designated_attendee: selectedAttendees.length > 0 ? selectedAttendees[0] : '',
       };
       
       console.log('Final meeting data being sent:', meetingData);
-      
-      // Ensure data format is correct for the API
-      if (!meetingData.designated_attendee && meetingData.designated_attendees && meetingData.designated_attendees.length > 0) {
-        meetingData.designated_attendee = meetingData.designated_attendees[0];
-      }
       
       // Validate meeting ID before sending request
       if (!meeting || !meeting.id) {

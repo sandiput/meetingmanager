@@ -130,44 +130,7 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left Column - Meeting Details & Recipients */}
             <div className="space-y-6">
-              {/* Meeting Details */}
-              <div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-4">Meeting Details</h4>
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-100">
-                  {/* Meeting Title */}
-                  <div className="mb-3 p-3 bg-green-100 rounded-lg">
-                    <div className="flex items-start gap-2">
-                      <span className="flex-shrink-0">📋</span>
-                      <div>
-                        <h5 className="font-semibold text-green-800 text-base">{meeting.title}</h5>
-                        <p className="text-sm text-green-700 mt-1">{meeting.discussion_results || 'No description available'}</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2 text-sm text-green-700">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 flex-shrink-0" />
-                      <span>{formattedDateTime}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 flex-shrink-0" />
-                      <span>Attendees: {meeting.designated_attendees?.join(', ') || 'None'}</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="flex-shrink-0">💻</span>
-                      <span>Meeting Link: {meeting.meeting_link || 'Not provided'}</span>
-                    </div>
-                    {meeting.location && (
-                      <div className="flex items-center gap-2">
-                        <span className="flex-shrink-0">📍</span>
-                        <span>Location: {meeting.location}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
+ 
               {/* Recipients */}
               <div>
                 <h4 className="text-lg font-semibold text-gray-800 mb-4">Send To</h4>
@@ -269,62 +232,93 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
                 <h4 className="text-lg font-semibold text-gray-800 mb-4">
                   Message Preview
                 </h4>
-                <div className="bg-gray-50 rounded-xl p-5 border">
-                  <div className="bg-white rounded-lg p-5 border shadow-sm">
-                    <div className="font-semibold text-gray-800 mb-3 text-base">
-                      ⏰ Meeting Reminder
-                    </div>
-                    <div className="space-y-2 leading-relaxed text-sm text-gray-700">
-                      <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0">📋</span>
-                        <span><strong className="text-gray-800">{meeting.title}</strong></span>
-                      </div>
-                      {meeting.discussion_results && (
-                        <div className="flex items-start gap-2">
-                          <span className="flex-shrink-0">📝</span>
-                          <div>
-                            <span className="font-medium text-gray-800">Description:</span>
-                            <p className="text-gray-700 mt-1 leading-relaxed text-xs">
-                              {meeting.discussion_results.substring(0, 150)}{meeting.discussion_results.length > 150 ? '...' : ''}
-                            </p>
-                          </div>
+                
+                {/* Individual Preview */}
+                {sendToAttendee && (
+                  <div className="mb-4">
+                    <h5 className="text-sm font-medium text-gray-600 mb-2">Individual Reminder:</h5>
+                    <div className="bg-gray-50 rounded-xl p-5 border">
+                      <div className="bg-white rounded-lg p-5 border shadow-sm">
+                        <div className="font-semibold text-gray-800 mb-3 text-base">
+                          *Pengingat Rapat*
                         </div>
-                      )}
-                      <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0">⏰</span>
-                        <span><strong className="text-gray-800">Time:</strong> {formattedDateTime}</span>
-                      </div>
-                      <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0">📍</span>
-                        <span><strong className="text-gray-800">Location:</strong> {meeting.location || 'Not specified'}</span>
-                      </div>
-                      {meeting.meeting_link && (
-                        <div className="flex items-start gap-2">
-                          <span className="flex-shrink-0">💻</span>
-                          <a href={meeting.meeting_link} className="text-blue-600 hover:underline font-medium">Join Meeting</a>
+                        <div className="space-y-2 leading-relaxed text-sm text-gray-700 whitespace-pre-line">
+                          <div>📅 {meeting.title}</div>
+                          <div>🕐 {formattedStartTime} - {formattedEndTime}</div>
+                          <div>📍 {meeting.location || 'TBD'}</div>
+                          <div className="mt-3">Rapat akan dimulai dalam 30 menit.</div>
+                          {meeting.meeting_link && (
+                            <div className="mt-2">
+                              🔗 Link: <a href={meeting.meeting_link} className="text-blue-600 hover:underline font-medium">{meeting.meeting_link}</a>
+                            </div>
+                          )}
+                          {message && (
+                            <div className="mt-4 pt-3 border-t border-gray-200">
+                              <div className="font-medium text-gray-800">💬 Custom Message:</div>
+                              <div className="text-gray-700 mt-1">{message}</div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="flex items-start gap-2">
-                        <span className="flex-shrink-0">👥</span>
-                        <span>Attendees: <span className="font-medium">{meeting.designated_attendees?.join(', ') || 'None'}</span></span>
-                      </div>
-                      {message && (
-                        <div className="flex items-start gap-2 mt-3 pt-3 border-t border-gray-200">
-                          <span className="flex-shrink-0">💬</span>
-                          <div>
-                            <span className="font-medium text-gray-800">Custom Message:</span>
-                            <p className="text-gray-700 mt-1 leading-relaxed text-xs">{message}</p>
-                          </div>
+                        <div className="mt-4 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 italic">
+                            📱 Pesan otomatis dari Meeting Manager
+                          </p>
                         </div>
-                      )}
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 italic">
-                        📱 This is an automated reminder from Meeting Manager.
-                      </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
+                
+                {/* Group Preview */}
+                {sendToGroup && (
+                  <div>
+                    <h5 className="text-sm font-medium text-gray-600 mb-2">Group Notification:</h5>
+                    <div className="bg-gray-50 rounded-xl p-5 border">
+                      <div className="bg-white rounded-lg p-5 border shadow-sm">
+                        <div className="font-semibold text-gray-800 mb-3 text-base">
+                          *Jadwal Rapat Hari Ini*
+                        </div>
+                        <div className="font-semibold text-gray-800 mb-3 text-sm">
+                          *{formattedDate}*
+                        </div>
+                        <div className="space-y-3 leading-relaxed text-sm text-gray-700">
+                          <div>
+                            <div className="font-medium">1. {meeting.title}</div>
+                            <div className="mt-1 ml-3 space-y-1">
+                              <div>Waktu : {formattedStartTime} s.d. {formattedEndTime}</div>
+                              <div>Lokasi : {meeting.location || 'TBD'}</div>
+                              {meeting.meeting_link && (
+                                <div>🔗 <a href={meeting.meeting_link} className="text-blue-600 hover:underline">{meeting.meeting_link}</a></div>
+                              )}
+                            </div>
+                          </div>
+                          {message && (
+                            <div className="mt-4 pt-3 border-t border-gray-200">
+                              <div className="font-medium text-gray-800">💬 Custom Message:</div>
+                              <div className="text-gray-700 mt-1">{message}</div>
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-4 pt-3 border-t border-gray-200">
+                          <p className="text-xs text-gray-500 italic">
+                            📱 Pesan otomatis dari Meeting Manager<br/>
+                            🤖 Subdirektorat Intelijen
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* No selection message */}
+                {!sendToAttendee && !sendToGroup && (
+                  <div className="bg-gray-50 rounded-xl p-5 border">
+                    <div className="text-center text-gray-500 py-8">
+                      <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                      <p>Pilih penerima untuk melihat preview pesan</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

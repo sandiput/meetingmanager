@@ -7,8 +7,7 @@ export interface Meeting {
   end_time: string;
   location: string;
   meeting_link?: string;
-  designated_attendees: string[];
-  designated_attendee: string; // For backward compatibility
+  participants: Participant[]; // Primary source from backend
   dress_code?: string;
   invitation_reference?: string;
   attendance_link?: string;
@@ -20,8 +19,7 @@ export interface Meeting {
   group_notification_sent_at?: string;
   created_at: string;
   updated_at: string;
-  participants?: Participant[];
-  attendees?: Participant[]; // For backward compatibility
+  attendees?: Participant[];
 }
 
 export interface Participant {
@@ -79,7 +77,7 @@ export interface CreateMeetingForm {
   end_time: string;
   location: string;
   meeting_link?: string;
-  designated_attendees: string[];
+  participants: string[]; // Array of participant names
   dress_code?: string;
   invitation_reference?: string;
   attendance_link?: string;

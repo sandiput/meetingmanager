@@ -238,10 +238,8 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
         discussion_results: formData.discussion_results,
         whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,
         group_notification_enabled: formData.group_notification_enabled,
-        designated_attendees: selectedAttendees,
+        // Send participants as array of objects (backend format)
         participants: selectedAttendees.map(name => ({ name })),
-        // Include designated_attendee for backward compatibility
-        designated_attendee: selectedAttendees.length > 0 ? selectedAttendees[0] : '',
       };
       
       console.log('Final meeting data being sent:', meetingData);

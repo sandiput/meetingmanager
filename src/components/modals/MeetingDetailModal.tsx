@@ -195,13 +195,13 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                       </div>
                     </div>
                   ))
-                ) : meeting.designated_attendees?.map((attendee, index) => (
+                ) : meeting.participants?.map((participant, index) => (
                   <div key={index} className="flex items-center gap-4 bg-gray-50 rounded-lg p-4">
                     <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center text-white text-lg font-semibold">
-                      {attendee.charAt(0).toUpperCase()}
+                      {participant.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-gray-800">{attendee}</p>
+                      <p className="text-lg font-semibold text-gray-800">{participant.name}</p>
                       <p className="text-sm text-gray-600">Peserta yang Ditunjuk</p>
                     </div>
                   </div>
@@ -214,7 +214,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
             </div>
 
             {/* Quick Attendee Summary */}
-            {((meeting.participants && meeting.participants.length > 0) || (meeting.attendees && meeting.attendees.length > 0) || (meeting.designated_attendees && meeting.designated_attendees.length > 0)) && (
+            {(meeting.participants?.length > 0 || meeting.attendees?.length > 0) && (
               <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-indigo-600" />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, MessageCircle, Info, Users, Search, UserPlus } from 'lucide-react';
-import { participantsApi, meetingsApi } from '../../services/api';
+import { participantsApi, meetingsApi, daftarKantorApi } from '../../services/api';
 import { Participant, CreateMeetingForm } from '../../types';
 import { useToast } from '../../hooks/useToast';
 import clsx from 'clsx';
@@ -24,6 +24,12 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showNewParticipantModal, setShowNewParticipantModal] = useState(false);
+  
+  // State for invited_by field
+  const [invitedByInput, setInvitedByInput] = useState('');
+  const [filteredInvitedBy, setFilteredInvitedBy] = useState<{ kd_kantor: string; nama_kantor_pendek: string; nama_kantor_lengkap: string }[]>([]);
+  const [showInvitedBySuggestions, setShowInvitedBySuggestions] = useState(false);
+  const [selectedInvitedBy, setSelectedInvitedBy] = useState<string>('');
   const { success, error } = useToast();
 
   const [formData, setFormData] = useState<CreateMeetingForm>({
@@ -35,11 +41,12 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     meeting_link: '',
     designated_attendees: [],
     dress_code: '',
-    invitation_reference: '',
+    invitation_letter_reference: '',
     attendance_link: '',
     discussion_results: '',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
+    invited_by: '',
   });
 
   useEffect(() => {
@@ -79,6 +86,31 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       setShowSuggestions(false);
     }
   }, [attendeeInput, participants, selectedAttendees]);
+  
+  // Filter daftar kantor for invited_by field
+  useEffect(() => {
+    const searchKantor = async () => {
+      if (invitedByInput.trim().length >= 2) {
+        try {
+          const response = await daftarKantorApi.search(invitedByInput);
+          if (response.success) {
+            setFilteredInvitedBy(response.data.slice(0, 5));
+            setShowInvitedBySuggestions(response.data.length > 0);
+          }
+        } catch (error) {
+          console.error('Error searching kantor:', error);
+          setFilteredInvitedBy([]);
+          setShowInvitedBySuggestions(false);
+        }
+      } else {
+        setFilteredInvitedBy([]);
+        setShowInvitedBySuggestions(false);
+      }
+    };
+    
+    const debounceTimer = setTimeout(searchKantor, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [invitedByInput]);
   
   // Fetch participants when component mounts
   useEffect(() => {
@@ -168,6 +200,33 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     }
   };
   
+  // Handler functions for invited_by field
+  const handleInvitedBySelect = (kantor: { kd_kantor: string; nama_kantor_pendek: string; nama_kantor_lengkap: string }) => {
+    setSelectedInvitedBy(kantor.nama_kantor_pendek);
+    setInvitedByInput(kantor.nama_kantor_pendek);
+    setFormData(prev => ({ ...prev, invited_by: kantor.nama_kantor_pendek }));
+    setShowInvitedBySuggestions(false);
+  };
+  
+  const handleInvitedByInputKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredInvitedBy.length > 0) {
+        handleInvitedBySelect(filteredInvitedBy[0].name);
+      }
+    } else if (e.key === 'Escape') {
+      setShowInvitedBySuggestions(false);
+    }
+  };
+  
+  const handleInvitedByInputChange = (value: string) => {
+    setInvitedByInput(value);
+    if (value.trim() === '') {
+      setSelectedInvitedBy('');
+      setFormData(prev => ({ ...prev, invited_by: '' }));
+    }
+  };
+  
   const handleAddNewParticipant = () => {
     if (attendeeInput.trim() !== '') {
       setShowNewParticipantModal(true);
@@ -232,7 +291,8 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
         location: formData.location,
         meeting_link: formData.meeting_link,
         dress_code: formData.dress_code,
-        invitation_reference: formData.invitation_reference,
+        invitation_letter_reference: formData.invitation_letter_reference,
+        invited_by: formData.invited_by,
         attendance_link: formData.attendance_link,
         agenda: formData.agenda,
         discussion_results: formData.discussion_results,
@@ -296,15 +356,19 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       meeting_link: '',
       designated_attendees: [],
       dress_code: '',
-      invitation_reference: '',
+      invitation_letter_reference: '',
       attendance_link: '',
       discussion_results: '',
       whatsapp_reminder_enabled: true,
       group_notification_enabled: true,
+      invited_by: '',
     });
     setSelectedAttendees([]);
     setAttendeeInput('');
     setShowSuggestions(false);
+    setSelectedInvitedBy('');
+    setInvitedByInput('');
+    setShowInvitedBySuggestions(false);
   };
 
   const handleClose = () => {
@@ -557,11 +621,103 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               </label>
               <input
                 type="text"
-                value={formData.invitation_reference}
-                onChange={(e) => handleInputChange('invitation_reference', e.target.value)}
+                value={formData.invitation_letter_reference}
+                onChange={(e) => handleInputChange('invitation_letter_reference', e.target.value)}
                 className="w-full rounded-lg border-2 border-gray-200 px-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
                 placeholder="e.g., REF-2024-001"
               />
+            </div>
+
+            {/* Invited By */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Users className="w-4 h-4 inline mr-2" />
+                Invited By
+              </label>
+              
+              {/* Invited By Input with Autocomplete */}
+              <div className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    value={invitedByInput}
+                    onChange={(e) => handleInvitedByInputChange(e.target.value)}
+                    onKeyDown={handleInvitedByInputKeyDown}
+                    onFocus={() => {
+                      if (invitedByInput.trim().length > 0) {
+                        setShowInvitedBySuggestions(true);
+                      } else if (participants && participants.length > 0) {
+                        setFilteredInvitedBy(participants);
+                        setShowInvitedBySuggestions(true);
+                      }
+                    }}
+                    onBlur={() => setTimeout(() => setShowInvitedBySuggestions(false), 500)}
+                    className="w-full rounded-lg border-2 border-gray-200 pl-10 pr-4 py-3 text-sm transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 focus:outline-none hover:border-gray-300"
+                    placeholder="Type name of person who invited this meeting..."
+                    autoComplete="off"
+                  />
+                </div>
+                
+                {/* Suggestions Dropdown */}
+                {showInvitedBySuggestions && filteredInvitedBy.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-50">
+                    {filteredInvitedBy.map((kantor) => (
+                      <button
+                        key={kantor.kd_kantor}
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault(); // Prevent blur event from firing before click
+                          handleInvitedBySelect(kantor);
+                        }}
+                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors text-left border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-sm">
+                          {kantor.nama_kantor_pendek.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-sm text-gray-800">{kantor.nama_kantor_pendek}</div>
+                          <div className="text-xs text-gray-500">{kantor.nama_kantor_lengkap}</div>
+                          <div className="text-xs text-gray-400">{kantor.kd_kantor}</div>
+                        </div>
+                        <UserPlus className="w-4 h-4 text-gray-400" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-2">
+                Select the person who invited or organized this meeting
+              </p>
+              
+              {/* Selected Invited By Display */}
+              {selectedInvitedBy && (
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <p className="text-sm font-medium text-blue-800 mb-1">
+                    Meeting invited by:
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-blue-200 text-blue-800 text-sm rounded-full shadow-sm">
+                      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-xs">
+                        {selectedInvitedBy.charAt(0).toUpperCase()}
+                      </div>
+                      {selectedInvitedBy}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedInvitedBy('');
+                        setInvitedByInput('');
+                        setFormData(prev => ({ ...prev, invited_by: '' }));
+                      }}
+                      className="text-xs text-blue-600 hover:text-blue-800"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Attendance Link */}

@@ -10,6 +10,7 @@ export interface Meeting {
   participants: Participant[]; // Primary source from backend
   dress_code?: string;
   invitation_reference?: string;
+  invitation_letter_reference?: string;
   attendance_link?: string;
   discussion_results?: string;
   status?: 'upcoming' | 'completed';
@@ -30,6 +31,16 @@ export interface Participant {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface DaftarKantor {
+  kd_kantor: string;
+  nama_kantor_pendek: string;
+  nama_kantor_lengkap: string;
+  alamat?: string;
+  eselon2?: string;
+  is_kanwil?: string;
+  kota?: string;
 }
 
 export interface Settings {
@@ -79,10 +90,12 @@ export interface CreateMeetingForm {
   participants: string[]; // Array of participant names
   dress_code?: string;
   invitation_reference?: string;
+  invitation_letter_reference?: string;
   attendance_link?: string;
   discussion_results?: string;
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
+  invited_by?: string;
 }
 
 export interface CreateParticipantForm {

@@ -464,12 +464,36 @@ export const settingsApi = {
 // Review API section removed to fix duplicate declaration
 
 // Export all API functions
+// Daftar Kantor API
+export const daftarKantorApi = {
+  getAll: async (): Promise<ApiResponse<{ kd_kantor: string; nama_kantor_pendek: string; nama_kantor_lengkap: string }[]>> => {
+    try {
+      const response = await apiClient.get('/kantor');
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to fetch daftar kantor:', error);
+      throw error;
+    }
+  },
+
+  search: async (query: string): Promise<ApiResponse<{ kd_kantor: string; nama_kantor_pendek: string; nama_kantor_lengkap: string }[]>> => {
+    try {
+      const response = await apiClient.get(`/kantor/search/${query}`);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to search daftar kantor with query ${query}:`, error);
+      throw error;
+    }
+  },
+};
+
 export const api = {
   dashboard: dashboardApi,
   meetings: meetingsApi,
   participants: participantsApi,
   settings: settingsApi,
   review: reviewApi,
+  daftarKantor: daftarKantorApi,
 };
 
 // End of file

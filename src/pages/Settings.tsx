@@ -418,7 +418,7 @@ export const Settings: React.FC = () => {
                   placeholder="Enter template for individual reminders..."
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Use {'{title}'}, {'{start_time}'}, {'{end_time}'}, {'{location}'}, {'{meeting_link}'}
+                  Use {'{title}'}, {'{start_time}'}, {'{end_time}'}, {'{location}'}, {'{meeting_link}'}, {'{agenda}'}, {'{dress_code}'}, {'{participants}'}, {'{attendance_link}'}
                 </p>
               </div>
               

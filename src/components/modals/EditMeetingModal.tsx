@@ -236,6 +236,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         dress_code: formData.dress_code,
         invitation_reference: formData.invitation_reference,
         attendance_link: formData.attendance_link,
+        meeting_link: formData.meeting_link,
         agenda: formData.agenda,
         discussion_results: formData.discussion_results,
         whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,

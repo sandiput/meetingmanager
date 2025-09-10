@@ -15,8 +15,7 @@ export interface Meeting {
   status?: 'upcoming' | 'completed';
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
-  reminder_sent_at?: string;
-  group_notification_sent_at?: string;
+  invited_by?: string;
   created_at: string;
   updated_at: string;
   attendees?: Participant[];

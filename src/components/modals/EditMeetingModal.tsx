@@ -50,6 +50,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
   useEffect(() => {
     if (isOpen && meeting) {
+      
       // Pastikan designated_attendees selalu array dan tangani berbagai format data
       let attendees = [];
       
@@ -124,7 +125,6 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
           const response = await daftarKantorApi.search(invitedByInput);
           if (response.success) {
             setInvitedByKantorList(response.data.slice(0, 5));
-            setShowInvitedBySuggestions(response.data.length > 0);
           }
         } catch (error) {
           console.error('Error searching kantor:', error);
@@ -153,6 +153,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
       if (!isOpen) {
         setFilteredParticipants([]);
         setShowSuggestions(false);
+        setInvitedByInput("");
       }
     };
   }, [isOpen]);

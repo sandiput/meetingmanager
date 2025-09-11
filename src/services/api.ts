@@ -106,6 +106,17 @@ export const reviewApi = {
     }
   },
     
+  getTopInvitedBy: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<any[]>> => {
+    try {
+      const params = { period, ...queryParams };
+      const response = await apiClient.get('/review/top-invited-by', { params });
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to fetch top invited by for period ${period}:`, error);
+      throw error;
+    }
+  },
+    
   getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<SeksiStats[]>> => {
     try {
       const params = { period, ...queryParams };

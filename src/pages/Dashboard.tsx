@@ -267,7 +267,7 @@ export const Dashboard: React.FC = () => {
       
       <div className="container mx-auto px-6 py-8 sm:px-8">
         {/* Dashboard Stats */}
-        {stats && (
+        {/* {stats && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatsCard
               title="Total Meetings"
@@ -294,7 +294,7 @@ export const Dashboard: React.FC = () => {
               iconColor="bg-orange-100 text-orange-600"
             />
           </div>
-        )}
+        )} */}
 
         {/* All Meetings */}
         <div className="space-y-6">

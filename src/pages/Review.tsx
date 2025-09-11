@@ -13,6 +13,7 @@ type PeriodType = 'weekly' | 'monthly' | 'yearly' | 'custom';
 export const Review: React.FC = () => {
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [topParticipants, setTopParticipants] = useState<TopParticipant[]>([]);
+  const [topInvitedBy, setTopInvitedBy] = useState<any[]>([]);
   const [seksiStats, setSeksiStats] = useState<SeksiStats[]>([]);
   const [meetingTrends, setMeetingTrends] = useState<MeetingTrend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,15 +37,17 @@ export const Review: React.FC = () => {
         ? { startDate: customStartDate, endDate: customEndDate }
         : {};
       
-      const [statsResponse, participantsResponse, seksiResponse, trendsResponse] = await Promise.all([
+      const [statsResponse, participantsResponse, invitedByResponse, seksiResponse, trendsResponse] = await Promise.all([
         reviewApi.getStats(selectedPeriod, queryParams),
         reviewApi.getTopParticipants(selectedPeriod, queryParams),
+        reviewApi.getTopInvitedBy(selectedPeriod, queryParams),
         reviewApi.getSeksiStats(selectedPeriod, queryParams),
         reviewApi.getMeetingTrends(selectedPeriod, queryParams),
       ]);
       
       setStats(statsResponse.data);
       setTopParticipants(participantsResponse.data);
+      setTopInvitedBy(invitedByResponse.data);
       setSeksiStats(seksiResponse.data);
       setMeetingTrends(trendsResponse.data);
     } catch (err) {
@@ -256,213 +259,211 @@ export const Review: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Top 10 Participants */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-yellow-100">
-                <Award className="w-5 h-5 text-yellow-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800">Top 10 Most Active Participants</h3>
-                <p className="text-sm text-gray-500">Participants with highest meeting attendance</p>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              {topParticipants.map((participant, index) => (
-                <div key={participant.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className={clsx(
-                    'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
-                    index === 0 ? 'bg-yellow-500' :
-                    index === 1 ? 'bg-gray-400' :
-                    index === 2 ? 'bg-orange-400' :
-                    'bg-blue-500'
-                  )}>
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-800">{participant.name}</p>
-                    <p className="text-xs text-gray-500">{participant.seksi}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-indigo-600">{participant.meeting_count}</p>
-                    <p className="text-xs text-gray-400">meetings</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Column with vertical layout */}
-          <div className="grid grid-cols-1 gap-4">
-            {/* Meeting Distribution by Seksi */}
-            <div className="bg-white rounded-lg p-6 shadow-sm border">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-purple-100">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">Meeting Distribution by Seksi</h3>
-                  <p className="text-sm text-gray-500">Participation breakdown by department</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                {seksiStats.map((seksi, index) => {
-                  const percentage = stats ? (seksi.meeting_count / stats.total_meetings * 100) : 0;
-                  return (
-                    <div key={seksi.seksi} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={clsx('w-4 h-4 rounded-full', getSeksiColor(index))} />
-                          <span className="text-sm font-medium text-gray-700">{seksi.seksi}</span>
-                        </div>
-                        <div className="text-right">
-                          <span className="text-lg font-bold text-indigo-600">{seksi.meeting_count}</span>
-                          <span className="text-xs text-gray-400 ml-2">({percentage.toFixed(1)}%)</span>
-                        </div>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className={clsx('h-2 rounded-full transition-all duration-700', getSeksiColor(index))}
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Participants per Seksi Pie Chart */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-indigo-50">
-                  <Users className="w-5 h-5 text-indigo-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Participants by Seksi</h3>
-                  <p className="text-sm text-gray-500">Distribution overview</p>
-                </div>
-              </div>
-              
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={seksiStats.map((seksi, index) => ({
-                        name: seksi.seksi,
-                        value: seksi.participant_count || seksi.meeting_count,
-                        color: getSeksiColor(index).replace('bg-', '#').replace('-500', '')
-                      }))}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      innerRadius={60}
-                      fill="#8884d8"
-                      dataKey="value"
-                      animationBegin={0}
-                      animationDuration={800}
-                      onMouseEnter={(data, index) => {
-                        // Add hover effect by modifying the pie chart
-                        const pieChart = document.querySelector('.recharts-pie');
-                        if (pieChart) {
-                          const sectors = pieChart.querySelectorAll('.recharts-pie-sector');
-                          sectors.forEach((sector, i) => {
-                            if (i === index) {
-                              // Highlight the hovered sector
-                              sector.style.transform = 'scale(1.05)';
-                              sector.style.transformOrigin = 'center';
-                              sector.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))';
-                              sector.style.transition = 'all 0.3s ease';
-                            } else {
-                              // Dim other sectors
-                              sector.style.opacity = '0.6';
-                              sector.style.transition = 'all 0.3s ease';
-                            }
-                          });
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        // Reset all sectors
-                        const pieChart = document.querySelector('.recharts-pie');
-                        if (pieChart) {
-                          const sectors = pieChart.querySelectorAll('.recharts-pie-sector');
-                          sectors.forEach((sector) => {
-                            sector.style.transform = 'scale(1)';
-                            sector.style.opacity = '1';
-                            sector.style.filter = 'none';
-                            sector.style.transition = 'all 0.3s ease';
-                          });
-                        }
-                      }}
-                    >
-                      {seksiStats.map((entry, index) => {
-                        const colorMap = {
-                          'bg-blue-500': '#3b82f6',
-                          'bg-green-500': '#10b981',
-                          'bg-purple-500': '#8b5cf6',
-                          'bg-orange-500': '#f97316',
-                          'bg-red-500': '#ef4444',
-                          'bg-indigo-500': '#6366f1'
-                        };
-                        const colorClass = getSeksiColor(index);
-                        const color = colorMap[colorClass as keyof typeof colorMap] || '#6366f1';
-                        return (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={color}
-                            stroke="#ffffff"
-                            strokeWidth={3}
-                            style={{
-                              cursor: 'pointer',
-                              transition: 'all 0.3s ease'
-                            }}
-                          />
-                        );
-                      })}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{
-                        backgroundColor: '#ffffff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                        fontSize: '14px'
-                      }}
-                      formatter={(value, name) => [`${value} participants`, name]}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              
-              {/* Simple Legend */}
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {seksiStats.slice(0, 6).map((seksi, index) => {
-                  const colorMap = {
-                    'bg-blue-500': '#3b82f6',
-                    'bg-green-500': '#10b981',
-                    'bg-purple-500': '#8b5cf6',
-                    'bg-orange-500': '#f97316',
-                    'bg-red-500': '#ef4444',
-                    'bg-indigo-500': '#6366f1'
-                  };
-                  const colorClass = getSeksiColor(index);
-                  const color = colorMap[colorClass as keyof typeof colorMap] || '#6366f1';
-                  return (
-                    <div key={index} className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: color }}
-                      ></div>
-                      <span className="text-xs text-gray-600 truncate">{seksi.seksi}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+  {/* Kolom Kiri */}
+  <div className="space-y-6">
+    {/* Top 5 Most Active Participants */}
+    <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-yellow-100">
+          <Award className="w-5 h-5 text-yellow-600" />
         </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">Top 5 Most Active Participants</h3>
+          <p className="text-sm text-gray-500">Participants with highest meeting attendance</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {topParticipants.map((participant, index) => (
+          <div key={participant.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div className={clsx(
+              'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
+              index === 0 ? 'bg-yellow-500' :
+              index === 1 ? 'bg-gray-400' :
+              index === 2 ? 'bg-orange-400' :
+              'bg-blue-500'
+            )}>
+              {index + 1}
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-800">{participant.name}</p>
+              <p className="text-xs text-gray-500">{participant.seksi}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-indigo-600">{participant.meeting_count}</p>
+              <p className="text-xs text-gray-400">meetings</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Meeting Distribution by Seksi */}
+    <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-purple-100">
+          <BarChart3 className="w-5 h-5 text-purple-600" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">Meeting Distribution by Seksi</h3>
+          <p className="text-sm text-gray-500">Participation breakdown by department</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {seksiStats.map((seksi, index) => {
+          const percentage = stats ? (seksi.meeting_count / stats.total_meetings * 100) : 0;
+          return (
+            <div key={seksi.seksi} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={clsx('w-4 h-4 rounded-full', getSeksiColor(index))} />
+                  <span className="text-sm font-medium text-gray-700">{seksi.seksi}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-lg font-bold text-indigo-600">{seksi.meeting_count}</span>
+                  <span className="text-xs text-gray-400 ml-2">({percentage.toFixed(1)}%)</span>
+                </div>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className={clsx('h-2 rounded-full transition-all duration-700', getSeksiColor(index))}
+                  style={{ width: `${percentage}%` }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  {/* Kolom Kanan */}
+  <div className="space-y-6">
+    {/* Top 5 Invited By */}
+    <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-green-100">
+          <Users className="w-5 h-5 text-green-600" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">Top 5 Invited By</h3>
+          <p className="text-sm text-gray-500">Most active meeting organizers</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {topInvitedBy.map((inviter, index) => (
+          <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <div className={clsx(
+              'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
+              index === 0 ? 'bg-green-500' :
+              index === 1 ? 'bg-blue-400' :
+              index === 2 ? 'bg-purple-400' :
+              'bg-indigo-500'
+            )}>
+              {index + 1}
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-gray-800">{inviter.invited_by}</p>
+              <p className="text-xs text-gray-500">Meeting organizer</p>
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-green-600">{inviter.meeting_count}</p>
+              <p className="text-xs text-gray-400">meetings</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Participants per Seksi Pie Chart */}
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-lg bg-indigo-50">
+          <Users className="w-5 h-5 text-indigo-600" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Participants by Seksi</h3>
+          <p className="text-sm text-gray-500">Distribution overview</p>
+        </div>
+      </div>
+
+      <div className="h-80">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={seksiStats.map((seksi, index) => ({
+                name: seksi.seksi,
+                value: seksi.participant_count || seksi.meeting_count,
+              }))}
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              innerRadius={60}
+              dataKey="value"
+              animationBegin={0}
+              animationDuration={800}
+            >
+              {seksiStats.map((entry, index) => {
+                const colorMap = {
+                  'bg-blue-500': '#3b82f6',
+                  'bg-green-500': '#10b981',
+                  'bg-purple-500': '#8b5cf6',
+                  'bg-orange-500': '#f97316',
+                  'bg-red-500': '#ef4444',
+                  'bg-indigo-500': '#6366f1'
+                };
+                const colorClass = getSeksiColor(index);
+                const color = colorMap[colorClass as keyof typeof colorMap] || '#6366f1';
+                return (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={color}
+                    stroke="#ffffff"
+                    strokeWidth={3}
+                  />
+                );
+              })}
+            </Pie>
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: '#ffffff',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '14px'
+              }}
+              formatter={(value, name) => [`${value} participants`, name]}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        {seksiStats.slice(0, 6).map((seksi, index) => {
+          const colorMap = {
+            'bg-blue-500': '#3b82f6',
+            'bg-green-500': '#10b981',
+            'bg-purple-500': '#8b5cf6',
+            'bg-orange-500': '#f97316',
+            'bg-red-500': '#ef4444',
+            'bg-indigo-500': '#6366f1'
+          };
+          const colorClass = getSeksiColor(index);
+          const color = colorMap[colorClass as keyof typeof colorMap] || '#6366f1';
+          return (
+            <div key={index} className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></div>
+              <span className="text-xs text-gray-600 truncate">{seksi.seksi}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+</div>
+
 
         {/* Meeting Trends */}
         <div className="bg-white rounded-lg p-6 shadow-sm border mb-6">

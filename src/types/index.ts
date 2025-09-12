@@ -1,4 +1,15 @@
 // Data Types for Meeting Manager Application
+export interface Attachment {
+  id: string;
+  meeting_id: string;
+  filename: string;
+  original_name: string;
+  file_path: string;
+  file_size: number;
+  file_type: string;
+  uploaded_at: string;
+}
+
 export interface Meeting {
   id: string;
   title: string;
@@ -20,6 +31,7 @@ export interface Meeting {
   created_at: string;
   updated_at: string;
   attendees?: Participant[];
+  attachments?: Attachment[];
 }
 
 export interface Participant {
@@ -96,6 +108,9 @@ export interface CreateMeetingForm {
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
   invited_by?: string;
+  agenda?: string;
+  attachments?: File[];
+  photos?: File[];
 }
 
 export interface CreateParticipantForm {

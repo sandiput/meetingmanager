@@ -13,6 +13,7 @@ import {
   TopParticipant,
   SeksiStats,
   MeetingTrend,
+  Attachment,
 } from '../types';
 
 import { API_CONFIG } from '../utils/constants';
@@ -498,6 +499,67 @@ export const daftarKantorApi = {
   },
 };
 
+// Attachments API
+export const attachmentsApi = {
+  upload: async (meetingId: string, file: File, fileCategory: 'attachment' | 'photo' = 'attachment', onProgress?: (progress: number) => void): Promise<ApiResponse<Attachment>> => {
+    try {
+      const formData = new FormData();
+      formData.append('meetingId', meetingId);
+      formData.append('fileCategory', fileCategory);
+      formData.append('file', file);
+
+      const response = await apiClient.post('/attachments/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          if (onProgress && progressEvent.total) {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            onProgress(progress);
+          }
+        },
+      });
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to upload attachment:', error);
+      throw error;
+    }
+  },
+
+  getByMeetingId: async (meetingId: string, category?: 'attachment' | 'photo'): Promise<ApiResponse<{ attachments: Attachment[] }>> => {
+    try {
+      const params = category ? { category } : {};
+      const response = await apiClient.get(`/attachments/meeting/${meetingId}`, { params });
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to fetch attachments for meeting ${meetingId}:`, error);
+      throw error;
+    }
+  },
+
+  download: async (attachmentId: string): Promise<Blob> => {
+    try {
+      const response = await apiClient.get(`/attachments/download/${attachmentId}`, {
+        responseType: 'blob',
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to download attachment ${attachmentId}:`, error);
+      throw error;
+    }
+  },
+
+  delete: async (attachmentId: string): Promise<ApiResponse<void>> => {
+    try {
+      const response = await apiClient.delete(`/attachments/${attachmentId}`);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to delete attachment ${attachmentId}:`, error);
+      throw error;
+    }
+  },
+};
+
 export const api = {
   dashboard: dashboardApi,
   meetings: meetingsApi,
@@ -505,6 +567,7 @@ export const api = {
   settings: settingsApi,
   review: reviewApi,
   daftarKantor: daftarKantorApi,
+  attachments: attachmentsApi,
 };
 
 // End of file

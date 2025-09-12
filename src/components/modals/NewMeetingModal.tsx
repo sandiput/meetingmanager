@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, MessageCircle, Info, Users, Search, UserPlus } from 'lucide-react';
-import { participantsApi, meetingsApi, daftarKantorApi } from '../../services/api';
+import { participantsApi, meetingsApi, daftarKantorApi, attachmentsApi } from '../../services/api';
 import { Participant, CreateMeetingForm } from '../../types';
 import { useToast } from '../../hooks/useToast';
 import clsx from 'clsx';
 import { NewParticipantModal } from './NewParticipantModal';
+import { FileUpload } from '../FileUpload';
 
 interface NewMeetingModalProps {
   isOpen: boolean;
@@ -38,14 +39,18 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
     end_time: '',
     location: '',
     meeting_link: '',
-    designated_attendees: [],
+    participants: [],
     dress_code: '',
+    invitation_reference: '',
     invitation_letter_reference: '',
     attendance_link: '',
     discussion_results: '',
     whatsapp_reminder_enabled: true,
     group_notification_enabled: true,
     invited_by: '',
+    agenda: '',
+    attachments: [],
+    photos: [],
   });
 
   useEffect(() => {
@@ -327,6 +332,32 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       });
       console.log('Response from backend:', response);
       
+      // Upload attachments if any
+      if (formData.attachments && formData.attachments.length > 0) {
+        console.log('Uploading attachments for meeting:', response.data.id);
+        for (const file of formData.attachments) {
+          try {
+            await attachmentsApi.upload(response.data.id, file, 'attachment');
+          } catch (uploadErr) {
+            console.error('Failed to upload attachment:', uploadErr);
+            // Continue with other files even if one fails
+          }
+        }
+      }
+
+      // Upload photos if any
+      if (formData.photos && formData.photos.length > 0) {
+        console.log('Uploading photos for meeting:', response.data.id);
+        for (const file of formData.photos) {
+          try {
+            await attachmentsApi.upload(response.data.id, file, 'photo');
+          } catch (uploadErr) {
+            console.error('Failed to upload photo:', uploadErr);
+            // Continue with other files even if one fails
+          }
+        }
+      }
+      
       success('Meeting created successfully!');
       onSuccess();
       onClose();
@@ -347,19 +378,21 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
       end_time: '',
       location: '',
       meeting_link: '',
-      designated_attendees: [],
+      participants: [],
       dress_code: '',
+      invitation_reference: '',
       invitation_letter_reference: '',
       attendance_link: '',
       discussion_results: '',
       whatsapp_reminder_enabled: true,
       group_notification_enabled: true,
       invited_by: '',
+      agenda: '',
+      attachments: [],
     });
     setSelectedAttendees([]);
     setAttendeeInput('');
     setShowSuggestions(false);
-    setSelectedInvitedBy('');
     setInvitedByInput('');
     setShowInvitedBySuggestions(false);
   };
@@ -699,22 +732,29 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Attachments/Supporting Documents
               </label>
-              <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6 hover:border-indigo-400 transition-colors">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md bg-white font-medium text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:text-indigo-500"
-                    >
-                      <span>Upload files</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
-                </div>
-              </div>
+              <FileUpload
+              onFilesChange={(files) => setFormData(prev => ({ ...prev, attachments: files }))}
+              acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.xls', '.xlsx', '.ppt', '.pptx']}
+              maxFileSize={10}
+              multiple={true}
+              existingFiles={[]}
+              fileCategory="attachment"
+            />
+            </div>
+
+            {/* Photos */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Photos
+              </label>
+              <FileUpload
+              onFilesChange={(files) => setFormData(prev => ({ ...prev, photos: files }))}
+              acceptedTypes={['image/*']}
+              maxFileSize={5}
+              multiple={true}
+              existingFiles={[]}  
+              fileCategory="photo"
+            />
             </div>
 
             {/* Agenda */}
@@ -750,22 +790,18 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Meeting Photos
               </label>
-              <div className="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6 hover:border-indigo-400 transition-colors">
-                <div className="space-y-1 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="photo-upload"
-                      className="relative cursor-pointer rounded-md bg-white font-medium text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:text-indigo-500"
-                    >
-                      <span>Upload photos</span>
-                      <input id="photo-upload" name="photo-upload" type="file" className="sr-only" multiple accept="image/*" />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB each</p>
-                </div>
-              </div>
+              <FileUpload
+              onFilesChange={(files) => {
+                const currentPhotos = formData.photos || [];
+                const allFiles = [...currentPhotos, ...files];
+                setFormData(prev => ({ ...prev, photos: allFiles }));
+              }}
+              acceptedTypes={['image/*']}
+              maxFileSize={10}
+              multiple={true}
+              existingFiles={[]}
+              fileCategory="photo"
+            />
             </div>
 
             {/* WhatsApp Notification Settings */}

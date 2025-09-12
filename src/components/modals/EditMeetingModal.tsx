@@ -728,7 +728,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                 acceptedTypes={['.pdf', '.doc', '.docx', '.txt', '.xls', '.xlsx', '.ppt', '.pptx']}
                 maxFileSize={10}
                 multiple={true}
-                existingFiles={existingAttachments}
+                existingAttachments={existingAttachments}
                 onDeleteExisting={(fileId) => handleDeleteExisting(fileId, 'attachment')}
                 fileCategory="attachment"
               />

@@ -404,7 +404,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               <div className="flex items-center space-x-3">
                 {getFileIcon(attachment.file_type)}
                 <div>
-                  <p className="text-sm font-medium text-gray-900">{attachment.original_name}</p>
+                  <p className="text-sm font-medium text-gray-900">{attachment.original_filename}</p>
                   <p className="text-xs text-gray-500">{formatFileSize(attachment.file_size)}</p>
                 </div>
               </div>

@@ -407,12 +407,21 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
     <div 
       className="fixed inset-0 z-[9998] flex items-center justify-center overflow-y-auto bg-black/50 backdrop-blur-sm"
       onClick={(e) => {
-        if (e.target === e.currentTarget) {
+        // Only close if clicking directly on the backdrop, not on any child elements
+        if (e.target === e.currentTarget && !e.defaultPrevented) {
+          e.preventDefault();
+          e.stopPropagation();
           handleClose();
         }
       }}
     >
-      <div className="flex w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl m-4 max-h-[90vh]">
+      <div 
+        className="flex w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl m-4 max-h-[90vh]"
+        onClick={(e) => {
+          // Prevent any clicks inside the modal from bubbling up to the backdrop
+          e.stopPropagation();
+        }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 p-6">
           <div>

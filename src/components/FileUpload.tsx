@@ -195,12 +195,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   // Handle preview image for both files and attachments
   const handlePreviewImage = useCallback((item: File | Attachment) => {
-    if (item instanceof File) {
-      const url = URL.createObjectURL(item);
+    // Check if item is a File by checking for File-specific properties
+    if ('size' in item && 'type' in item && 'name' in item && !('id' in item)) {
+      const url = URL.createObjectURL(item as File);
       setPreviewImage(url);
     } else {
       // For Attachment type
-      setPreviewImage(`${import.meta.env.VITE_API_BASE_URL}/attachments/download/${item.id}`);
+      setPreviewImage(`${import.meta.env.VITE_API_BASE_URL}/attachments/download/${(item as Attachment).id}`);
     }
     setShowPreview(true);
   }, []);
@@ -411,7 +412,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               <div className="flex items-center space-x-2">
                 {attachment.file_type.startsWith('image/') && (
                   <button
-                    onClick={() => handlePreviewImage(attachment)}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePreviewImage(attachment);
+                    }}
                     className="text-blue-500 hover:text-blue-700 transition-colors p-1 rounded"
                     title="Preview image"
                   >
@@ -419,7 +424,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   </button>
                 )}
                 <button
-                  onClick={() => downloadAttachment(attachment)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    downloadAttachment(attachment);
+                  }}
                   className="text-green-500 hover:text-green-700 transition-colors p-1 rounded"
                   title="Download file"
                 >
@@ -427,7 +436,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 </button>
                 {onDeleteExisting && (
                   <button
-                    onClick={() => handleDeleteExisting(attachment.id)}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteExisting(attachment.id);
+                    }}
                     className="text-red-500 hover:text-red-700 transition-colors p-1 rounded"
                     title="Delete file"
                   >
@@ -462,7 +475,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
               <div className="flex items-center space-x-2">
                 {fileItem.file.type.startsWith('image/') && (
                   <button
-                    onClick={() => handlePreviewImage(fileItem.file)}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePreviewImage(fileItem.file);
+                    }}
                     className="text-blue-500 hover:text-blue-700 transition-colors p-1 rounded"
                     title="Preview image"
                   >
@@ -470,7 +487,11 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   </button>
                 )}
                 <button
-                  onClick={() => removeSelectedFile(fileItem.id)}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSelectedFile(fileItem.id);
+                  }}
                   className="text-red-500 hover:text-red-700"
                 >
                   <X className="w-4 h-4" />
@@ -508,6 +529,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" onClick={closePreview}>
           <div className="relative max-w-4xl max-h-full p-4">
             <button
+              type="button"
               onClick={closePreview}
               className="absolute top-2 right-2 text-white hover:text-gray-300 transition-colors z-10"
             >

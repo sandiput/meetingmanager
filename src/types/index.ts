@@ -3,10 +3,11 @@ export interface Attachment {
   id: string;
   meeting_id: string;
   filename: string;
-  original_name: string;
+  original_filename: string;
   file_path: string;
   file_size: number;
   file_type: string;
+  file_category: string;
   uploaded_at: string;
 }
 

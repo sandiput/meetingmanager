@@ -288,7 +288,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = attachment.original_name;
+      a.download = attachment.original_filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

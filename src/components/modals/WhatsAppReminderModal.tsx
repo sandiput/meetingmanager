@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, MessageCircle, Send, Clock, Users, CheckCircle, XCircle } from 'lucide-react';
+import { X, MessageCircle, Send, CheckCircle, XCircle } from 'lucide-react';
 import { meetingsApi, api } from '../../services/api';
 import { Meeting } from '../../types';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../contexts/ToastContext';
 import clsx from 'clsx';
 import { format } from 'date-fns';
 
@@ -90,7 +90,6 @@ export const WhatsAppReminderModal: React.FC<WhatsAppReminderModalProps> = ({
   const formattedDate = format(startDateTime, 'dd MMM yyyy');
   const formattedStartTime = format(startDateTime, 'h:mm a');
   const formattedEndTime = format(endDateTime, 'h:mm a');
-  const formattedDateTime = `${formattedDate}, ${formattedStartTime} - ${formattedEndTime}`;
 
   return (
     <div 

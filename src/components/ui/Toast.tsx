@@ -36,9 +36,12 @@ export const Toast: React.FC<ToastProps> = ({ toast, onRemove }) => {
   return (
     <div
       className={clsx(
-        'fixed top-4 right-4 z-[9999] min-w-80 rounded-xl shadow-lg text-white px-6 py-4 flex items-center gap-3 animate-in slide-in-from-right-full',
+        'min-w-80 rounded-xl shadow-lg text-white px-6 py-4 flex items-center gap-3',
         colorMap[toast.type]
       )}
+      style={{
+        animation: 'slideInFromRight 0.3s ease-out'
+      }}
     >
       <Icon className="w-5 h-5 flex-shrink-0" />
       <div className="flex-1">

@@ -175,3 +175,8 @@ export interface MeetingTrend {
   count: number;
   completion_rate: number;
 }
+
+export interface TopInvitedBy {
+  invited_by: string;
+  meeting_count: number;
+}

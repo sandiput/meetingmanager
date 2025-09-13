@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { dashboardApi, meetingsApi, participantsApi, settingsApi } from '../services/api';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import Alert from '../components/ui/Alert';
 import Spinner from '../components/ui/Spinner';
+import { useToast } from '../contexts/ToastContext';
 
 const TestConnection: React.FC = () => {
   const [dashboardStatus, setDashboardStatus] = useState<{ success: boolean; message: string; loading: boolean }>({
@@ -30,10 +31,28 @@ const TestConnection: React.FC = () => {
     loading: true
   });
 
+  const { success, error, info, warning } = useToast();
+
+  const testToast = () => {
+    success('Toast Success', 'Toast berhasil ditampilkan!');
+  };
+
+  const testToastError = () => {
+    error('Toast Error', 'Ini adalah contoh toast error.');
+  };
+
+  const testToastInfo = () => {
+    info('Toast Info', 'Ini adalah contoh toast info.');
+  };
+
+  const testToastWarning = () => {
+    warning('Toast Warning', 'Ini adalah contoh toast warning.');
+  };
+
   const testDashboardConnection = async () => {
     setDashboardStatus({ success: false, message: '', loading: true });
     try {
-      const response = await dashboardApi.getStats();
+      await dashboardApi.getStats();
       setDashboardStatus({
         success: true,
         message: 'Berhasil terhubung ke API Dashboard',
@@ -51,7 +70,7 @@ const TestConnection: React.FC = () => {
   const testMeetingsConnection = async () => {
     setMeetingsStatus({ success: false, message: '', loading: true });
     try {
-      const response = await meetingsApi.getUpcoming();
+      await meetingsApi.getUpcoming();
       setMeetingsStatus({
         success: true,
         message: 'Berhasil terhubung ke API Meetings',
@@ -69,7 +88,7 @@ const TestConnection: React.FC = () => {
   const testParticipantsConnection = async () => {
     setParticipantsStatus({ success: false, message: '', loading: true });
     try {
-      const response = await participantsApi.getAll();
+      await participantsApi.getAll();
       setParticipantsStatus({
         success: true,
         message: 'Berhasil terhubung ke API Participants',
@@ -87,7 +106,7 @@ const TestConnection: React.FC = () => {
   const testSettingsConnection = async () => {
     setSettingsStatus({ success: false, message: '', loading: true });
     try {
-      const response = await settingsApi.get();
+      await settingsApi.get();
       setSettingsStatus({
         success: true,
         message: 'Berhasil terhubung ke API Settings',
@@ -102,16 +121,16 @@ const TestConnection: React.FC = () => {
     }
   };
 
-  const testAllConnections = () => {
+  const testAllConnections = useCallback(() => {
     testDashboardConnection();
     testMeetingsConnection();
     testParticipantsConnection();
     testSettingsConnection();
-  };
+  }, []);
 
   useEffect(() => {
     testAllConnections();
-  }, []);
+  }, [testAllConnections]);
 
   const renderStatus = (status: { success: boolean; message: string; loading: boolean }) => {
     if (status.loading) {
@@ -179,6 +198,24 @@ const TestConnection: React.FC = () => {
             </Button>
           </Card.Body>
         </Card>
+      </div>
+
+      <div className="mt-6">
+        <h2 className="text-xl font-bold mb-4">Test Toast Notifications</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Button onClick={testToast} variant="success" size="sm">
+            Test Success Toast
+          </Button>
+          <Button onClick={testToastError} variant="danger" size="sm">
+            Test Error Toast
+          </Button>
+          <Button onClick={testToastInfo} variant="primary" size="sm">
+            Test Info Toast
+          </Button>
+          <Button onClick={testToastWarning} variant="secondary" size="sm">
+            Test Warning Toast
+          </Button>
+        </div>
       </div>
 
       <div className="mt-6">

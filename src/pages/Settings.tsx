@@ -3,7 +3,7 @@ import { Save, MessageCircle, Clock, Smartphone, QrCode, CheckCircle, XCircle, R
 import { Header } from '../components/layout/Header';
 import { settingsApi } from '../services/api';
 import { UpdateSettingsForm } from '../types';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
 import { clsx } from 'clsx';
 
 

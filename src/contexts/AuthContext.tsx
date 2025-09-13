@@ -21,15 +21,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock user data
-const mockUser: User = {
-  id: '1',
-  username: 'admin',
-  email: 'admin@meetingmanager.com',
-  avatar: '',
-  role: 'admin',
-  created_at: '2025-01-01T00:00:00Z',
-};
+
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -43,7 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsedUser = JSON.parse(savedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
-      } catch (error) {
+      } catch {
         localStorage.removeItem('meeting_manager_user');
       }
     }

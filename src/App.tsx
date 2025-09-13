@@ -1,9 +1,9 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { ToastProvider } from './contexts/ToastContext';
+
 import { Sidebar } from './components/layout/Sidebar';
-import { ToastProvider } from './components/ToastProvider';
+import { ToastRenderer } from './components/ToastProvider';
 import { Dashboard } from './pages/Dashboard';
 import { Participants } from './pages/Participants';
 import { Review } from './pages/Review';
@@ -35,6 +35,7 @@ function App() {
               </Routes>
             </main>
           </div>
+          <ToastRenderer />
         </ToastProvider>
       </Router>
     </AuthProvider>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, User, Shield, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../contexts/ToastContext';
 import { clsx } from 'clsx';
 
 export const LoginPage: React.FC = () => {
@@ -33,7 +33,7 @@ export const LoginPage: React.FC = () => {
       } else {
         error('Invalid username or password');
       }
-    } catch (err) {
+    } catch {
       error('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -59,7 +59,7 @@ export const LoginPage: React.FC = () => {
       } else {
         error('Email address not found');
       }
-    } catch (err) {
+    } catch {
       error('Failed to send reset instructions');
     } finally {
       setResetLoading(false);

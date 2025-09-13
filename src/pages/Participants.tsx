@@ -6,7 +6,7 @@ import { EditParticipantModal } from '../components/modals/EditParticipantModal'
 import { DeleteParticipantModal } from '../components/modals/DeleteParticipantModal';
 import { participantsApi } from '../services/api';
 import { Participant } from '../types';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
 import { clsx } from 'clsx';
 
 export const Participants: React.FC = () => {

@@ -9,7 +9,7 @@ import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModa
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
 import { meetingsApi } from '../services/api';
 import { Meeting } from '../types';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
 
 type MeetingFilterType = 'all' | 'upcoming' | 'completed';
 

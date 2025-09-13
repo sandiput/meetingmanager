@@ -7,7 +7,7 @@ import { Participant, Meeting, CreateMeetingForm, Attachment } from '../../types
 interface EditMeetingForm extends CreateMeetingForm {
   id: string;
 }
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../contexts/ToastContext';
 import { clsx } from 'clsx';
 import { FileUpload } from '../FileUpload';
 

@@ -23,7 +23,7 @@ import { Meeting, Attachment } from "../../types";
 import { clsx } from "clsx";
 import { format } from "date-fns";
 import { attachmentsApi } from "../../services/api";
-import { useToast } from "../../hooks/useToast";
+import { useToast } from "../../contexts/ToastContext";
 
 interface MeetingDetailModalProps {
   isOpen: boolean;
@@ -121,10 +121,10 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      addToast("File berhasil didownload");
+      addToast({ type: 'success', title: 'File berhasil didownload' });
     } catch (error) {
       console.error("Download failed:", error);
-      addToast("Gagal mendownload file");
+      addToast({ type: 'error', title: 'Gagal mendownload file' });
     }
   };
 
@@ -630,7 +630,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                           Dibuat oleh
                         </p>
                         <p className="text-gray-700">
-                          {meeting.created_by || "Admin"}
+                          {meeting.invited_by || "Admin"}
                         </p>
                       </div>
                     </div>

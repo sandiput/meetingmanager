@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, User, Lock, Camera, Save, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../contexts/ToastContext';
 import { clsx } from 'clsx';
 
 interface UserSettingsModalProps {

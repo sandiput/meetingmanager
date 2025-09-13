@@ -1,20 +1,20 @@
 import React from 'react';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
 import { Toast } from './ui/Toast';
 
-export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ToastRenderer: React.FC = () => {
   const { toasts, removeToast } = useToast();
 
   return (
-    <>
-      {children}
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          toast={toast}
-          onRemove={removeToast}
-        />
+    <div className="fixed top-4 right-4 z-[100001] space-y-2">
+      {toasts.map((toast, index) => (
+        <div key={toast.id} style={{ transform: `translateY(${index * 10}px)` }}>
+          <Toast
+            toast={toast}
+            onRemove={removeToast}
+          />
+        </div>
       ))}
-    </>
+    </div>
   );
 };

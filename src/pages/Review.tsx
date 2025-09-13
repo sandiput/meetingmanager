@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { Calendar, Users, TrendingUp, BarChart3, Clock, Award, Target, FileText, Download } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Calendar, Users, TrendingUp, BarChart3, Clock, Award, Download } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { reviewApi } from '../services/api';
-import { ReviewStats, TopParticipant, SeksiStats, MeetingTrend } from '../types';
-import { useToast } from '../hooks/useToast';
+import { ReviewStats, TopParticipant, SeksiStats, MeetingTrend, TopInvitedBy } from '../types';
+import { useToast } from '../contexts/ToastContext';
 import { clsx } from 'clsx';
 import { format, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 type PeriodType = 'weekly' | 'monthly' | 'yearly' | 'custom';
 
 export const Review: React.FC = () => {
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [topParticipants, setTopParticipants] = useState<TopParticipant[]>([]);
-  const [topInvitedBy, setTopInvitedBy] = useState<any[]>([]);
+  const [topInvitedBy, setTopInvitedBy] = useState<TopInvitedBy[]>([]);
   const [seksiStats, setSeksiStats] = useState<SeksiStats[]>([]);
   const [meetingTrends, setMeetingTrends] = useState<MeetingTrend[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,20 +22,14 @@ export const Review: React.FC = () => {
   const [customEndDate, setCustomEndDate] = useState<string>('');
   const { error } = useToast();
 
-  useEffect(() => {
-    if (selectedPeriod !== 'custom') {
-      fetchReviewData();
-    }
-  }, [selectedPeriod]);
-
-  const fetchReviewData = async () => {
+  const fetchReviewData = useCallback(async () => {
     try {
       setLoading(true);
       
       // Prepare query parameters for custom period
       const queryParams = selectedPeriod === 'custom' && customStartDate && customEndDate 
-        ? { startDate: customStartDate, endDate: customEndDate }
-        : {};
+        ? { startDate: customStartDate, endDate: customEndDate } as Record<string, string | number>
+        : undefined;
       
       const [statsResponse, participantsResponse, invitedByResponse, seksiResponse, trendsResponse] = await Promise.all([
         reviewApi.getStats(selectedPeriod, queryParams),
@@ -47,7 +41,12 @@ export const Review: React.FC = () => {
       
       setStats(statsResponse.data);
       setTopParticipants(participantsResponse.data);
-      setTopInvitedBy(invitedByResponse.data);
+      // Transform the API response to match TopInvitedBy interface
+      const transformedInvitedBy = invitedByResponse.data.map((item: { invited_by: string; meeting_count: number }) => ({
+        invited_by: item.invited_by,
+        meeting_count: item.meeting_count
+      }));
+      setTopInvitedBy(transformedInvitedBy);
       setSeksiStats(seksiResponse.data);
       setMeetingTrends(trendsResponse.data);
     } catch (err) {
@@ -56,7 +55,13 @@ export const Review: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedPeriod, customStartDate, customEndDate, error]);
+
+  useEffect(() => {
+    if (selectedPeriod !== 'custom') {
+      fetchReviewData();
+    }
+  }, [selectedPeriod, fetchReviewData]);
 
   const getPeriodLabel = () => {
     const now = new Date();
@@ -93,8 +98,8 @@ export const Review: React.FC = () => {
     try {
       // Prepare query parameters for custom period
       const queryParams = selectedPeriod === 'custom' && customStartDate && customEndDate 
-        ? { startDate: customStartDate, endDate: customEndDate }
-        : {};
+        ? { startDate: customStartDate, endDate: customEndDate } as Record<string, string | number>
+        : undefined;
         
       const blob = await reviewApi.exportExcel(selectedPeriod, queryParams);
       const url = URL.createObjectURL(blob);
@@ -215,7 +220,7 @@ export const Review: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Registered Participants</p>
-                  <p className="text-2xl font-bold text-gray-800">{stats.active_participants}</p>
+                  <p className="text-2xl font-bold text-gray-800">{stats.avg_participants}</p>
                   <p className="text-xs text-gray-500 mt-1">
                     Currently active members
                   </p>
@@ -353,27 +358,38 @@ export const Review: React.FC = () => {
       </div>
 
       <div className="space-y-3">
-        {topInvitedBy.map((inviter, index) => (
-          <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-            <div className={clsx(
-              'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
-              index === 0 ? 'bg-green-500' :
-              index === 1 ? 'bg-blue-400' :
-              index === 2 ? 'bg-purple-400' :
-              'bg-indigo-500'
-            )}>
-              {index + 1}
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-gray-800">{inviter.invited_by}</p>
-              <p className="text-xs text-gray-500">Meeting organizer</p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-green-600">{inviter.meeting_count}</p>
-              <p className="text-xs text-gray-400">meetings</p>
-            </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
           </div>
-        ))}
+        ) : topInvitedBy.length > 0 ? (
+          topInvitedBy.map((inviter, index) => (
+            <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+              <div className={clsx(
+                'flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-bold',
+                index === 0 ? 'bg-green-500' :
+                index === 1 ? 'bg-blue-400' :
+                index === 2 ? 'bg-purple-400' :
+                'bg-indigo-500'
+              )}>
+                {index + 1}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-gray-800">{inviter.invited_by}</p>
+                <p className="text-xs text-gray-500">Meeting organizer</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold text-green-600">{inviter.meeting_count}</p>
+                <p className="text-xs text-gray-400">meetings</p>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8">
+            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 text-sm">No data available for the selected period</p>
+          </div>
+        )}
       </div>
     </div>
 
@@ -393,7 +409,7 @@ export const Review: React.FC = () => {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={seksiStats.map((seksi, index) => ({
+              data={seksiStats.map((seksi) => ({
                 name: seksi.seksi,
                 value: seksi.participant_count || seksi.meeting_count,
               }))}
@@ -405,7 +421,7 @@ export const Review: React.FC = () => {
               animationBegin={0}
               animationDuration={800}
             >
-              {seksiStats.map((entry, index) => {
+              {seksiStats.map((_, index) => {
                 const colorMap = {
                   'bg-blue-500': '#3b82f6',
                   'bg-green-500': '#10b981',

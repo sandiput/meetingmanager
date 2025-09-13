@@ -3,7 +3,7 @@ import { X, User, Phone, Car as IdCard, Building2 } from 'lucide-react';
 import { participantsApi } from '../../services/api';
 import { CreateParticipantForm } from '../../types';
 import { SEKSI_OPTIONS } from '../../utils/constants';
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../../contexts/ToastContext';
 import { clsx } from 'clsx';
 
 interface NewParticipantModalProps {

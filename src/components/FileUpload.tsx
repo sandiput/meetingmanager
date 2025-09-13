@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload, X, File, Image, Download, Trash2, Eye } from 'lucide-react';
 import { Attachment } from '../types';
 import { attachmentsApi } from '../services/api';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '../contexts/ToastContext';
 
 interface FileUploadProps {
   meetingId?: string;
@@ -47,7 +47,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { addToast } = useToast();
+  const { success, error } = useToast();
 
   // Update attachments when existingAttachments prop changes
   useEffect(() => {
@@ -90,6 +90,46 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   // Use category-specific accepted types if not provided
   const effectiveAcceptedTypes = acceptedTypes.length > 0 ? acceptedTypes : getDefaultAcceptedTypes();
 
+  // Upload files immediately after selection
+  const uploadFilesImmediately = useCallback(async (filesToUpload: PreviewFile[]) => {
+    if (!meetingId || filesToUpload.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const uploadPromises = filesToUpload.map(async (fileItem) => {
+        // Use different API endpoints or parameters based on category
+        if (fileCategory === 'photo') {
+          return await attachmentsApi.upload(meetingId, fileItem.file, 'photo');
+        } else {
+          return await attachmentsApi.upload(meetingId, fileItem.file, 'attachment');
+        }
+      });
+      
+      const responses = await Promise.all(uploadPromises);
+      const newAttachments = responses.map(response => response.data).flat();
+      
+      // Use functional update to avoid dependency on attachments
+      setAttachments(prevAttachments => {
+        const updatedAttachments = [...prevAttachments, ...newAttachments];
+        onAttachmentsChange?.(updatedAttachments);
+        return updatedAttachments;
+      });
+      
+      // Clear selected files after successful upload
+      setSelectedFiles([]);
+      setUploadProgress({});
+      
+      const successMessage = fileCategory === 'photo' ? 'Foto berhasil diupload' : 'File berhasil diupload';
+      success(successMessage);
+    } catch (err: unknown) {
+      console.error('Upload failed:', err);
+      const errorMessage = fileCategory === 'photo' ? 'Gagal mengupload foto' : 'Gagal mengupload file';
+      error(errorMessage);
+    } finally {
+      setIsUploading(false);
+    }
+  }, [meetingId, fileCategory, onAttachmentsChange, success, error]);
+
   // Handle file selection and auto-upload
   const handleFileSelect = useCallback(async (files: FileList) => {
     const fileArray = Array.from(files);
@@ -98,7 +138,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     for (const file of fileArray) {
       // Validate file size
       if (file.size > maxFileSize * 1024 * 1024) {
-        addToast(`File ${file.name} terlalu besar. Maksimal ${maxFileSize}MB`);
+        error(`File ${file.name} terlalu besar. Maksimal ${maxFileSize}MB`);
         continue;
       }
 
@@ -107,7 +147,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       if (fileCategory === 'photo') {
         isValidType = file.type.startsWith('image/');
         if (!isValidType) {
-          addToast(`File ${file.name} harus berupa gambar untuk kategori Photos`);
+          error(`File ${file.name} harus berupa gambar untuk kategori Photos`);
           continue;
         }
       } else {
@@ -119,7 +159,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
           return file.name.toLowerCase().endsWith(type.toLowerCase());
         });
         if (!isValidType) {
-          addToast(`Tipe file ${file.name} tidak didukung untuk kategori Attachments`);
+          error(`Tipe file ${file.name} tidak didukung untuk kategori Attachments`);
           continue;
         }
       }
@@ -147,7 +187,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     if (meetingId && validFiles.length > 0) {
       await uploadFilesImmediately(validFiles);
     }
-  }, [maxFileSize, effectiveAcceptedTypes, multiple, addToast, onFilesChange, generatePreview, fileCategory, meetingId]);
+  }, [maxFileSize, effectiveAcceptedTypes, multiple, error, onFilesChange, generatePreview, fileCategory, meetingId, uploadFilesImmediately]);
 
   // Drag and drop handlers
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -215,71 +255,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     setShowPreview(false);
   }, [previewImage]);
 
-  // Upload files immediately after selection
-  const uploadFilesImmediately = useCallback(async (filesToUpload: PreviewFile[]) => {
-    if (!meetingId || filesToUpload.length === 0) return;
 
-    setIsUploading(true);
-    try {
-      const uploadPromises = filesToUpload.map(async (fileItem) => {
-        // Use different API endpoints or parameters based on category
-        if (fileCategory === 'photo') {
-          return await attachmentsApi.upload(meetingId, fileItem.file, 'photo');
-        } else {
-          return await attachmentsApi.upload(meetingId, fileItem.file, 'attachment');
-        }
-      });
-      
-      const responses = await Promise.all(uploadPromises);
-      const newAttachments = responses.map(response => response.data).flat();
-      
-      // Use functional update to avoid dependency on attachments
-      setAttachments(prevAttachments => {
-        const updatedAttachments = [...prevAttachments, ...newAttachments];
-        onAttachmentsChange?.(updatedAttachments);
-        return updatedAttachments;
-      });
-      
-      // Clear selected files after successful upload
-      setSelectedFiles([]);
-      setUploadProgress({});
-      
-      const successMessage = fileCategory === 'photo' ? 'Foto berhasil diupload' : 'File berhasil diupload';
-      addToast(successMessage);
-    } catch (error) {
-      console.error('Upload failed:', error);
-      const errorMessage = fileCategory === 'photo' ? 'Gagal mengupload foto' : 'Gagal mengupload file';
-      addToast(errorMessage);
-    } finally {
-      setIsUploading(false);
-    }
-  }, [meetingId, onAttachmentsChange, addToast, fileCategory]);
-
-  // Legacy upload function (kept for backward compatibility)
-  const uploadFiles = useCallback(async () => {
-    if (!meetingId || selectedFiles.length === 0) return;
-    await uploadFilesImmediately(selectedFiles);
-  }, [meetingId, selectedFiles, uploadFilesImmediately]);
-
-  // Delete attachment
-  const deleteAttachment = useCallback(async (attachmentId: string) => {
-    try {
-      const response = await attachmentsApi.delete(attachmentId);
-      if (response.success) {
-        setAttachments(prevAttachments => {
-          const newAttachments = prevAttachments.filter(a => a.id !== attachmentId);
-          onAttachmentsChange?.(newAttachments);
-          return newAttachments;
-        });
-        const successMessage = fileCategory === 'photo' ? 'Foto berhasil dihapus' : 'File berhasil dihapus';
-        addToast(successMessage);
-      }
-    } catch (error) {
-      console.error('Delete failed:', error);
-      const errorMessage = fileCategory === 'photo' ? 'Gagal menghapus foto' : 'Gagal menghapus file';
-      addToast(errorMessage);
-    }
-  }, [onAttachmentsChange, addToast, fileCategory]);
 
   // Download attachment
   const downloadAttachment = useCallback(async (attachment: Attachment) => {
@@ -293,12 +269,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('Download failed:', error);
+    } catch (err: unknown) {
+      console.error('Download failed:', err);
       const errorMessage = fileCategory === 'photo' ? 'Gagal mendownload foto' : 'Gagal mendownload file';
-      addToast(errorMessage);
+      error(errorMessage);
     }
-  }, [addToast, fileCategory]);
+  }, [error, fileCategory]);
 
   // Format file size
   const formatFileSize = (bytes: number): string => {

@@ -7,7 +7,7 @@ import {
   attachmentsApi,
 } from "../../services/api";
 import { Participant, CreateMeetingForm } from "../../types";
-import { useToast } from "../../hooks/useToast";
+import { useToast } from "../../contexts/ToastContext";
 import clsx from "clsx";
 import { NewParticipantModal } from "./NewParticipantModal";
 import { FileUpload } from "../FileUpload";

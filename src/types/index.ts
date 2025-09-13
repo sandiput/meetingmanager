@@ -24,6 +24,7 @@ export interface Meeting {
   invitation_reference?: string;
   invitation_letter_reference?: string;
   attendance_link?: string;
+  agenda?: string;
   discussion_results?: string;
   status?: 'upcoming' | 'completed';
   whatsapp_reminder_enabled: boolean;
@@ -89,6 +90,13 @@ export interface PaginatedResponse<T> {
   current_page: number;
   last_page: number;
   per_page: number;
+  total: number;
+}
+
+export interface ParticipantsPaginatedResponse {
+  participants: Participant[];
+  page: number;
+  total_pages: number;
   total: number;
 }
 

@@ -76,7 +76,7 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
                 </p>
                 <div className="text-sm text-red-600">
                   <p>📍 {meeting.location}</p>
-                  <p>👤 Attendee: {meeting.designated_attendee}</p>
+                  <p>👤 Attendees: {meeting.participants?.map(p => p.name).join(', ') || 'No attendees'}</p>
                 </div>
               </div>
             </div>

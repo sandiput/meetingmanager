@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Save, MessageCircle, Clock, Info, Eye, Send, Calendar, Users, User, MapPin, Shirt, Smartphone, QrCode, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Save, MessageCircle, Clock, Smartphone, QrCode, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { settingsApi } from '../services/api';
-import { Settings as SettingsType, UpdateSettingsForm, Meeting } from '../types';
+import { UpdateSettingsForm } from '../types';
 import { useToast } from '../hooks/useToast';
 import { clsx } from 'clsx';
-import { format } from 'date-fns';
+
 
 export const Settings: React.FC = () => {
-  const [settings, setSettings] = useState<SettingsType | null>(null);
   const [formData, setFormData] = useState<UpdateSettingsForm>({
     group_notification_time: '07:00',
     group_notification_enabled: true,
@@ -17,14 +16,7 @@ export const Settings: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewDate, setPreviewDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [previewMessage, setPreviewMessage] = useState('');
-  const [previewMeetings, setPreviewMeetings] = useState<Meeting[]>([]);
-  const [loadingPreview, setLoadingPreview] = useState(false);
-  const [sendingTest, setSendingTest] = useState(false);
-  const [selectedPersonalMeeting, setSelectedPersonalMeeting] = useState<Meeting | null>(null);
-  const [sendingPersonalTest, setSendingPersonalTest] = useState(false);
+
   const [whatsappStatus, setWhatsappStatus] = useState({
     connected: false,
     authenticated: false,
@@ -40,18 +32,11 @@ export const Settings: React.FC = () => {
   const [loadingWhatsApp, setLoadingWhatsApp] = useState(false);
   const { success, error } = useToast();
 
-  useEffect(() => {
-    fetchSettings();
-    fetchWhatsAppStatus();
-    fetchTemplates();
-  }, []);
-
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
       const response = await settingsApi.get();
       const data = response.data;
-      setSettings(data);
       setFormData({
         group_notification_time: data.group_notification_time,
         group_notification_enabled: data.group_notification_enabled,
@@ -59,15 +44,26 @@ export const Settings: React.FC = () => {
         individual_reminder_enabled: data.individual_reminder_enabled,
       });
       setSelectedGroupId(data.whatsapp_group_id || '');
-    } catch (err) {
+    } catch {
       error('Failed to load settings');
-      console.error('Settings fetch error:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
 
-  const fetchWhatsAppStatus = async () => {
+  const fetchWhatsAppGroups = useCallback(async () => {
+    try {
+      const response = await fetch('/api/whatsapp/groups');
+      const data = await response.json();
+      if (data.success) {
+        setWhatsappGroups(data.data);
+      }
+    } catch {
+      // Silent error handling for WhatsApp groups
+    }
+  }, []);
+
+  const fetchWhatsAppStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/whatsapp/status');
       const data = await response.json();
@@ -82,46 +78,38 @@ export const Settings: React.FC = () => {
           fetchWhatsAppGroups();
         }
       }
-    } catch (err) {
-      console.error('WhatsApp status fetch error:', err);
+    } catch {
+      // Silent error handling for WhatsApp status
     }
-  };
+  }, [fetchWhatsAppGroups]);
 
-  const fetchWhatsAppGroups = async () => {
-    try {
-      const response = await fetch('/api/whatsapp/groups');
-      const data = await response.json();
-      if (data.success) {
-        setWhatsappGroups(data.data);
-      }
-    } catch (err) {
-      console.error('WhatsApp groups fetch error:', err);
-    }
-  };
-
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     try {
       const response = await fetch('/api/whatsapp/templates');
       const data = await response.json();
       if (data.success) {
         setTemplates(data.data);
       }
-    } catch (err) {
-      console.error('Templates fetch error:', err);
+    } catch {
+      // Silent error handling for templates
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchSettings();
+    fetchWhatsAppStatus();
+    fetchTemplates();
+  }, [fetchSettings, fetchWhatsAppStatus, fetchTemplates]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       setSaving(true);
-      const response = await settingsApi.update(formData);
-      setSettings(response.data);
+      await settingsApi.update(formData);
       success('Settings saved successfully');
-    } catch (err) {
+    } catch {
       error('Failed to save settings');
-      console.error('Settings update error:', err);
     } finally {
       setSaving(false);
     }
@@ -134,79 +122,7 @@ export const Settings: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePreviewGroupMessage = async () => {
-    try {
-      setLoadingPreview(true);
-      const response = await settingsApi.previewGroupMessage(previewDate);
-      setPreviewMessage(response.data.message);
-      setPreviewMeetings(response.data.meetings);
-      setShowPreview(true);
-    } catch (err) {
-      error('Failed to load message preview');
-      console.error('Preview error:', err);
-    } finally {
-      setLoadingPreview(false);
-    }
-  };
 
-  const handleSendTestMessage = async () => {
-    try {
-      setSendingTest(true);
-      await settingsApi.sendTestGroupMessage(previewDate);
-      success('Test message sent to WhatsApp group successfully!');
-    } catch (err) {
-      error('Failed to send test message');
-      console.error('Send test error:', err);
-    } finally {
-      setSendingTest(false);
-    }
-  };
-
-  const generatePersonalMessage = (meeting: Meeting): string => {
-    const startDateTime = new Date(`${meeting.date}T${meeting.start_time}`);
-    const endDateTime = new Date(`${meeting.date}T${meeting.end_time}`);
-    const formattedDate = format(startDateTime, 'dd MMM yyyy');
-    const formattedStartTime = format(startDateTime, 'HH:mm');
-    const formattedEndTime = format(endDateTime, 'HH:mm');
-
-    let message = `⏰ *Meeting Reminder*\n\n`;
-    message += `📋 *${meeting.title}*\n`;
-    message += `📅 ${formattedDate}\n`;
-    message += `⏰ ${formattedStartTime} - ${formattedEndTime}\n`;
-    message += `📍 ${meeting.location}\n`;
-    
-    if (meeting.meeting_link) {
-      message += `💻 Join: ${meeting.meeting_link}\n`;
-    }
-    
-    if (meeting.dress_code) {
-      message += `👔 Dress Code: ${meeting.dress_code}\n`;
-    }
-    
-    if (meeting.attendance_link) {
-      message += `🔗 Attendance: ${meeting.attendance_link}\n`;
-    }
-    
-    message += `\nHarap bersiap dan datang tepat waktu.\n\n`;
-    message += `📱 Pesan otomatis dari Meeting Manager\n`;
-    message += `🤖 Subdirektorat Intelijen`;
-
-    return message;
-  };
-
-  const handleSendTestPersonalMessage = async (meeting: Meeting) => {
-    try {
-      setSendingPersonalTest(true);
-      // Mock API call - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      success(`Test personal reminder sent to ${meeting.designated_attendee}!`);
-    } catch (err) {
-      error('Failed to send test personal reminder');
-      console.error('Send personal test error:', err);
-    } finally {
-      setSendingPersonalTest(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -313,7 +229,7 @@ export const Settings: React.FC = () => {
                         } else {
                           error(data.message);
                         }
-                      } catch (err) {
+                      } catch {
                         error('Failed to connect WhatsApp');
                       } finally {
                         setLoadingWhatsApp(false);
@@ -372,14 +288,14 @@ export const Settings: React.FC = () => {
                       } else {
                         error(data.message);
                       }
-                    } catch (err) {
+                    } catch {
                       error('Failed to update group');
                     }
                   }}
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 >
                   <option value="">Select a group...</option>
-                  {whatsappGroups.map((group: any) => (
+                  {whatsappGroups.map((group: { id: string; name: string }) => (
                     <option key={group.id} value={group.id}>
                       {group.name}
                     </option>
@@ -437,7 +353,7 @@ export const Settings: React.FC = () => {
                     } else {
                       error(data.message);
                     }
-                  } catch (err) {
+                  } catch {
                     error('Failed to update templates');
                   }
                 }}

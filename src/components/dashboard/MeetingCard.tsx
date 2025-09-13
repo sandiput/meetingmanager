@@ -1,6 +1,5 @@
 import React from 'react';
-import { Clock, MapPin, User, CheckCircle, Ruler as Schedule, MoreVertical, MessageCircle, Edit, Trash2 } from 'lucide-react';
-import { Eye } from 'lucide-react';
+import { Clock, CheckCircle, MoreVertical, Edit, Trash2, MessageCircle, Eye } from 'lucide-react';
 import { Meeting } from '../../types';
 // Removed getMeetingStatus import - using status from database
 import { clsx } from 'clsx';
@@ -8,7 +7,6 @@ import { format, isToday, isTomorrow, differenceInDays, isPast } from 'date-fns'
 
 interface MeetingCardProps {
   meeting: Meeting;
-  isAuthenticated?: boolean; // Keep for backward compatibility but always true
   onView: (meeting: Meeting) => void;
   onEdit: (meeting: Meeting) => void;
   onDelete: (meeting: Meeting) => void;
@@ -30,7 +28,6 @@ const statusConfig = {
 
 export const MeetingCard: React.FC<MeetingCardProps> = ({
   meeting,
-  isAuthenticated = true, // Always authenticated now
   onView,
   onEdit,
   onDelete,
@@ -83,14 +80,6 @@ console.log('meeting : ',meeting);
   if (meeting.participants && meeting.participants.length > 0) {
     attendeeNames = meeting.participants.map(participant => participant.name);
     primaryAttendeeName = attendeeNames[0];
-  } else if (meeting.designated_attendees && meeting.designated_attendees.length > 0) {
-    // Fall back to designated_attendees if participants not available
-    attendeeNames = meeting.designated_attendees;
-    primaryAttendeeName = attendeeNames[0];
-  } else if (meeting.designated_attendee) {
-    // Last fallback to legacy field
-    attendeeNames = [meeting.designated_attendee];
-    primaryAttendeeName = meeting.designated_attendee;
   }
   
   const attendeeInitial = typeof primaryAttendeeName === 'string' && primaryAttendeeName.length > 0 ? primaryAttendeeName.charAt(0).toUpperCase() : '?';

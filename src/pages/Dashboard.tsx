@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Calendar, Users, TrendingUp, MessageCircle, Clock } from 'lucide-react';
+import { Plus, Calendar } from 'lucide-react';
 import { Header } from '../components/layout/Header';
-import { StatsCard } from '../components/dashboard/StatsCard';
 import { MeetingCard } from '../components/dashboard/MeetingCard';
 import { NewMeetingModal } from '../components/modals/NewMeetingModal';
 import { EditMeetingModal } from '../components/modals/EditMeetingModal';
 import { MeetingDetailModal } from '../components/modals/MeetingDetailModal';
 import { WhatsAppReminderModal } from '../components/modals/WhatsAppReminderModal';
 import { DeleteConfirmationModal } from '../components/modals/DeleteConfirmationModal';
-import { meetingsApi, dashboardApi } from '../services/api';
-import { Meeting, DashboardStats } from '../types';
+import { meetingsApi } from '../services/api';
+import { Meeting } from '../types';
 import { useToast } from '../hooks/useToast';
-import { format, parseISO } from 'date-fns';
 
 type MeetingFilterType = 'all' | 'upcoming' | 'completed';
 
@@ -42,9 +40,7 @@ const sortMeetings = (meetings: Meeting[]): Meeting[] => {
 };
 
 export const Dashboard: React.FC = () => {
-  const [allMeetings, setAllMeetings] = useState<Meeting[]>([]);
   const [filteredMeetings, setFilteredMeetings] = useState<Meeting[]>([]);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNewMeetingModal, setShowNewMeetingModal] = useState(false);
   const [showEditMeetingModal, setShowEditMeetingModal] = useState(false);
@@ -62,22 +58,19 @@ export const Dashboard: React.FC = () => {
         console.log('🚀 Dashboard: Starting data fetch...');
         setLoading(true);
         
-        // Fetch both stats and meetings
-        const [statsResponse, meetingsResponse] = await Promise.all([
-          dashboardApi.getStats(),
-          filterType === 'all' 
-            ? meetingsApi.getAll(1) 
-            : meetingsApi.getAll(1, { status: filterType })
-        ]);
+        // Fetch meetings
+        const meetingsResponse = filterType === 'all' 
+          ? await meetingsApi.getAll(1) 
+          : await meetingsApi.getAll(1, { status: filterType });
         
-        if (statsResponse && statsResponse.data) {
-          setStats(statsResponse.data);
-          console.log('✅ Dashboard stats loaded:', statsResponse.data);
-        }
+        // if (statsResponse && statsResponse.data) {
+        //   setStats(statsResponse.data);
+        //   console.log('✅ Dashboard stats loaded:', statsResponse.data);
+        // }
         
         if (meetingsResponse && meetingsResponse.data) {
           // Handle paginated response from meetingsApi.getAll()
-          let meetings = [];
+          let meetings: Meeting[] = [];
           if (meetingsResponse.data.data) {
             meetings = meetingsResponse.data.data;
             
@@ -86,19 +79,16 @@ export const Dashboard: React.FC = () => {
             meetings = sortMeetings(meetings);
           }
           
-          setAllMeetings(meetings);
           setFilteredMeetings(meetings);
           console.log('✅ Dashboard: All meetings loaded:', meetings.length, 'meetings');
           console.log('📋 Dashboard: Meeting titles:', meetings.map(m => `${m.title} (${m.date})`));
         } else {
-          setAllMeetings([]);
           setFilteredMeetings([]);
           console.log('❌ Dashboard: No meetings data received');
         }
       } catch (err) {
         console.error('❌ Dashboard fetch error:', err);
         error('Failed to load dashboard data');
-        setAllMeetings([]);
         setFilteredMeetings([]);
       } finally {
         setLoading(false);
@@ -131,12 +121,12 @@ export const Dashboard: React.FC = () => {
       await meetingsApi.delete(selectedMeeting.id);
       
       // Remove meeting from state
-      setAllMeetings(prev => prev.filter(m => m.id !== selectedMeeting.id));
+      setFilteredMeetings(prev => prev.filter(m => m.id !== selectedMeeting.id));
       
       success('Meeting deleted successfully');
       setShowDeleteModal(false);
       setSelectedMeeting(null);
-    } catch (err) {
+    } catch {
       error('Failed to delete meeting');
     } finally {
       setDeletingMeeting(false);
@@ -157,21 +147,13 @@ export const Dashboard: React.FC = () => {
     console.log('🔄 Refreshing data after modal success...');
     const fetchDashboardData = async () => {
       try {
-        const [statsResponse, meetingsResponse] = await Promise.all([
-          dashboardApi.getStats(),
-          filterType === 'all' 
-            ? meetingsApi.getAll(1) 
-            : meetingsApi.getAll(1, { status: filterType })
-        ]);
-        
-        if (statsResponse && statsResponse.data) {
-          setStats(statsResponse.data);
-          console.log('✅ Dashboard stats refreshed');
-        }
+        const meetingsResponse = await (filterType === 'all' 
+          ? meetingsApi.getAll(1) 
+          : meetingsApi.getAll(1, { status: filterType }));
         
         if (meetingsResponse && meetingsResponse.data) {
           // Handle paginated response from meetingsApi.getAll()
-          let meetings = [];
+          let meetings: Meeting[] = [];
           if (meetingsResponse.data.data) {
             meetings = meetingsResponse.data.data;
             
@@ -180,18 +162,15 @@ export const Dashboard: React.FC = () => {
             meetings = sortMeetings(meetings);
           }
           
-          setAllMeetings(meetings);
           setFilteredMeetings(meetings);
           console.log('✅ Refreshed meetings:', meetings.length);
         } else {
-          setAllMeetings([]);
           setFilteredMeetings([]);
           console.log('❌ No meetings after refresh');
         }
       } catch (err) {
         console.error('❌ Refresh error:', err);
         error('Failed to refresh dashboard data');
-        setAllMeetings([]);
         setFilteredMeetings([]);
       }
     };
@@ -353,7 +332,6 @@ export const Dashboard: React.FC = () => {
                       onEdit={handleEditMeeting}
                       onDelete={handleDeleteMeeting}
                       onSendReminder={handleSendReminder}
-                      isAuthenticated={true}
                     />
                   </React.Fragment>
                 );

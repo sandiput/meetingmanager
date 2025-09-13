@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Plus, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import { NewParticipantModal } from '../components/modals/NewParticipantModal';
 import { EditParticipantModal } from '../components/modals/EditParticipantModal';
 import { DeleteParticipantModal } from '../components/modals/DeleteParticipantModal';
 import { participantsApi } from '../services/api';
-import { Participant, PaginatedResponse } from '../types';
+import { Participant } from '../types';
 import { useToast } from '../hooks/useToast';
 import { clsx } from 'clsx';
 
@@ -25,31 +25,30 @@ export const Participants: React.FC = () => {
   });
   const { success, error } = useToast();
 
-  useEffect(() => {
-    fetchParticipants();
-  }, []);
-
-  const fetchParticipants = async (page = 1) => {
+  const fetchParticipants = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const response = await participantsApi.getAll(page);
-      setParticipants(response.data.participants.map(participant => ({
+      setParticipants(response.data.participants.map((participant: Participant) => ({
         ...participant,
         whatsapp_number: participant.whatsapp_number.replace(/^(\+62|62|0)/, ""),
       })));
       setPagination({
-        current_page: response.data.current_page,
-        last_page: response.data.last_page,
-        per_page: response.data.per_page,
+        current_page: response.data.page,
+        last_page: response.data.total_pages,
+        per_page: 10, // Default per page from backend
         total: response.data.total,
       });
-    } catch (err) {
+    } catch {
       error('Failed to load participants');
-      console.error('Participants fetch error:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [error]);
+
+  useEffect(() => {
+    fetchParticipants();
+  }, [fetchParticipants]);
 
   const handleDeleteParticipant = async (participant: Participant) => {
     setSelectedParticipant(participant);
@@ -77,7 +76,7 @@ export const Participants: React.FC = () => {
       success('Participant deleted successfully');
       setShowDeleteModal(false);
       setSelectedParticipant(null);
-    } catch (err) {
+    } catch {
       error('Failed to delete participant');
     } finally {
       setDeletingParticipant(false);

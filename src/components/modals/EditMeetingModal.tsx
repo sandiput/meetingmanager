@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload, MessageCircle, Info, Users, Search, UserPlus } from 'lucide-react';
+import { X, MessageCircle, Info, Users, Search, UserPlus } from 'lucide-react';
 import { participantsApi, meetingsApi, daftarKantorApi, attachmentsApi } from '../../services/api';
-import { Participant, Meeting, CreateMeetingForm } from '../../types';
+import { Participant, Meeting, CreateMeetingForm, Attachment } from '../../types';
+
+// Extended form interface for editing meetings (includes id)
+interface EditMeetingForm extends CreateMeetingForm {
+  id: string;
+}
 import { useToast } from '../../hooks/useToast';
 import { clsx } from 'clsx';
 import { FileUpload } from '../FileUpload';
@@ -32,7 +37,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   const [showInvitedBySuggestions, setShowInvitedBySuggestions] = useState(false);
   const { success, error } = useToast();
 
-  const [formData, setFormData] = useState<CreateMeetingForm>({
+  const [formData, setFormData] = useState<EditMeetingForm>({
     id: '',
     title: '',
     date: '',
@@ -52,23 +57,17 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
     attachments: [],
     photos: [],
   });
-  const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
-  const [existingPhotos, setExistingPhotos] = useState<any[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<Attachment[]>([]);
 
   useEffect(() => {
     if (isOpen && meeting) {
       
       // Pastikan designated_attendees selalu array dan tangani berbagai format data
-      let attendees = [];
+      let attendees: string[] = [];
       
-      // Prioritaskan participants jika tersedia
-      if (meeting.participants && Array.isArray(meeting.participants) && meeting.participants.length > 0) {
-        // Ekstrak nama dari objek participants
-        attendees = meeting.participants.map(participant => participant.name);
-        console.log('Using participants data:', attendees);
-      }
       // Use participants from backend as primary data source
-      else if (meeting.participants && Array.isArray(meeting.participants) && meeting.participants.length > 0) {
+      if (meeting.participants && Array.isArray(meeting.participants) && meeting.participants.length > 0) {
         // Extract names from participants objects
         attendees = meeting.participants.map(participant => participant.name);
         console.log('Using participants data:', attendees);
@@ -109,8 +108,8 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
       // Load existing attachments and photos
       if (meeting.attachments) {
         const allFiles = meeting.attachments || [];
-        const attachments = allFiles.filter((file: any) => file.file_category === 'attachment' || !file.file_category);
-        const photos = allFiles.filter((file: any) => file.file_category === 'photo');
+        const attachments = allFiles.filter((file: Attachment) => file.file_category === 'attachment' || !file.file_category);
+        const photos = allFiles.filter((file: Attachment) => file.file_category === 'photo');
         setExistingAttachments(attachments);
         setExistingPhotos(photos);
       }
@@ -192,10 +191,6 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
   };
 
   const handleInputChange = (field: keyof CreateMeetingForm, value: string | boolean) => {
-    if (field === 'designated_attendees') {
-      // This shouldn't happen with current UI, but keeping for type safety
-      return;
-    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -206,7 +201,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
       // Update formData to include the new attendee
       setFormData(prev => ({
         ...prev,
-        designated_attendees: newSelectedAttendees
+        participants: newSelectedAttendees
       }));
       
       console.log('Added attendee:', participantName);
@@ -293,7 +288,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
 
     try {
       setLoading(true);
-      console.log('Updating meeting with data:', { ...formData, designated_attendees: selectedAttendees });
+      console.log('Updating meeting with data:', { ...formData, participants: selectedAttendees });
       // Format time values to match backend expectations (HH:mm:ss format)
       const formatTimeValue = (timeValue: string) => {
         if (!timeValue) return '';
@@ -313,7 +308,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         return timeValue;
       };
       
-      // Prepare data for backend, removing any fields that might cause issues
+      // Prepare data for backend, converting empty strings to undefined
       const meetingData = {
         id: formData.id,
         title: formData.title,
@@ -321,17 +316,17 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
         start_time: formatTimeValue(formData.start_time),
         end_time: formatTimeValue(formData.end_time),
         location: formData.location,
-        dress_code: formData.dress_code,
-        invitation_letter_reference: formData.invitation_letter_reference,
-        attendance_link: formData.attendance_link,
-        meeting_link: formData.meeting_link,
-        agenda: formData.agenda,
-        discussion_results: formData.discussion_results,
+        dress_code: formData.dress_code || undefined,
+        invitation_letter_reference: formData.invitation_letter_reference || undefined,
+        attendance_link: formData.attendance_link || undefined,
+        meeting_link: formData.meeting_link || undefined,
+        agenda: formData.agenda || undefined,
+        discussion_results: formData.discussion_results || undefined,
         whatsapp_reminder_enabled: formData.whatsapp_reminder_enabled,
         group_notification_enabled: formData.group_notification_enabled,
-        invited_by: formData.invited_by,
-        // Send participants as array of objects (backend format)
-        participants: selectedAttendees.map(name => ({ name })),
+        invited_by: formData.invited_by || undefined,
+        // Send participants as array of names (form format)
+        participants: selectedAttendees,
       };
       
       console.log('Final meeting data being sent:', meetingData);
@@ -381,13 +376,18 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
       success('Meeting updated successfully!');
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update meeting:', err);
       
       // Provide more specific error message if available
-      if (err.response && err.response.data && err.response.data.message) {
-        error(`Failed to update meeting: ${err.response.data.message}`);
-      } else if (err.message) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        if (axiosErr.response?.data?.message) {
+          error(`Failed to update meeting: ${axiosErr.response.data.message}`);
+        } else {
+          error('Failed to update meeting. Please try again.');
+        }
+      } else if (err instanceof Error) {
         error(`Failed to update meeting: ${err.message}`);
       } else {
         error('Failed to update meeting. Please try again.');
@@ -600,7 +600,7 @@ export const EditMeetingModal: React.FC<EditMeetingModalProps> = ({
                         onClick={() => {
                           if (confirm('Are you sure you want to remove all attendees?')) {
                             setSelectedAttendees([]);
-                            setFormData(prev => ({ ...prev, designated_attendees: [] }));
+                            setFormData(prev => ({ ...prev, participants: [] }));
                           }
                         }}
                         className="text-xs text-indigo-600 hover:text-indigo-800"

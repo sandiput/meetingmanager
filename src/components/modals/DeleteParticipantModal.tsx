@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, AlertTriangle, Trash2, User, Phone, Car as IdCard } from 'lucide-react';
+import { X, AlertTriangle, Trash2, Phone, Car as IdCard } from 'lucide-react';
 import { Participant } from '../../types';
 import { clsx } from 'clsx';
 

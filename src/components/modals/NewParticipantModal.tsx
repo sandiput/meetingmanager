@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { X, User, Phone, Car as IdCard, Building2 } from 'lucide-react';
 import { participantsApi } from '../../services/api';
 import { CreateParticipantForm } from '../../types';
-import { SEKSI_OPTIONS, VALIDATION_RULES } from '../../utils/constants';
+import { SEKSI_OPTIONS } from '../../utils/constants';
 import { useToast } from '../../hooks/useToast';
 import { clsx } from 'clsx';
 
@@ -102,7 +102,7 @@ export const NewParticipantModal: React.FC<NewParticipantModalProps> = ({
       onSuccess();
       onClose();
       resetForm();
-    } catch (err) {
+    } catch {
       error('Failed to create participant');
     } finally {
       setLoading(false);

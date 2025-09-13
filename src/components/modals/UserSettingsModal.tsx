@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, User, Lock, Upload, Camera, Save, Eye, EyeOff } from 'lucide-react';
+import { X, User, Lock, Camera, Save, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../hooks/useToast';
 import { clsx } from 'clsx';
@@ -48,7 +48,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
       setLoading(true);
       await updateProfile({ avatar });
       success('Profile updated successfully!');
-    } catch (err) {
+    } catch {
       error('Failed to update profile');
     } finally {
       setLoading(false);
@@ -85,7 +85,7 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
       } else {
         error('Current password is incorrect');
       }
-    } catch (err) {
+    } catch {
       error('Failed to change password');
     } finally {
       setLoading(false);
@@ -308,9 +308,9 @@ export const UserSettingsModal: React.FC<UserSettingsModalProps> = ({
             onClick={(e) => {
               e.preventDefault();
               if (activeTab === 'profile') {
-                handleProfileUpdate(e as any);
+                handleProfileUpdate(e as React.FormEvent);
               } else {
-                handlePasswordChange(e as any);
+                handlePasswordChange(e as React.FormEvent);
               }
             }}
             disabled={loading}

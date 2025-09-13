@@ -6,6 +6,7 @@ import {
   DashboardStats, 
   ApiResponse, 
   PaginatedResponse,
+  ParticipantsPaginatedResponse,
   CreateMeetingForm,
   CreateParticipantForm,
   UpdateSettingsForm,
@@ -54,7 +55,7 @@ apiClient.interceptors.response.use(
   }
 );
 // Helper function to normalize API responses
-const normalizeApiResponse = <T>(response: any): ApiResponse<T> => {
+const normalizeApiResponse = <T>(response: { data: T; message?: string; success?: boolean }): ApiResponse<T> => {
   return {
     data: response.data,
     message: response.message || '',
@@ -85,7 +86,7 @@ export const dashboardApi = {
 };
 // Review API
 export const reviewApi = {
-  getStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<ReviewStats>> => {
+  getStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<ReviewStats>> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/stats', { params });
@@ -96,7 +97,7 @@ export const reviewApi = {
     }
   },
     
-  getTopParticipants: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<TopParticipant[]>> => {
+  getTopParticipants: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<TopParticipant[]>> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/top-participants', { params });
@@ -107,7 +108,7 @@ export const reviewApi = {
     }
   },
     
-  getTopInvitedBy: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<any[]>> => {
+  getTopInvitedBy: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<{ name: string; count: number }[]>> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/top-invited-by', { params });
@@ -118,7 +119,7 @@ export const reviewApi = {
     }
   },
     
-  getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<SeksiStats[]>> => {
+  getSeksiStats: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<SeksiStats[]>> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/seksi-stats', { params });
@@ -129,7 +130,7 @@ export const reviewApi = {
     }
   },
     
-  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<ApiResponse<MeetingTrend[]>> => {
+  getMeetingTrends: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<MeetingTrend[]>> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/meeting-trends', { params });
@@ -140,7 +141,7 @@ export const reviewApi = {
     }
   },
   
-  exportExcel: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, any> = {}): Promise<Blob> => {
+  exportExcel: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<Blob> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/export-excel', {
@@ -171,7 +172,7 @@ export const meetingsApi = {
     }
   },
     
-  getAll: async (page = 1, filters?: Record<string, any>): Promise<ApiResponse<PaginatedResponse<Meeting>>> => {
+  getAll: async (page = 1, filters?: Record<string, string | number>): Promise<ApiResponse<PaginatedResponse<Meeting>>> => {
     try {
       const params = { page, ...filters };
       const response = await apiClient.get('/meetings', { params });
@@ -231,13 +232,14 @@ export const meetingsApi = {
       
       const response = await apiClient.put(`/meetings/${id}`, cleanData);
       return normalizeApiResponse(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Enhanced error logging with response details if available
-      if (error.response) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { status: number; statusText: string } };
         console.error(`Failed to update meeting with id ${id}:`, {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data
+          status: axiosError.response.status,
+          statusText: axiosError.response.statusText,
+          data: 'response' in axiosError && axiosError.response && 'data' in axiosError.response ? axiosError.response.data : 'No data'
         });
       } else {
         console.error(`Failed to update meeting with id ${id}:`, error);
@@ -314,7 +316,7 @@ export const meetingsApi = {
 
 // Participants API
 export const participantsApi = {
-  getAll: async (page = 1): Promise<ApiResponse<PaginatedResponse<Participant>>> => {
+  getAll: async (page = 1): Promise<ApiResponse<ParticipantsPaginatedResponse>> => {
     try {
       const response = await apiClient.get('/participants', { params: { page, limit:1000 } });
       return normalizeApiResponse(response.data);

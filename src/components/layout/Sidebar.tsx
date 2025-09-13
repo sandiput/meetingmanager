@@ -1,12 +1,10 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Eye, 
   Users, 
   Settings, 
   Search,
-  MessageCircle,
   CheckCircle,
   PlusCircle,
   Calendar,
@@ -27,26 +25,31 @@ const navigationItems = [
     name: 'Dashboard',
     href: '/',
     icon: LayoutDashboard,
+    badge: undefined as string | undefined,
   },
   {
     name: 'Participants',
     href: '/participants',
     icon: Users,
+    badge: undefined as string | undefined,
   },
   {
     name: 'Review',
     href: '/review',
     icon: BarChart3,
+    badge: undefined as string | undefined,
   },
   {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
+    badge: undefined as string | undefined,
   },
   {
     name: 'Test Connection',
     href: '/test-connection',
     icon: CheckCircle,
+    badge: undefined as string | undefined,
   },
 ];
 
@@ -76,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const [showResults, setShowResults] = React.useState(false);
   const [showDetailModal, setShowDetailModal] = React.useState(false);
   const [selectedMeeting, setSelectedMeeting] = React.useState<Meeting | null>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Removed unused variable
 
   // Debounced search function
   React.useEffect(() => {
@@ -202,7 +205,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                               📍 {meeting.location}
                             </p>
                             <p className="text-xs text-gray-400 truncate">
-                              👥 {meeting.designated_attendees?.join(', ') || 'No attendees'}
+                              👥 {meeting.participants?.map(p => p.name).join(', ') || 'No attendees'}
                             </p>
                           </div>
                           <div className="flex-shrink-0">

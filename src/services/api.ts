@@ -33,8 +33,8 @@ const apiClient = axios.create({
 // Add request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('auth_token');
+    // Get token from localStorage (using same key as AuthContext)
+    const token = localStorage.getItem('meeting_manager_token');
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -51,6 +51,13 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
+    // Handle 401 errors (unauthorized)
+    if (error.response?.status === 401) {
+      // Remove token from localStorage
+      localStorage.removeItem('meeting_manager_token');
+      // Redirect to login page
+      window.location.href = '/login';
+    }
     return Promise.reject(error);
   }
 );

@@ -9,10 +9,13 @@ import {
   PlusCircle,
   Calendar,
   BarChart3,
+  User,
+  LogOut,
 } from 'lucide-react';
 import { meetingsApi } from '../../services/api';
 import { Meeting } from '../../types';
 import { MeetingDetailModal } from '../modals/MeetingDetailModal';
+import { useAuth } from '../../contexts/AuthContext';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 
@@ -46,6 +49,12 @@ const navigationItems = [
     badge: undefined as string | undefined,
   },
   {
+    name: 'Profile',
+    href: '/profile',
+    icon: User,
+    badge: undefined as string | undefined,
+  },
+  {
     name: 'Test Connection',
     href: '/test-connection',
     icon: CheckCircle,
@@ -73,6 +82,7 @@ const recentActivities = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+  const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [searchResults, setSearchResults] = React.useState<Meeting[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
@@ -312,11 +322,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </div>
         </div>
 
-        {/* App Info */}
+        {/* User Info */}
         <div className="border-t border-gray-200 p-4">
-          <div className="text-center">
-            <p className="text-sm font-semibold text-gray-800">Made by Sandi</p>
-            <p className="text-xs text-gray-400 mt-1">v1.0.0</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                {user?.profile_photo ? (
+                  <img 
+                    src={`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/uploads/profiles/${user.profile_photo}`} 
+                    alt="Profile" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <User className="w-4 h-4 text-gray-400" />
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-800 truncate">
+                  {user?.full_name || user?.username || 'User'}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{user?.role || 'Member'}</p>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>

@@ -53,7 +53,12 @@ export const Settings: React.FC = () => {
 
   const fetchWhatsAppGroups = useCallback(async () => {
     try {
-      const response = await fetch('/api/whatsapp/groups');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/whatsapp/groups`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('meeting_manager_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       if (data.success) {
         setWhatsappGroups(data.data);
@@ -65,7 +70,12 @@ export const Settings: React.FC = () => {
 
   const fetchWhatsAppStatus = useCallback(async () => {
     try {
-      const response = await fetch('/api/whatsapp/status');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/whatsapp/status`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('meeting_manager_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       if (data.success) {
         setWhatsappStatus({
@@ -85,7 +95,12 @@ export const Settings: React.FC = () => {
 
   const fetchTemplates = useCallback(async () => {
     try {
-      const response = await fetch('/api/whatsapp/templates');
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/whatsapp/templates`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('meeting_manager_token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const data = await response.json();
       if (data.success) {
         setTemplates(data.data);
@@ -219,8 +234,12 @@ export const Settings: React.FC = () => {
                     onClick={async () => {
                       setLoadingWhatsApp(true);
                       try {
-                        const response = await fetch('/api/whatsapp/connect', {
-                          method: 'POST'
+                        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/whatsapp/connect`, {
+                          method: 'POST',
+                          headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('meeting_manager_token')}`,
+                            'Content-Type': 'application/json'
+                          }
                         });
                         const data = await response.json();
                         if (data.success) {
@@ -277,9 +296,12 @@ export const Settings: React.FC = () => {
                     const groupId = e.target.value;
                     setSelectedGroupId(groupId);
                     try {
-                      const response = await fetch('/api/whatsapp/group', {
+                      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/whatsapp/group`, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                          'Content-Type': 'application/json',
+                          'Authorization': `Bearer ${localStorage.getItem('meeting_manager_token')}`
+                        },
                         body: JSON.stringify({ groupId })
                       });
                       const data = await response.json();
@@ -342,9 +364,12 @@ export const Settings: React.FC = () => {
                 type="button"
                 onClick={async () => {
                   try {
-                    const response = await fetch('/api/whatsapp/templates', {
+                    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/whatsapp/templates`, {
                       method: 'PUT',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('meeting_manager_token')}`
+                      },
                       body: JSON.stringify(templates)
                     });
                     const data = await response.json();

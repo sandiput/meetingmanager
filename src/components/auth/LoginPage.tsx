@@ -156,14 +156,14 @@ export const LoginPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Demo Credentials */}
+          {/* Demo Credentials
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-100">
             <p className="text-xs font-semibold text-blue-800 mb-2">Demo Credentials:</p>
             <div className="text-xs text-blue-700 space-y-1">
               <p><strong>Username:</strong> admin</p>
               <p><strong>Password:</strong> admin123</p>
             </div>
-          </div>
+          </div> */}
 
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-6">

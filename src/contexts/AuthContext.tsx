@@ -8,7 +8,7 @@ interface User {
   whatsapp_number?: string;
   profile_picture?: string;
   avatar?: string;
-  role: 'admin';
+  role: 'admin' | 'super_admin';
   created_at: string;
 }
 

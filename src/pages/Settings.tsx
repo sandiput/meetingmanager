@@ -3,7 +3,7 @@ import { Save, MessageCircle, Clock, Smartphone, QrCode, CheckCircle, XCircle, R
 import { Header } from '../components/layout/Header';
 import UserProfileHeader from '../components/UserProfileHeader';
 import { settingsApi } from '../services/api';
-import { Settings as SettingsType } from '../types';
+import { UpdateSettingsForm } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { clsx } from 'clsx';
 
@@ -120,7 +120,7 @@ export const Settings: React.FC = () => {
     field: keyof UpdateSettingsForm,
     value: string | number | boolean
   ) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev: UpdateSettingsForm) => ({ ...prev, [field]: value }));
   };
 
 

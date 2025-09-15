@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, Camera, Save, Eye, EyeOff } from 'lucide-react';
+import { Camera, Save, Eye, EyeOff } from 'lucide-react';
 import { Header } from '../components/layout/Header';
 import UserProfileHeader from '../components/UserProfileHeader';
 import { useAuth } from '../contexts/AuthContext';

@@ -24,6 +24,7 @@ import { clsx } from "clsx";
 import { format } from "date-fns";
 import { attachmentsApi } from "../../services/api";
 import { useToast } from "../../contexts/ToastContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface MeetingDetailModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
   const [showPreview, setShowPreview] = useState(false);
   const [attachmentView, setAttachmentView] = useState<"grid" | "list">("grid");
   const { addToast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   if (!isOpen || !meeting) return null;
 
@@ -429,7 +431,8 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                         {attachments.length}
                       </span>
                     </h2>
-                    <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-amber-200">
+                    {isAuthenticated && (
+                      <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-amber-200">
                       <button
                         onClick={() => setAttachmentView("grid")}
                         className={clsx(
@@ -453,10 +456,12 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                         <List className="w-4 h-4" />
                       </button>
                     </div>
+                    )}
                   </div>
 
-                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
-                    <div
+                  {isAuthenticated ? (
+                    <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-6 border border-amber-100">
+                      <div
                       className={clsx(
                         attachmentView === "grid"
                           ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -513,8 +518,15 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                           </div>
                         </div>
                       ))}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200 text-center">
+                      <div className="text-gray-600 text-lg font-medium">
+                        Anda harus login untuk melihat isi file
+                      </div>
+                    </div>
+                  )}
                 </section>
               )}
 
@@ -529,8 +541,9 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                     </span>
                   </h2>
 
-                  <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {isAuthenticated ? (
+                    <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-6 border border-pink-100">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                       {photos.map((photo) => (
                         <div
                           key={photo.id}
@@ -578,6 +591,13 @@ export const MeetingDetailModal: React.FC<MeetingDetailModalProps> = ({
                       ))}
                     </div>
                   </div>
+                  ) : (
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200 text-center">
+                      <div className="text-gray-600 text-lg font-medium">
+                        Anda harus login untuk melihat isi file
+                      </div>
+                    </div>
+                  )}
                 </section>
               )}
 

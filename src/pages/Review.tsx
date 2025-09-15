@@ -43,9 +43,9 @@ export const Review: React.FC = () => {
       setStats(statsResponse.data);
       setTopParticipants(participantsResponse.data);
       // Transform the API response to match TopInvitedBy interface
-      const transformedInvitedBy = invitedByResponse.data.map((item: { invited_by: string; meeting_count: number }) => ({
-        invited_by: item.invited_by,
-        meeting_count: item.meeting_count
+      const transformedInvitedBy = invitedByResponse.data.map((item: { name: string; count: number }) => ({
+        invited_by: item.name,
+        meeting_count: item.count
       }));
       setTopInvitedBy(transformedInvitedBy);
       setSeksiStats(seksiResponse.data);

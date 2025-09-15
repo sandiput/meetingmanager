@@ -52,8 +52,8 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ className = '' })
   };
 
   const getInitials = () => {
-    if (user?.full_name) {
-      return user.full_name
+    if (user?.name) {
+      return user.name
         .split(' ')
         .map(name => name.charAt(0).toUpperCase())
         .slice(0, 2)
@@ -78,7 +78,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ className = '' })
           {getProfileImageUrl() ? (
             <img
               src={getProfileImageUrl()!}
-              alt={user.full_name || user.username}
+              alt={user.name || user.username}
               className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
               onError={(e) => {
                 // Fallback to initials if image fails to load
@@ -100,7 +100,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ className = '' })
         {/* User Name */}
         <div className="text-left">
           <p className="text-sm font-medium text-gray-900">
-            {user.full_name || user.username}
+            {user.name || user.username}
           </p>
           <p className="text-xs text-gray-500">
             {user.role === 'super_admin' ? 'Super Admin' : 'Admin'}

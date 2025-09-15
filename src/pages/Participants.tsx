@@ -4,6 +4,7 @@ import { Header } from '../components/layout/Header';
 import { NewParticipantModal } from '../components/modals/NewParticipantModal';
 import { EditParticipantModal } from '../components/modals/EditParticipantModal';
 import { DeleteParticipantModal } from '../components/modals/DeleteParticipantModal';
+import UserProfileHeader from '../components/UserProfileHeader';
 import { participantsApi } from '../services/api';
 import { Participant } from '../types';
 import { useToast } from '../contexts/ToastContext';
@@ -111,13 +112,16 @@ export const Participants: React.FC = () => {
         title="Participants"
         subtitle="Manage employee information for meetings."
         actions={
-          <button
-            onClick={handleNewParticipant}
-            className="bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Participant</span>
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleNewParticipant}
+              className="bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Participant</span>
+            </button>
+            <UserProfileHeader />
+          </div>
         }
       />
       

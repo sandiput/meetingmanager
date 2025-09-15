@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Save, MessageCircle, Clock, Smartphone, QrCode, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { Header } from '../components/layout/Header';
+import UserProfileHeader from '../components/UserProfileHeader';
 import { settingsApi } from '../services/api';
-import { UpdateSettingsForm } from '../types';
+import { Settings as SettingsType } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { clsx } from 'clsx';
 
@@ -137,6 +138,7 @@ export const Settings: React.FC = () => {
       <Header
         title="Settings"
         subtitle="Configure your notification preferences."
+        actions={<UserProfileHeader />}
       />
       
       <div className="container mx-auto px-6 py-8 sm:px-8">

@@ -9,12 +9,14 @@ import {
   PlusCircle,
   Calendar,
   BarChart3,
+  LogIn,
 } from 'lucide-react';
 import { meetingsApi } from '../../services/api';
 import { Meeting } from '../../types';
 import { MeetingDetailModal } from '../modals/MeetingDetailModal';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SidebarProps {
   className?: string;
@@ -26,30 +28,43 @@ const navigationItems = [
     href: '/',
     icon: LayoutDashboard,
     badge: undefined as string | undefined,
+    requireAuth: false,
+  },
+  {
+    name: 'Login',
+    href: '/login',
+    icon: LogIn,
+    badge: undefined as string | undefined,
+    requireAuth: false,
+    hideWhenAuthenticated: true,
   },
   {
     name: 'Participants',
     href: '/participants',
     icon: Users,
     badge: undefined as string | undefined,
+    requireAuth: true,
   },
   {
     name: 'Review',
     href: '/review',
     icon: BarChart3,
     badge: undefined as string | undefined,
+    requireAuth: true,
   },
   {
     name: 'Settings',
     href: '/settings',
     icon: Settings,
     badge: undefined as string | undefined,
+    requireAuth: true,
   },
   {
     name: 'Test Connection',
     href: '/test-connection',
     icon: CheckCircle,
     badge: undefined as string | undefined,
+    requireAuth: true,
   },
 ];
 
@@ -73,6 +88,7 @@ const recentActivities = [
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
+  const { isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = React.useState('');
   const [searchResults, setSearchResults] = React.useState<Meeting[]>([]);
   const [isSearching, setIsSearching] = React.useState(false);
@@ -80,6 +96,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const [showDetailModal, setShowDetailModal] = React.useState(false);
   const [selectedMeeting, setSelectedMeeting] = React.useState<Meeting | null>(null);
   // const navigate = useNavigate(); // Removed unused variable
+
+  // Filter navigation items based on authentication status
+  const visibleNavigationItems = navigationItems.filter(item => {
+    if (item.hideWhenAuthenticated && isAuthenticated) {
+      return false;
+    }
+    if (item.requireAuth && !isAuthenticated) {
+      return false;
+    }
+    return true;
+  });
 
   // Debounced search function
   React.useEffect(() => {
@@ -238,7 +265,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
         {/* Navigation */}
         <nav className="flex-grow space-y-1 px-4">
-          {navigationItems.map((item) => (
+          {visibleNavigationItems.map((item) => (
             <NavLink
               key={item.name}
               to={item.href}

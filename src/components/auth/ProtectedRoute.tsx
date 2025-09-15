@@ -1,4 +1,6 @@
 import React from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoginPage } from './LoginPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -7,6 +9,11 @@ interface ProtectedRouteProps {
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children
 }) => {
-  // No authentication required - always render children
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
   return <>{children}</>;
 };

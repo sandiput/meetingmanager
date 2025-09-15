@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, User, Shield, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
@@ -15,6 +16,7 @@ export const LoginPage: React.FC = () => {
   
   const { login, resetPassword } = useAuth();
   const { success, error } = useToast();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,6 +32,8 @@ export const LoginPage: React.FC = () => {
       
       if (loginSuccess) {
         success('Login successful!');
+        // Redirect to dashboard after successful login
+        navigate('/dashboard');
       } else {
         error('Invalid username or password');
       }

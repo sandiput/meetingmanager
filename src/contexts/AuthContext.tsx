@@ -4,6 +4,9 @@ interface User {
   id: string;
   username: string;
   email: string;
+  name?: string;
+  whatsapp_number?: string;
+  profile_picture?: string;
   avatar?: string;
   role: 'admin';
   created_at: string;
@@ -14,7 +17,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
-  updateProfile: (data: { avatar?: string }) => Promise<void>;
+  updateProfile: () => Promise<void>;
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<boolean>;
 }
@@ -28,17 +31,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in (from localStorage)
-    const savedUser = localStorage.getItem('meeting_manager_user');
-    if (savedUser) {
+    // Check authentication status from server
+    const checkAuthStatus = async () => {
       try {
-        const parsedUser = JSON.parse(savedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch {
-        localStorage.removeItem('meeting_manager_user');
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/status`, {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.data.isAuthenticated && data.data.admin) {
+            const admin = data.data.admin;
+            setUser({
+          id: admin.id.toString(),
+          username: admin.username,
+          email: admin.email,
+          name: admin.full_name || admin.name,
+          whatsapp_number: admin.whatsapp_number,
+          profile_picture: admin.profile_picture,
+          role: 'admin',
+          created_at: admin.created_at || new Date().toISOString()
+        });
+            setIsAuthenticated(true);
+            localStorage.setItem('meeting_manager_user', JSON.stringify({
+          id: admin.id.toString(),
+          username: admin.username,
+          email: admin.email,
+          name: admin.full_name || admin.name,
+          whatsapp_number: admin.whatsapp_number,
+          profile_picture: admin.profile_picture,
+          role: 'admin',
+          created_at: admin.created_at || new Date().toISOString()
+        }));
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        // Fallback to localStorage if server check fails
+        const savedUser = localStorage.getItem('meeting_manager_user');
+        if (savedUser) {
+          try {
+            const parsedUser = JSON.parse(savedUser);
+            setUser(parsedUser);
+            setIsAuthenticated(true);
+          } catch {
+            localStorage.removeItem('meeting_manager_user');
+          }
+        }
       }
-    }
+    };
+    
+    checkAuthStatus();
   }, []);
 
   const login = async (username: string, password: string): Promise<boolean> => {
@@ -48,17 +91,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include', // Include cookies in request
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        const { user, token } = data.data;
+        const { admin } = data.data;
         
-        setUser(user);
+        setUser({
+          id: admin.id.toString(),
+          username: admin.username,
+          email: admin.email,
+          name: admin.full_name || admin.name,
+          whatsapp_number: admin.whatsapp_number,
+          profile_picture: admin.profile_picture,
+          role: 'admin',
+          created_at: admin.created_at || new Date().toISOString()
+        });
         setIsAuthenticated(true);
-        localStorage.setItem('meeting_manager_user', JSON.stringify(user));
-        localStorage.setItem('auth_token', token);
         return true;
       }
       return false;
@@ -68,27 +119,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-    localStorage.removeItem('meeting_manager_user');
-    localStorage.removeItem('auth_token');
+  const logout = async () => {
+    try {
+      await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem('meeting_manager_user');
+    }
   };
 
-  const updateProfile = async (data: { avatar?: string }): Promise<void> => {
+  const updateProfile = async (): Promise<void> => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/auth/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify(data),
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'}/profile`, {
+        method: 'GET',
+        credentials: 'include'
       });
 
       if (response.ok) {
         const result = await response.json();
-        const updatedUser = result.data;
+        const admin = result.data;
+        const updatedUser = {
+          id: admin.id.toString(),
+          username: admin.username,
+          email: admin.email,
+          name: admin.full_name || admin.name,
+          whatsapp_number: admin.whatsapp_number,
+          profile_picture: admin.profile_picture,
+          role: 'admin' as const,
+          created_at: admin.created_at || new Date().toISOString()
+        };
         setUser(updatedUser);
         localStorage.setItem('meeting_manager_user', JSON.stringify(updatedUser));
       }
@@ -104,9 +169,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
-        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+        credentials: 'include',
+        body: JSON.stringify({ currentPassword, newPassword, confirmPassword: newPassword }),
       });
 
       return response.ok;

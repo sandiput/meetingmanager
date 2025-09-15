@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Calendar, Users, TrendingUp, BarChart3, Clock, Award, Download } from 'lucide-react';
 import { Header } from '../components/layout/Header';
+import UserProfileHeader from '../components/UserProfileHeader';
 import { reviewApi } from '../services/api';
 import { ReviewStats, TopParticipant, SeksiStats, MeetingTrend, TopInvitedBy } from '../types';
 import { useToast } from '../contexts/ToastContext';
@@ -193,6 +194,8 @@ export const Review: React.FC = () => {
               <Download className="w-4 h-4" />
               <span>Export Report</span>
             </button>
+            
+            <UserProfileHeader />
           </div>
         }
       />

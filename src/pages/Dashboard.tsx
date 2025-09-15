@@ -11,6 +11,7 @@ import UserProfileHeader from '../components/UserProfileHeader';
 import { meetingsApi } from '../services/api';
 import { Meeting } from '../types';
 import { useToast } from '../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 
 type MeetingFilterType = 'all' | 'upcoming' | 'completed';
 
@@ -52,6 +53,7 @@ export const Dashboard: React.FC = () => {
   const [deletingMeeting, setDeletingMeeting] = useState(false);
   const [filterType, setFilterType] = useState<MeetingFilterType>('all');
   const { success, error } = useToast();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -236,13 +238,15 @@ export const Dashboard: React.FC = () => {
         subtitle="Manage your meetings and automated WhatsApp notifications"
         actions={
           <div className="flex items-center gap-4">
-            <button
-              onClick={handleNewMeeting}
-              className="bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
-            >
-              <Plus className="w-4 h-4" />
-              <span>New Meeting</span>
-            </button>
+            {isAuthenticated && (
+              <button
+                onClick={handleNewMeeting}
+                className="bg-gradient-to-r from-indigo-500 to-cyan-500 hover:from-indigo-600 hover:to-cyan-600 text-white flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>New Meeting</span>
+              </button>
+            )}
             <UserProfileHeader />
           </div>
         }

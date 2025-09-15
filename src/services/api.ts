@@ -23,8 +23,9 @@ import { API_CONFIG } from '../utils/constants';
 
 // Create axios instance with base configuration
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://api.local/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
   timeout: API_CONFIG.TIMEOUT,
+  withCredentials: true, // Include cookies in requests
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -33,11 +34,7 @@ const apiClient = axios.create({
 // Add request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
+    // No need to add Authorization header since we're using cookies
     return config;
   },
   (error) => {

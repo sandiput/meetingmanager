@@ -890,24 +890,6 @@ export const NewMeetingModal: React.FC<NewMeetingModalProps> = ({
                 />
               </div>
 
-              {/* Meeting Photos */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meeting Photos
-                </label>
-                <FileUpload
-                  onFilesChange={(files) => {
-                    const currentPhotos = formData.photos || [];
-                    const allFiles = [...currentPhotos, ...files];
-                    setFormData((prev) => ({ ...prev, photos: allFiles }));
-                  }}
-                  acceptedTypes={["image/*"]}
-                  maxFileSize={10}
-                  multiple={true}
-                  fileCategory="photo"
-                />
-              </div>
-
               {/* WhatsApp Notification Settings */}
               <div className="bg-green-50 border border-green-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">

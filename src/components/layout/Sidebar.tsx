@@ -6,7 +6,6 @@ import {
   Settings, 
   Search,
   CheckCircle,
-  PlusCircle,
   Calendar,
   BarChart3,
   LogIn,
@@ -14,6 +13,7 @@ import {
 import { meetingsApi } from '../../services/api';
 import { Meeting } from '../../types';
 import { MeetingDetailModal } from '../modals/MeetingDetailModal';
+import RecentActivity from '../RecentActivity';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { useAuth } from '../../contexts/AuthContext';
@@ -68,24 +68,7 @@ const navigationItems = [
   },
 ];
 
-const recentActivities = [
-  {
-    id: '1',
-    title: 'Rapat Dikonfirmasi',
-    subtitle: 'Rapat Koordinasi Bulanan',
-    time: '2 min ago',
-    icon: CheckCircle,
-    iconColor: 'text-green-600 bg-green-100',
-  },
-  {
-    id: '2',
-    title: 'Rapat Baru',
-    subtitle: 'Briefing Intelijen Mingguan',
-    time: '15 min ago',
-    icon: PlusCircle,
-    iconColor: 'text-blue-600 bg-blue-100',
-  },
-];
+
 
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const { isAuthenticated } = useAuth();
@@ -312,30 +295,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* Recent Activity */}
         <div className="flex-grow px-4">
           <div className="border-t border-gray-200 pt-4">
-            <h3 className="mb-3 px-2 text-xs font-semibold uppercase text-gray-400 tracking-wider">
-              Recent Activity
-            </h3>
-            <ul className="space-y-3">
-              {recentActivities.map((activity) => (
-                <li key={activity.id} className="flex items-start gap-3">
-                  <div className={clsx(
-                    'flex size-8 items-center justify-center rounded-full flex-shrink-0',
-                    activity.iconColor
-                  )}>
-                    <activity.icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {activity.title}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {activity.subtitle}
-                    </p>
-                    <p className="text-xs text-gray-400">{activity.time}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <RecentActivity limit={2} showHeader={true} />
           </div>
         </div>
 

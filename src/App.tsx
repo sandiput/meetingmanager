@@ -11,6 +11,7 @@ import { Participants } from './pages/Participants';
 import { Review } from './pages/Review';
 import { Settings } from './pages/Settings';
 import { Profile } from './pages/Profile';
+import UserManagement from './pages/UserManagement';
 import TestConnection from './pages/TestConnection';
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
                         <Route path="/review" element={<Review />} />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/profile" element={<Profile />} />
+                        <Route path="/user-management" element={<UserManagement />} />
                         <Route path="/test-connection" element={<TestConnection />} />
                       </Routes>
                     </main>

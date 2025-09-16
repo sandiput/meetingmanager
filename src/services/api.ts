@@ -559,6 +559,95 @@ export const attachmentsApi = {
   },
 };
 
+// Admin Management API
+export const adminApi = {
+  getAll: async (): Promise<ApiResponse<any[]>> => {
+    try {
+      const response = await apiClient.get('/admins');
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to fetch admins:', error);
+      throw error;
+    }
+  },
+
+  getById: async (id: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiClient.get(`/admins/${id}`);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to fetch admin with id ${id}:`, error);
+      throw error;
+    }
+  },
+
+  create: async (data: {
+    username: string;
+    email: string;
+    password: string;
+    full_name: string;
+    role?: string;
+    whatsapp_number?: string;
+  }): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiClient.post('/admins', data);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error('Failed to create admin:', error);
+      throw error;
+    }
+  },
+
+  update: async (id: string, data: {
+    username?: string;
+    email?: string;
+    full_name?: string;
+    role?: string;
+    whatsapp_number?: string;
+  }): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiClient.put(`/admins/${id}`, data);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to update admin with id ${id}:`, error);
+      throw error;
+    }
+  },
+
+  delete: async (id: string): Promise<ApiResponse<void>> => {
+    try {
+      const response = await apiClient.delete(`/admins/${id}`);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to delete admin with id ${id}:`, error);
+      throw error;
+    }
+  },
+
+  updatePassword: async (id: string, data: {
+    newPassword: string;
+    confirmPassword: string;
+  }): Promise<ApiResponse<void>> => {
+    try {
+      const response = await apiClient.put(`/admins/${id}/password`, data);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to update password for admin ${id}:`, error);
+      throw error;
+    }
+  },
+
+  toggleStatus: async (id: string): Promise<ApiResponse<any>> => {
+    try {
+      const response = await apiClient.put(`/admins/${id}/toggle-status`);
+      return normalizeApiResponse(response.data);
+    } catch (error) {
+      console.error(`Failed to toggle status for admin ${id}:`, error);
+      throw error;
+    }
+  },
+};
+
 export const api = {
   dashboard: dashboardApi,
   meetings: meetingsApi,
@@ -567,6 +656,7 @@ export const api = {
   review: reviewApi,
   daftarKantor: daftarKantorApi,
   attachments: attachmentsApi,
+  admin: adminApi,
 };
 
 // End of file

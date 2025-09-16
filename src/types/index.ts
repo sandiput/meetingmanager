@@ -47,6 +47,21 @@ export interface Participant {
   updated_at: string;
 }
 
+export interface Admin {
+  id: string;
+  username: string;
+  email: string;
+  full_name: string;
+  role: "super_admin" | "admin";
+  is_active: boolean;
+  whatsapp_number: string;
+  last_login: string | null;
+  ip_address: string | null;
+  created_at: string;
+  updated_at: string;
+  password?: string; // Menambahkan properti password sebagai opsional
+}
+
 export interface DaftarKantor {
   kd_kantor: string;
   nama_kantor_pendek: string;

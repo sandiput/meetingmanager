@@ -15,6 +15,7 @@ import {
   SeksiStats,
   MeetingTrend,
   Attachment,
+  Admin,
 } from '../types';
 
 import { API_CONFIG } from '../utils/constants';
@@ -561,7 +562,7 @@ export const attachmentsApi = {
 
 // Admin Management API
 export const adminApi = {
-  getAll: async (): Promise<ApiResponse<any[]>> => {
+  getAll: async (): Promise<ApiResponse<Admin[]>> => {
     try {
       const response = await apiClient.get('/admins');
       return normalizeApiResponse(response.data);
@@ -571,24 +572,17 @@ export const adminApi = {
     }
   },
 
-  getById: async (id: string): Promise<ApiResponse<any>> => {
+  getById: async (id: string): Promise<ApiResponse<Admin>> => {
     try {
       const response = await apiClient.get(`/admins/${id}`);
       return normalizeApiResponse(response.data);
     } catch (error) {
-      console.error(`Failed to fetch admin with id ${id}:`, error);
+      console.error(`Failed to fetch admin ${id}:`, error);
       throw error;
     }
   },
 
-  create: async (data: {
-    username: string;
-    email: string;
-    password: string;
-    full_name: string;
-    role?: string;
-    whatsapp_number?: string;
-  }): Promise<ApiResponse<any>> => {
+  create: async (data: Partial<Admin>): Promise<ApiResponse<Admin>> => {
     try {
       const response = await apiClient.post('/admins', data);
       return normalizeApiResponse(response.data);
@@ -598,18 +592,12 @@ export const adminApi = {
     }
   },
 
-  update: async (id: string, data: {
-    username?: string;
-    email?: string;
-    full_name?: string;
-    role?: string;
-    whatsapp_number?: string;
-  }): Promise<ApiResponse<any>> => {
+  update: async (id: string, data: Partial<Admin>): Promise<ApiResponse<Admin>> => {
     try {
       const response = await apiClient.put(`/admins/${id}`, data);
       return normalizeApiResponse(response.data);
     } catch (error) {
-      console.error(`Failed to update admin with id ${id}:`, error);
+      console.error(`Failed to update admin ${id}:`, error);
       throw error;
     }
   },
@@ -619,14 +607,15 @@ export const adminApi = {
       const response = await apiClient.delete(`/admins/${id}`);
       return normalizeApiResponse(response.data);
     } catch (error) {
-      console.error(`Failed to delete admin with id ${id}:`, error);
+      console.error(`Failed to delete admin ${id}:`, error);
       throw error;
     }
   },
 
   updatePassword: async (id: string, data: {
-    newPassword: string;
-    confirmPassword: string;
+    current_password: string;
+    new_password: string;
+    confirm_password: string;
   }): Promise<ApiResponse<void>> => {
     try {
       const response = await apiClient.put(`/admins/${id}/password`, data);
@@ -637,7 +626,7 @@ export const adminApi = {
     }
   },
 
-  toggleStatus: async (id: string): Promise<ApiResponse<any>> => {
+  toggleStatus: async (id: string): Promise<ApiResponse<Admin>> => {
     try {
       const response = await apiClient.put(`/admins/${id}/toggle-status`);
       return normalizeApiResponse(response.data);

@@ -16,6 +16,8 @@ import {
   MeetingTrend,
   Attachment,
   Admin,
+  TopInvitedBy,
+  AdminResponse,
 } from '../types';
 
 import { API_CONFIG } from '../utils/constants';
@@ -106,7 +108,7 @@ export const reviewApi = {
     }
   },
     
-  getTopInvitedBy: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<{ name: string; count: number }[]>> => {
+  getTopInvitedBy: async (period: 'weekly' | 'monthly' | 'yearly' | 'custom' = 'monthly', queryParams: Record<string, string | number> = {}): Promise<ApiResponse<TopInvitedBy[]>> => {
     try {
       const params = { period, ...queryParams };
       const response = await apiClient.get('/review/top-invited-by', { params });
@@ -562,10 +564,10 @@ export const attachmentsApi = {
 
 // Admin Management API
 export const adminApi = {
-  getAll: async (): Promise<ApiResponse<Admin[]>> => {
+  getAll: async (): Promise<ApiResponse<AdminResponse>> => {
     try {
       const response = await apiClient.get('/admins');
-      return normalizeApiResponse(response.data);
+      return normalizeApiResponse<AdminResponse>(response.data);
     } catch (error) {
       console.error('Failed to fetch admins:', error);
       throw error;

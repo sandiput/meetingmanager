@@ -26,7 +26,7 @@ export interface Meeting {
   attendance_link?: string;
   agenda?: string;
   discussion_results?: string;
-  status?: 'upcoming' | 'completed';
+  status?: "upcoming" | "completed";
   whatsapp_reminder_enabled: boolean;
   group_notification_enabled: boolean;
   invited_by?: string;
@@ -60,6 +60,17 @@ export interface Admin {
   created_at: string;
   updated_at: string;
   password?: string; // Menambahkan properti password sebagai opsional
+}
+
+// Interface untuk respons admin dari API
+export interface AdminResponse {
+  admins: Admin[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
 }
 
 export interface DaftarKantor {

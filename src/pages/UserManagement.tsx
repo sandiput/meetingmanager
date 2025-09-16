@@ -20,7 +20,8 @@ import { Header } from "../components/layout/Header";
 import { useToast } from "../contexts/ToastContext";
 import { adminApi } from "../services/api";
 import { format } from "date-fns";
-import { useCallback } from 'react';
+import { useCallback } from "react";
+import UserProfileHeader from "../components/UserProfileHeader";
 
 interface User {
   id: string;
@@ -96,7 +97,9 @@ const UserManagement: React.FC = () => {
   };
 
   // Status Filter
-  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleStatusFilterChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setStatusFilter(e.target.value as "all" | "active" | "inactive");
   };
 
@@ -105,10 +108,13 @@ const UserManagement: React.FC = () => {
     setLoading(true);
     try {
       const response = await adminApi.getAll();
-      setUsers(response.data);
+      setUsers(response.data.admins);
     } catch (err: unknown) {
       const apiError = err as ApiError;
-      error('Error', apiError.response?.data?.message || 'Failed to fetch users');
+      error(
+        "Error",
+        apiError.response?.data?.message || "Failed to fetch users"
+      );
     } finally {
       setLoading(false);
     }
@@ -313,13 +319,16 @@ const UserManagement: React.FC = () => {
         title="User Management"
         subtitle="Manage system users and their permissions"
         actions={
-          <button
-            onClick={openCreateModal}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
-          >
-            <Plus className="w-4 h-4" />
-            Add User
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={openCreateModal}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              Add User
+            </button>
+            <UserProfileHeader />
+          </div>
         }
       />
 

@@ -49,8 +49,9 @@ export const Profile: React.FC = () => {
       });
       
       // Set preview URL for existing profile picture
-      if (user.profile_picture) {
-        setPreviewUrl(`http://localhost:8000${user.profile_picture}`);
+      if (user?.profile_picture) {
+        const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:8000';
+        setPreviewUrl(`${baseUrl}${user.profile_picture}`);
       }
     }
   }, [user]);
@@ -101,7 +102,8 @@ export const Profile: React.FC = () => {
         })
       };
 
-      const response = await fetch('http://localhost:8000/api/profile', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${baseUrl}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -120,7 +122,7 @@ export const Profile: React.FC = () => {
         const formData = new FormData();
         formData.append('profile_picture', profileImage);
 
-        const uploadResponse = await fetch('http://localhost:8000/api/profile/upload-picture', {
+        const uploadResponse = await fetch(`${baseUrl}/profile/upload-picture`, {
           method: 'POST',
           credentials: 'include',
           body: formData

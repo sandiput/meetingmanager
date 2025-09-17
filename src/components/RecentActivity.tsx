@@ -32,7 +32,8 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
   const fetchRecentActivities = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/api/recent-activities?limit=${limit}`, {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+      const response = await fetch(`${baseUrl}/recent-activities?limit=${limit}`, {
         method: 'GET',
         credentials: 'include', // Include cookies in request
         headers: {

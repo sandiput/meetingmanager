@@ -65,6 +65,7 @@ export const Settings: React.FC = () => {
   }, []);
 
   const fetchWhatsAppStatus = useCallback(async () => {
+    console.log('Fetching WhatsApp status...');
     try {
       const response = await fetch('/api/whatsapp/status');
       const data = await response.json();

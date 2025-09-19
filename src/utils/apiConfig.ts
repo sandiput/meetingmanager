@@ -35,12 +35,13 @@ class ApiConfig {
 
     // Second priority: Check if using production backend
     if (import.meta.env.VITE_BACKEND_ENV_PRODUCTION === 'true') {
-      return 'http://10.102.234.158:8000/api';
+      // Use environment variable or fallback to localhost
+      return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
     }
 
-    // Third priority: Detect if we're on the real server
+    // Third priority: Detect if we're on a production server
     const hostname = window.location.hostname;
-    if (hostname === '10.102.234.158' || hostname.includes('your-domain.com')) {
+    if (hostname.includes('your-domain.com')) {
       return `http://${hostname}:8000/api`;
     }
 
@@ -63,9 +64,9 @@ class ApiConfig {
       return apiUrl.substring(0, apiUrl.length - 4);
     }
 
-    // Third priority: Detect if we're on the real server
+    // Third priority: Detect if we're on a production server
     const hostname = window.location.hostname;
-    if (hostname === '10.102.234.158' || hostname.includes('your-domain.com')) {
+    if (hostname.includes('your-domain.com')) {
       return `http://${hostname}:8000`;
     }
 

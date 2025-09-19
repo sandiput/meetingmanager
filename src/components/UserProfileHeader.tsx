@@ -51,7 +51,7 @@ const UserProfileHeader: React.FC<UserProfileHeaderProps> = ({ className = '' })
 
   const getProfileImageUrl = () => {
     if (user?.profile_picture) {
-      return `${import.meta.env.VITE_SERVER_URL || 'http://10.102.234.158:8000'}${user.profile_picture}`;
+      return `${import.meta.env.VITE_SERVER_URL || 'http://localhost:8000'}${user.profile_picture}`;
     }
     return null;
   };
